@@ -1,0 +1,22 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "5.7",
+	"Category": "Games",
+	"Description": "The Betrayed Will / وصية الغدر — cinematic third-person story adventure. Phase 0 skeleton.",
+	"Modules": [
+		{
+			"Name": "TBW",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
+		}
+	],
+	"TargetPlatforms": [
+		"Windows"
+	]
+}

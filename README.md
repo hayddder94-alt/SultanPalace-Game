@@ -5,43 +5,40 @@ Ancient Babylon. A family. A will. A betrayal.
 
 **Platform:** Windows PC  
 **Distribution:** Steam  
-**Engine:** Unreal Engine 5 (minor version locked in Phase 0)  
+**Engine:** **Unreal Engine 5.7** (locked — see [`docs/ENGINE_VERSION_LOCK.md`](docs/ENGINE_VERSION_LOCK.md))  
 **Playtime:** 6–8 hours  
 **Scope:** Small-to-medium independent / AA-style. Not an open world. Not an RPG. Not a live service.
 
-This repository is the production home of the game. It is **not** an Islamic-palace simulator. The old one-line description was a placeholder and is retired.
+This repository is the production home of the game. It is **not** an Islamic-palace simulator.
 
 ## Current status
 
-**Planning phase complete. Full implementation has not started.**
+**Phase 0 — Pre-production lock — COMPLETE.**  
+Full campaign implementation has **not** started. Phase 1 has **not** started.
 
-Read the production bible before writing code, opening maps, or adding systems:
+- Engine: UE **5.7** locked in `TheBetrayedWill.uproject`
+- C++ module `TBW` skeleton exists (identity + flags + pawn stubs only)
+- Vertical Slice script timed to **~34 designed / ~41 first-time minutes**
+- Character pipeline: hybrid MetaHuman faces + custom period clothing
 
-**[docs/README.md](docs/README.md)**
+Read: [`docs/PHASE0_REPORT.md`](docs/PHASE0_REPORT.md) · [`docs/README.md`](docs/README.md)
 
-Start with:
+## Project layout
 
-1. [Assumptions and gaps](docs/00_ASSUMPTIONS_AND_GAPS.md)
-2. [Game design document](docs/GAME_DESIGN_DOCUMENT.md)
-3. [Story bible](docs/STORY_BIBLE.md)
-4. [Scope control](docs/SCOPE_CONTROL.md)
-5. [Production roadmap](docs/PRODUCTION_ROADMAP.md)
-
-## Pitch
-
-After a dying patriarch names the second son heir, you investigate the family conspiracy as the loyal brother who will not survive it — then finish the story as the imprisoned heir who must decide what the will was actually worth.
-
-## Pillars
-
-Exploration · Investigation · Focused melee · Simple stealth
-
-Quality over quantity. Story, faces, atmosphere, a tight loop, a stable Windows build.
+```
+TheBetrayedWill.uproject
+Source/TBW/          C++ game module
+Content/TBW/         game content (East Wing only for the slice)
+Config/
+docs/                production bible
+tools/validate_phase0.py
+```
 
 ## Recommended next action
 
-Phase 0 lock: Unreal version, Vertical Slice script timing, face pipeline decision, empty UE project skeleton.  
-Do **not** begin Phase 11 full-game production until the Phase 10 Vertical Slice gate passes.
+**Stop.** Await authorization for Phase 1 (install UE 5.7.x, first live compile, `L_Dev_Sandbox`).  
+Do not build Chapters 1–8. Do not build seven locations. Do not implement Steamworks.
 
 ## License / legal
 
-No copyrighted assets. Shipping title and store name: **The Betrayed Will** / **وصية الغدر**.
+No copyrighted assets. Shipping title: **The Betrayed Will** / **وصية الغدر**.

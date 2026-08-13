@@ -1,15 +1,19 @@
-# Local build artifacts
+# Local / agent
 build/
 build.log
+.arena/
+.vscode/
+.idea/
+*.log
 
-# Unreal Engine (project will be created in Phase 0/1)
+# Unreal Engine
 Binaries/
 DerivedDataCache/
 Intermediate/
 Saved/
 Build/
+FileOpenOrder/
 .vs/
-.idea/
 *.sln
 *.suo
 *.opensdf
@@ -19,6 +23,7 @@ Build/
 *.xcodeproj
 *.xcworkspace
 *.VC.opendb
+*.VC.db
 
 # Compiled
 *.dll
@@ -28,13 +33,14 @@ Build/
 *.lib
 *.exp
 *.ilk
+*.app
+*.ipa
 
 # OS
 .DS_Store
 Thumbs.db
 desktop.ini
 
-# IDE / agent
-.arena/
-.vscode/
-*.log
+# Per-user editor
+*EditorPerProjectUserSettings.ini
+Config/DefaultEditorPerProjectUserSettings.ini

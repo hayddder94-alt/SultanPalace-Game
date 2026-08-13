@@ -2,10 +2,10 @@
 
 **Project:** The Betrayed Will / وصية الغدر  
 **Code name:** TBW  
-**Engine:** Unreal Engine 5 (lock minor version in Phase 0; recommendation: 5.5 or current stable 5.x)  
+**Engine:** Unreal Engine **5.7** (locked 2026-08-13 — `ENGINE_VERSION_LOCK.md`)  
 **Languages:** C++ for systems, Blueprints for content hookup and iteration  
 **Target:** Windows PC (Steam), 64-bit  
-**Status:** Planning lock
+**Status:** Phase 0 locked. Campaign not in production.
 
 ---
 
@@ -200,8 +200,10 @@ Autosave uses a rotating backup (`_bak`) so a crash mid-write cannot eat the onl
 
 ## 4. Content folder structure
 
+Phase 0 lock uses `Content/TBW/...` (brief). Full-game aliases below remain valid as *logical* groups inside that root.
+
 ```
-/Content/
+/Content/TBW/
   /Characters/
     /Raynor/  /Leila/  /Evan/  /Nofan/  /Orin/  /Darius/  /Malik/  /Soren/
     /Guards/  /Civilians/  /Shared/
@@ -281,7 +283,7 @@ Gamepad and KBM maps ship together. Mouse sensitivity and a separate aim-look fo
 - Linked Anim Layers if it stays simple; do not over-engineer.
 - Motion Matching is **out** for 1.0. Too much capture cost.
 - IK: two-bone foot IK, simple hand IK for interact. No full Control Rig dependency for gameplay.
-- Cinematics use Level Sequencer + the same skeletons. Face: pose asset + a small viseme set for placeholder VO; MetaHuman is allowed for hero faces **if** the team can hold quality on four heads without eating the schedule. Decision in Phase 0. If MetaHuman is chosen, civilians stay traditional.
+- Cinematics use Level Sequencer + the same skeletons. **Phase 0 lock:** MetaHuman DNA for the four primaries + Orin; custom period clothing; traditional modular civilians/guards. See `CHARACTER_PIPELINE.md`.
 
 ## 8. Dialogue data shape (minimum)
 
@@ -436,6 +438,8 @@ Budgets are revisited after the Vertical Slice with actual numbers.
 | GAS | No | Status/combat complexity explodes (it must not) |
 | AI | StateTree, BT fallback | StateTree blocks VS |
 | UI | UMG | Team already fluent in CommonUI |
-| Faces | Decide Phase 0: MetaHuman heroes vs. traditional | Cost of four hero faces |
+| Faces | **Hybrid:** MetaHuman DNA for 4 primaries + Orin; custom period clothes; traditional modular for guards/civilians | Phase 2 import test fails non-preset faces |
 | Identity | One pawn + component | Swap bugs exceed possess bugs |
 | Steam | Phase 16 | Publisher demands earlier (none yet) |
+| Engine minor | **5.7** (not 5.8, not 5.5) | Critical 5.7 blocker with no workaround (exception process in ENGINE_VERSION_LOCK) |
+| Content root | `Content/TBW/...` per Phase 0 brief | — |

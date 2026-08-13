@@ -1,8 +1,9 @@
 # The Betrayed Will — Production Bible
 
 **Title:** The Betrayed Will / **وصية الغدر**  
-**Phase:** Planning complete. Implementation has **not** started.  
-**Read order for a new arrival:** this page → Assumptions → GDD → Story → Scope → Roadmap.
+**Phase:** Phase 0 locked. Phase 1 not authorized. Campaign not in production.  
+**Engine:** Unreal Engine **5.7**  
+**Read order for a new arrival:** [PHASE0_REPORT](PHASE0_REPORT.md) → Assumptions → GDD → Story → Scope gate → VS script.
 
 The original brief asked for fifteen named documents plus a risk register. They live here.
 
@@ -26,6 +27,25 @@ The original brief asked for fifteen named documents plus a risk register. They 
 | 15 | [SCOPE_CONTROL.md](SCOPE_CONTROL.md) | Cut order, budgets, kill rules |
 | 16 | [PROJECT_RISKS.md](PROJECT_RISKS.md) | Risk matrix, P0 weekly list |
 
-Implementation starts only after this planning set is treated as approved and Phase 0 acceptance is checked. The first production act is **not** “open the whole campaign.” It is Phase 0 lock + Phase 1 foundation + a Vertical Slice.
+### Phase 0 lock (this milestone)
+
+| Doc | Purpose |
+|---|---|
+| [ENGINE_VERSION_LOCK.md](ENGINE_VERSION_LOCK.md) | UE 5.7 selected and frozen |
+| [VERTICAL_SLICE_SCRIPT.md](VERTICAL_SLICE_SCRIPT.md) | Timed 30–45 min script |
+| [VERTICAL_SLICE_ASSET_BUDGET.md](VERTICAL_SLICE_ASSET_BUDGET.md) | Every VS asset, caps |
+| [PALACE_WING_SPEC.md](PALACE_WING_SPEC.md) | East Ceremonial Wing only |
+| [CHARACTER_PIPELINE.md](CHARACTER_PIPELINE.md) | MetaHuman vs traditional |
+| [CHARACTER_PRESENTATION.md](CHARACTER_PRESENTATION.md) | Four primaries |
+| [LEILA_SPEC.md](LEILA_SPEC.md) | Defined, not implemented |
+| [IDENTITY_ARCHITECTURE.md](IDENTITY_ARCHITECTURE.md) | One pawn, two data sets |
+| [SCOPE_GATE.md](SCOPE_GATE.md) | Green / Yellow / Red |
+| [PERFORMANCE_TARGETS.md](PERFORMANCE_TARGETS.md) | 1080p baselines later |
+| [PHASE0_RISK_REGISTER.md](PHASE0_RISK_REGISTER.md) | Slice-specific risks |
+| [PHASE0_VALIDATION.md](PHASE0_VALIDATION.md) | What was / was not run |
+| [PHASE1_PLAN.md](PHASE1_PLAN.md) | Next phase, not started |
+| [PHASE0_REPORT.md](PHASE0_REPORT.md) | Stop-line summary |
+
+Phase 1 does not start without explicit authorization. The campaign does not start until the Phase 10 Vertical Slice gate passes.
 
 See the repository root `README.md` for the public-facing summary.
