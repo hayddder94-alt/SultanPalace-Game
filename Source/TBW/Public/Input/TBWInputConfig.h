@@ -5,6 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "InputAction.h"
 #include "TBWInputConfig.generated.h"
 
 class UInputAction;
