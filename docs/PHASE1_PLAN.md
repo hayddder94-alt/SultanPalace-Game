@@ -31,7 +31,7 @@ A clean UE 5.7 project that boots, compiles, packages a Development Windows buil
 ## 3. Deliverables
 
 - [x] `TBW` source for Editor + Game  
-- [x] East Wing sandbox (runtime stand-in for `L_Dev_Sandbox`)  
+- [x] `ATBWDevSandbox` runtime stand-in for `L_Dev_Sandbox`  
 - [x] Input context + actions  
 - [x] Flag console  
 - [x] Package script  

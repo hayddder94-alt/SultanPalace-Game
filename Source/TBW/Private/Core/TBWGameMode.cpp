@@ -5,7 +5,7 @@
 #include "Core/TBWVersion.h"
 #include "Player/TBWPlayerCharacter.h"
 #include "Player/TBWPlayerController.h"
-#include "World/TBWEastWingSandbox.h"
+#include "World/TBWDevSandbox.h"
 #include "UI/TBWHUD.h"
 #include "EngineUtils.h"
 #include "TBW.h"
@@ -19,7 +19,7 @@ ATBWGameMode::ATBWGameMode()
 
 void ATBWGameMode::EnsureSandbox()
 {
-	if (Sandbox)
+	if (DevSandbox)
 	{
 		return;
 	}
@@ -30,33 +30,33 @@ void ATBWGameMode::EnsureSandbox()
 		return;
 	}
 
-	for (TActorIterator<ATBWEastWingSandbox> It(World); It; ++It)
+	for (TActorIterator<ATBWDevSandbox> It(World); It; ++It)
 	{
-		Sandbox = *It;
+		DevSandbox = *It;
 		return;
 	}
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	Sandbox = World->SpawnActor<ATBWEastWingSandbox>(FVector::ZeroVector, FRotator::ZeroRotator, Params);
+	DevSandbox = World->SpawnActor<ATBWDevSandbox>(FVector::ZeroVector, FRotator::ZeroRotator, Params);
 }
 
 void ATBWGameMode::StartPlay()
 {
 	EnsureSandbox();
-	UE_LOG(LogTBW, Display, TEXT("The Betrayed Will %s starting. Engine lock %s. East Wing sandbox %s."),
+	UE_LOG(LogTBW, Display, TEXT("The Betrayed Will %s starting. Engine lock %s. L_Dev_Sandbox %s."),
 		TBW_VERSION_STRING,
 		TBW_ENGINE_LOCK,
-		Sandbox ? TEXT("ready") : TEXT("MISSING"));
+		DevSandbox ? TEXT("ready") : TEXT("MISSING"));
 	Super::StartPlay();
 }
 
 void ATBWGameMode::RestartPlayer(AController* NewPlayer)
 {
 	EnsureSandbox();
-	if (Sandbox)
+	if (DevSandbox)
 	{
-		RestartPlayerAtTransform(NewPlayer, Sandbox->GetEvanSpawnTransform());
+		RestartPlayerAtTransform(NewPlayer, DevSandbox->GetPlayerSpawnTransform());
 		return;
 	}
 	Super::RestartPlayer(NewPlayer);

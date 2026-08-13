@@ -3,6 +3,7 @@
 
 #include "Core/TBWWorldStateSubsystem.h"
 #include "Core/TBWVersion.h"
+#include "UI/TBWHUD.h"
 #include "Player/TBWPlayerCharacter.h"
 #include "Player/TBWPlayerIdentityComponent.h"
 #include "Player/TBWIdentityFactory.h"
@@ -110,6 +111,75 @@ static FAutoConsoleCommand CVarVersion(
 	FConsoleCommandDelegate::CreateLambda([]()
 	{
 		UE_LOG(LogTBW, Display, TEXT("The Betrayed Will %s  (engine lock %s)"), TBW_VERSION_STRING, TBW_ENGINE_LOCK);
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarFlagsCheck(
+	TEXT("tbw.Flags.Check"),
+	TEXT("Return 1/0 whether a flag is set. Usage: tbw.Flags.Check <Name>"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World || Args.Num() < 1)
+		{
+			UE_LOG(LogTBW, Warning, TEXT("Usage: tbw.Flags.Check <Name>"));
+			return;
+		}
+		if (UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
+		{
+			UE_LOG(LogTBW, Display, TEXT("%s -> %s"), *Args[0], State->HasFlag(FName(*Args[0])) ? TEXT("true") : TEXT("false"));
+		}
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarFlagsClear(
+	TEXT("tbw.Flags.Clear"),
+	TEXT("Clear one flag. Usage: tbw.Flags.Clear <Name>"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World || Args.Num() < 1)
+		{
+			UE_LOG(LogTBW, Warning, TEXT("Usage: tbw.Flags.Clear <Name>"));
+			return;
+		}
+		if (UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
+		{
+			State->ClearFlag(FName(*Args[0]));
+		}
+	}));
+
+static FAutoConsoleCommandWithWorld CVarDebugReset(
+	TEXT("tbw.Debug.Reset"),
+	TEXT("Clear all world flags (test state reset)."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (World)
+		{
+			if (UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
+			{
+				State->ResetTestState();
+			}
+		}
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarDebugHud(
+	TEXT("tbw.Debug.Hud"),
+	TEXT("Show or hide the Phase 1 debug overlay. Usage: tbw.Debug.Hud 0|1"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			return;
+		}
+		const bool bShow = Args.Num() == 0 || Args[0] != TEXT("0");
+		if (APlayerController* PC = World->GetFirstPlayerController())
+		{
+			if (ATBWHUD* HUD = Cast<ATBWHUD>(PC->GetHUD()))
+			{
+				HUD->SetDebugVisible(bShow);
+			}
+		}
 	}));
 
 #endif

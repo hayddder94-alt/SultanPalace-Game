@@ -20,7 +20,7 @@ Full campaign implementation has **not** started.
 - Engine: UE **5.7** locked  
 - Version: `0.1.0-phase1`  
 - Player: walk / sprint / crouch / look / examine  
-- East Ceremonial Wing greybox spawned at runtime  
+- `L_Dev_Sandbox` runtime stand-in (floor, lights, two flag tests)  
 - Console: `tbw.Flags.Set`, `tbw.Flags.List`  
 - Package script: `tools/package_win_dev.ps1`
 

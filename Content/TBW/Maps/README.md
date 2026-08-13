@@ -1,6 +1,6 @@
 # Maps
 
-Phase 1 does **not** require an authored `.umap`. `ATBWGameMode` spawns `ATBWEastWingSandbox` at runtime.
+Phase 1 does **not** require an authored `.umap`. `ATBWGameMode` spawns `ATBWDevSandbox` (L_Dev_Sandbox stand-in) at runtime.
 
 Optional, after first editor open:
 

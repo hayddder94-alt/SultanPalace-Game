@@ -40,6 +40,12 @@ public:
 	TObjectPtr<UInputAction> InteractAction;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TBW|Input")
+	TObjectPtr<UInputAction> PrimaryAction;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TBW|Input")
+	TObjectPtr<UInputAction> SecondaryAction;
+
+	UPROPERTY(BlueprintReadOnly, Category = "TBW|Input")
 	TObjectPtr<UInputAction> PauseAction;
 
 	UPROPERTY(BlueprintReadOnly, Category = "TBW|Input")

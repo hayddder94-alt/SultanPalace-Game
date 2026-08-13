@@ -8,7 +8,7 @@
 #include "TBWHUD.generated.h"
 
 /**
- * Phase 1 debug / foundation HUD. No art. Replace with UMG in later phases.
+ * Phase 1 HUD. Shipping strips the debug overlay.
  */
 UCLASS()
 class TBW_API ATBWHUD : public AHUD
@@ -19,7 +19,15 @@ public:
 	virtual void DrawHUD() override;
 
 	void SetPausedBanner(bool bPaused);
+	void SetDebugVisible(bool bVisible);
+	bool IsDebugVisible() const { return bDebugVisible; }
 
 private:
 	bool bShowPaused = false;
+
+#if !UE_BUILD_SHIPPING
+	bool bDebugVisible = true;
+#else
+	bool bDebugVisible = false;
+#endif
 };

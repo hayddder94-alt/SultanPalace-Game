@@ -49,6 +49,8 @@ protected:
 	void CrouchStarted(const FInputActionValue& Value);
 	void CrouchEnded(const FInputActionValue& Value);
 	void InteractPressed(const FInputActionValue& Value);
+	void PrimaryPressed(const FInputActionValue& Value);
+	void SecondaryPressed(const FInputActionValue& Value);
 	void PausePressed(const FInputActionValue& Value);
 
 	void UpdateCamera(float DeltaSeconds);

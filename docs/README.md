@@ -45,7 +45,9 @@ The original brief asked for fifteen named documents plus a risk register. They 
 | [PHASE0_RISK_REGISTER.md](PHASE0_RISK_REGISTER.md) | Slice-specific risks |
 | [PHASE0_VALIDATION.md](PHASE0_VALIDATION.md) | What was / was not run |
 | [PHASE1_PLAN.md](PHASE1_PLAN.md) | Phase 1 tasks / remaining live compile |
-| [PHASE1_REPORT.md](PHASE1_REPORT.md) | Foundation delivered |
+| [PHASE1_REPORT.md](PHASE1_REPORT.md) | Earlier foundation note |
+| [PHASE1_EXECUTION.md](PHASE1_EXECUTION.md) | Acceptance record — structural vs runtime |
+| [INPUT_MAP.md](INPUT_MAP.md) | Phase 1 mappings |
 | [PHASE0_REPORT.md](PHASE0_REPORT.md) | Stop-line summary |
 
 Phase 1 does not start without explicit authorization. The campaign does not start until the Phase 10 Vertical Slice gate passes.

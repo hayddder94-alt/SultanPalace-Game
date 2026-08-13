@@ -76,6 +76,12 @@ void UTBWInputConfig::Build()
 	MappingContext->MapKey(InteractAction, EKeys::E);
 	MappingContext->MapKey(InteractAction, EKeys::Gamepad_FaceButton_Bottom);
 
+	MappingContext->MapKey(PrimaryAction, EKeys::LeftMouseButton);
+	MappingContext->MapKey(PrimaryAction, EKeys::Gamepad_RightTrigger);
+
+	MappingContext->MapKey(SecondaryAction, EKeys::RightMouseButton);
+	MappingContext->MapKey(SecondaryAction, EKeys::Gamepad_LeftTrigger);
+
 	MappingContext->MapKey(PauseAction, EKeys::Escape);
 	MappingContext->MapKey(PauseAction, EKeys::P);
 	MappingContext->MapKey(PauseAction, EKeys::Gamepad_Special_Right);

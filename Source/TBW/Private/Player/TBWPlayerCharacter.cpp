@@ -157,6 +157,8 @@ void ATBWPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 	Enhanced->BindAction(Input->CrouchAction, ETriggerEvent::Started, this, &ATBWPlayerCharacter::CrouchStarted);
 	Enhanced->BindAction(Input->CrouchAction, ETriggerEvent::Completed, this, &ATBWPlayerCharacter::CrouchEnded);
 	Enhanced->BindAction(Input->InteractAction, ETriggerEvent::Started, this, &ATBWPlayerCharacter::InteractPressed);
+	Enhanced->BindAction(Input->PrimaryAction, ETriggerEvent::Started, this, &ATBWPlayerCharacter::PrimaryPressed);
+	Enhanced->BindAction(Input->SecondaryAction, ETriggerEvent::Started, this, &ATBWPlayerCharacter::SecondaryPressed);
 	Enhanced->BindAction(Input->PauseAction, ETriggerEvent::Started, this, &ATBWPlayerCharacter::PausePressed);
 }
 
@@ -224,6 +226,16 @@ void ATBWPlayerCharacter::InteractPressed(const FInputActionValue& Value)
 	{
 		Interactor->TryInteract();
 	}
+}
+
+void ATBWPlayerCharacter::PrimaryPressed(const FInputActionValue& Value)
+{
+	UE_LOG(LogTBW, Verbose, TEXT("Primary action reserved for Phase 3 combat."));
+}
+
+void ATBWPlayerCharacter::SecondaryPressed(const FInputActionValue& Value)
+{
+	UE_LOG(LogTBW, Verbose, TEXT("Secondary action reserved for Phase 3 combat."));
 }
 
 void ATBWPlayerCharacter::PausePressed(const FInputActionValue& Value)

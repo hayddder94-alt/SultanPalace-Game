@@ -5,7 +5,7 @@
 **Engine:** Unreal Engine **5.7** (locked 2026-08-13 — `ENGINE_VERSION_LOCK.md`)  
 **Languages:** C++ for systems, Blueprints for content hookup and iteration  
 **Target:** Windows PC (Steam), 64-bit  
-**Status:** Phase 0 locked. Campaign not in production.
+**Status:** Phase 1 source foundation. Runtime/Editor not yet executed on this host.
 
 ---
 
@@ -75,7 +75,7 @@ All game classes use the `TBW` prefix. `A`/`U`/`F`/`I` Unreal prefixes stay.
 | `UTBWTagStatics` | Gameplay tag queries used as the shared language |
 | `UTBWLog` | Category log macros: `LogTBWSave`, `LogTBWQuest`, `LogTBWAI`, … |
 
-Flags are the bus. Example: `WorldState.Set(TBW.Flags.ClaspFound, true)` → Quest, Dialogue, and World listeners react.
+Flags are the bus. `UTBWWorldStateSubsystem` stores `FName → int32`. Typed overlay `ETBWWorldFlag` covers the Phase 1 examples (`WillWasRead`, `RaynorDisappeared`, `EvanInvestigating`, `ClueFound_01`, `GuardAlerted`) without blocking later data-driven names. Example: `WorldState.SetFlag(TEXT("ClaspFound"), 1)` → listeners react. This is not a quest system.
 
 ### 3.2 Player
 
@@ -272,7 +272,9 @@ Contexts (priority high to low):
 4. `IMC_TBW_Combat` (same keys, consumed when armed and an enemy is near — or simply always available)
 5. `IMC_TBW_Default`
 
-Default actions: Move, Look, Sprint, Crouch, Interact, Light, Heavy, Block, Dodge, Focus, Pause, Toss, Holster.
+Phase 1 actions: Move, Look, Sprint, Crouch, Interact, Primary, Secondary, Pause.  
+Primary/Secondary are reserved for Phase 3 combat and do nothing but log.  
+Later: Block, Dodge, Focus, Toss, Holster. See `INPUT_MAP.md`.
 
 Gamepad and KBM maps ship together. Mouse sensitivity and a separate aim-look for gamepad.
 
@@ -443,3 +445,5 @@ Budgets are revisited after the Vertical Slice with actual numbers.
 | Steam | Phase 16 | Publisher demands earlier (none yet) |
 | Engine minor | **5.7** (not 5.8, not 5.5) | Critical 5.7 blocker with no workaround (exception process in ENGINE_VERSION_LOCK) |
 | Content root | `Content/TBW/...` per Phase 0 brief | — |
+| World flags | FName map + `ETBWWorldFlag` overlay | Quest system would be a different class |
+| Phase 1 default map | Runtime `ATBWDevSandbox` (L_Dev_Sandbox stand-in). East Wing actor exists but is not the default. | First editor session can save a real `.umap` |

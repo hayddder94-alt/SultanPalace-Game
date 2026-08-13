@@ -7,7 +7,7 @@
 #include "GameFramework/GameModeBase.h"
 #include "TBWGameMode.generated.h"
 
-class ATBWEastWingSandbox;
+class ATBWDevSandbox;
 
 UCLASS()
 class TBW_API ATBWGameMode : public AGameModeBase
@@ -21,11 +21,11 @@ public:
 	virtual void RestartPlayer(AController* NewPlayer) override;
 
 	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
-	ATBWEastWingSandbox* GetSandbox() const { return Sandbox; }
+	ATBWDevSandbox* GetDevSandbox() const { return DevSandbox; }
 
 private:
 	void EnsureSandbox();
 
 	UPROPERTY()
-	TObjectPtr<ATBWEastWingSandbox> Sandbox;
+	TObjectPtr<ATBWDevSandbox> DevSandbox;
 };

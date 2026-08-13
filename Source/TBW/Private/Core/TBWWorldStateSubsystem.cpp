@@ -39,13 +39,14 @@ int32 UTBWWorldStateSubsystem::GetFlag(FName Flag) const
 
 bool UTBWWorldStateSubsystem::HasFlag(FName Flag) const
 {
-	return Flags.Contains(Flag);
+	return Flags.Contains(Flag) && Flags[Flag] != 0;
 }
 
 void UTBWWorldStateSubsystem::ClearFlag(FName Flag)
 {
 	if (Flags.Remove(Flag) > 0)
 	{
+		UE_LOG(LogTBW, Display, TEXT("Flag %s cleared"), *Flag.ToString());
 		OnFlagChanged.Broadcast(Flag, 0);
 	}
 }
@@ -53,6 +54,27 @@ void UTBWWorldStateSubsystem::ClearFlag(FName Flag)
 void UTBWWorldStateSubsystem::ClearAllFlags()
 {
 	Flags.Reset();
+	UE_LOG(LogTBW, Display, TEXT("All world flags cleared."));
+}
+
+void UTBWWorldStateSubsystem::SetWorldFlag(ETBWWorldFlag Flag, int32 Value)
+{
+	SetFlag(FTBWWorldFlags::ToName(Flag), Value);
+}
+
+int32 UTBWWorldStateSubsystem::GetWorldFlag(ETBWWorldFlag Flag) const
+{
+	return GetFlag(FTBWWorldFlags::ToName(Flag));
+}
+
+bool UTBWWorldStateSubsystem::CheckWorldFlag(ETBWWorldFlag Flag) const
+{
+	return HasFlag(FTBWWorldFlags::ToName(Flag));
+}
+
+void UTBWWorldStateSubsystem::ClearWorldFlag(ETBWWorldFlag Flag)
+{
+	ClearFlag(FTBWWorldFlags::ToName(Flag));
 }
 
 void UTBWWorldStateSubsystem::GetDebugLines(TArray<FString>& OutLines) const
@@ -74,4 +96,9 @@ void UTBWWorldStateSubsystem::LogAllFlags() const
 	{
 		UE_LOG(LogTBW, Display, TEXT("  %s"), *Line);
 	}
+}
+
+void UTBWWorldStateSubsystem::ResetTestState()
+{
+	ClearAllFlags();
 }
