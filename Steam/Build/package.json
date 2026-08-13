@@ -1,0 +1,25 @@
+{
+  "name": "sultan-palace",
+  "version": "1.0.0",
+  "description": "Sultan Palace - First authentic Ottoman palace simulation - Topkapi 1481 - RDR2/Ghost/AC style",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64",
+    "build:all": "electron-builder --win --mac --linux"
+  },
+  "author": "Hayder - Sultan Palace Team",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1"
+  },
+  "build": {
+    "appId": "com.sultanpalace.game",
+    "productName": "Sultan Palace - قصر السلطان",
+    "files": ["SultanPalace/**/*", "main.js", "package.json"],
+    "directories": {"buildResources": "assets"},
+    "win": {"target": "nsis", "icon": "SultanPalace/assets/courtyard_aaa.jpg"},
+    "nsis": {"oneClick": false, "allowToChangeInstallationDirectory": true}
+  }
+}
