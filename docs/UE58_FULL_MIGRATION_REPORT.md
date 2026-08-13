@@ -134,10 +134,21 @@ Filled after push.
 |---|---|
 | Repository | https://github.com/hayddder94-alt/SultanPalace-Game |
 | Branch | `arena/019ffc4c-sultanpalace-game` |
-| Final commit hash | *(pending)* |
+| Final commit hash | `5fe32473df63114fad9bbaff2e4564a0780890bc` |
 | Final commit message | migrate project to Unreal Engine 5.8 |
-| Push result | *(pending)* |
-| Post-push EngineAssociation | *(pending)* |
-| Authoritative `.uproject` count | 1 (root) |
+| Push result | **SUCCESS** `b0ca838..5fe3247` |
+| Post-push EngineAssociation | **5.8** (verified via GitHub API) |
+| Authoritative `.uproject` count | **1** (root). `TheBetrayedWill_UE58/` is 404 on the remote. |
+| Remote root contents | `.uproject`, `Source/`, `Config/`, `Content/`, `docs/`, `tools/`, `README.md`, `VERSION`, `.gitignore`, `backups/` |
+
+**GitHub now contains the final UE5.8-only project.**
+
+Clone:
+
+```
+git clone -b arena/019ffc4c-sultanpalace-game --single-branch https://github.com/hayddder94-alt/SultanPalace-Game.git
+```
+
+Open `TheBetrayedWill.uproject` with Unreal Engine 5.8.
 
 Do not start Phase 2 until a Windows UE 5.8 machine actually compiles and packages this root project.
