@@ -37,20 +37,10 @@ docs/                production bible
 tools/validate_phase0.py
 ```
 
-## Engine trees
-
-| Tree | Engine | Path |
-|---|---|---|
-| Current source (preserved) | **5.7** | repository root |
-| Frozen snapshot | **5.7** | `backups/UE57_preserved/` |
-| Migration copy | **5.8** | `TheBetrayedWill_UE58/` |
-
-See [`docs/UE58_MIGRATION_REPORT.md`](docs/UE58_MIGRATION_REPORT.md). The root `.uproject` stays on 5.7 until the 5.8 copy compiles, PIE-runs, and packages on a machine that actually has 5.8.
-
 ## Recommended next action
 
-On the production PC (UE **5.8** already installed): open `TheBetrayedWill_UE58/TheBetrayedWill.uproject`, generate files, PIE, package.  
-Do not start Phase 2. Do not start combat.
+On a Windows PC with Unreal Engine **5.7.x**: generate project files, PIE the sandbox, then `tools/package_win_dev.ps1`.  
+Do not build Chapters 1–8. Do not add combat until walking the wing feels right.
 
 ## License / legal
 

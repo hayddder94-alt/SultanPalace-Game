@@ -48,7 +48,6 @@ The original brief asked for fifteen named documents plus a risk register. They 
 | [PHASE1_REPORT.md](PHASE1_REPORT.md) | Earlier foundation note |
 | [PHASE1_EXECUTION.md](PHASE1_EXECUTION.md) | Acceptance record — structural vs runtime |
 | [INPUT_MAP.md](INPUT_MAP.md) | Phase 1 mappings |
-| [UE58_MIGRATION_REPORT.md](UE58_MIGRATION_REPORT.md) | 5.7 preserved; 5.8 copy only |
 | [PHASE0_REPORT.md](PHASE0_REPORT.md) | Stop-line summary |
 
 Phase 1 does not start without explicit authorization. The campaign does not start until the Phase 10 Vertical Slice gate passes.
