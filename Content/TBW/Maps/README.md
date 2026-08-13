@@ -1,8 +1,10 @@
 # Maps
 
-Create in the Unreal Editor during Phase 1 / 9:
+Phase 1 does **not** require an authored `.umap`. `ATBWGameMode` spawns `ATBWEastWingSandbox` at runtime.
 
-- `Dev/L_Dev_Sandbox` — Phase 1
-- `VS/L_VS_Palace` — Phase 9–10
+Optional, after first editor open:
 
-Do not create L_Market_P, L_Temple_P, L_Kurnah_P, or other campaign maps in the Vertical Slice.
+- Save the running level as `Dev/L_Dev_Sandbox` and set it as GameDefaultMap
+- `VS/L_VS_Palace` remains Phase 9–10
+
+Do not create `L_Market_P`, `L_Temple_P`, `L_Kurnah_P`, or other campaign maps.

@@ -7,10 +7,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "TBWGameMode.generated.h"
 
-/**
- * Default game mode. Death → checkpoint is Phase 2/8.
- * No respawn-as-a-service. Single player only.
- */
+class ATBWEastWingSandbox;
+
 UCLASS()
 class TBW_API ATBWGameMode : public AGameModeBase
 {
@@ -18,4 +16,16 @@ class TBW_API ATBWGameMode : public AGameModeBase
 
 public:
 	ATBWGameMode();
+
+	virtual void StartPlay() override;
+	virtual void RestartPlayer(AController* NewPlayer) override;
+
+	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
+	ATBWEastWingSandbox* GetSandbox() const { return Sandbox; }
+
+private:
+	void EnsureSandbox();
+
+	UPROPERTY()
+	TObjectPtr<ATBWEastWingSandbox> Sandbox;
 };

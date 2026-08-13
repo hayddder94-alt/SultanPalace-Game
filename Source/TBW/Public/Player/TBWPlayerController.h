@@ -8,11 +8,8 @@
 #include "TBWPlayerController.generated.h"
 
 class UInputMappingContext;
+class UTBWInputConfig;
 
-/**
- * Input routing only in Phase 0. Dialogue / cinematic / UI contexts arrive
- * in later phases. Enhanced Input is the only input path.
- */
 UCLASS()
 class TBW_API ATBWPlayerController : public APlayerController
 {
@@ -21,8 +18,23 @@ class TBW_API ATBWPlayerController : public APlayerController
 public:
 	ATBWPlayerController();
 
+	virtual void SetupInputComponent() override;
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintPure, Category = "TBW|Input")
+	UTBWInputConfig* GetInputConfig() const { return InputConfig; }
+
+	void TogglePauseMenu();
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "TBW|Input")
-	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> OverrideMappingContext;
+
+private:
+	void EnsureInputConfig();
+	void PushMapping();
+
+	UPROPERTY()
+	TObjectPtr<UTBWInputConfig> InputConfig;
+
+	bool bGameplayPaused = false;
 };

@@ -13,15 +13,18 @@ This repository is the production home of the game. It is **not** an Islamic-pal
 
 ## Current status
 
-**Phase 0 — Pre-production lock — COMPLETE.**  
-Full campaign implementation has **not** started. Phase 1 has **not** started.
+**Phase 1 — Technical foundation — code-first COMPLETE.**  
+Live Unreal compile and Windows `.exe` require a machine with UE 5.7.  
+Full campaign implementation has **not** started.
 
-- Engine: UE **5.7** locked in `TheBetrayedWill.uproject`
-- C++ module `TBW` skeleton exists (identity + flags + pawn stubs only)
-- Vertical Slice script timed to **~34 designed / ~41 first-time minutes**
-- Character pipeline: hybrid MetaHuman faces + custom period clothing
+- Engine: UE **5.7** locked  
+- Version: `0.1.0-phase1`  
+- Player: walk / sprint / crouch / look / examine  
+- East Ceremonial Wing greybox spawned at runtime  
+- Console: `tbw.Flags.Set`, `tbw.Flags.List`  
+- Package script: `tools/package_win_dev.ps1`
 
-Read: [`docs/PHASE0_REPORT.md`](docs/PHASE0_REPORT.md) · [`docs/README.md`](docs/README.md)
+Read: [`docs/PHASE1_REPORT.md`](docs/PHASE1_REPORT.md) · [`docs/README.md`](docs/README.md)
 
 ## Project layout
 
@@ -36,8 +39,8 @@ tools/validate_phase0.py
 
 ## Recommended next action
 
-**Stop.** Await authorization for Phase 1 (install UE 5.7.x, first live compile, `L_Dev_Sandbox`).  
-Do not build Chapters 1–8. Do not build seven locations. Do not implement Steamworks.
+On a Windows PC with Unreal Engine **5.7.x**: generate project files, PIE the sandbox, then `tools/package_win_dev.ps1`.  
+Do not build Chapters 1–8. Do not add combat until walking the wing feels right.
 
 ## License / legal
 

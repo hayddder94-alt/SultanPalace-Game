@@ -11,8 +11,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTBWFlagChanged, FName, Flag, int32
 
 /**
  * The flag bus. Quest, Dialogue, and World listen here.
- * Phase 0 ships a name→int map only. Phase 1 adds console cheats and
- * GameplayTag aliases. Do not serialize the entire actor graph.
+ * Compact name→int map. Do not serialize the entire actor graph.
  */
 UCLASS()
 class TBW_API UTBWWorldStateSubsystem : public UWorldSubsystem
@@ -30,6 +29,17 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "TBW|WorldState")
 	bool HasFlag(FName Flag) const;
+
+	UFUNCTION(BlueprintCallable, Category = "TBW|WorldState")
+	void ClearFlag(FName Flag);
+
+	UFUNCTION(BlueprintCallable, Category = "TBW|WorldState")
+	void ClearAllFlags();
+
+	void GetDebugLines(TArray<FString>& OutLines) const;
+	void LogAllFlags() const;
+
+	const TMap<FName, int32>& GetAllFlags() const { return Flags; }
 
 	UPROPERTY(BlueprintAssignable, Category = "TBW|WorldState")
 	FTBWFlagChanged OnFlagChanged;

@@ -1,9 +1,10 @@
 # The Betrayed Will — Production Bible
 
 **Title:** The Betrayed Will / **وصية الغدر**  
-**Phase:** Phase 0 locked. Phase 1 not authorized. Campaign not in production.  
+**Phase:** Phase 1 code-first complete. Campaign not in production.  
 **Engine:** Unreal Engine **5.7**  
-**Read order for a new arrival:** [PHASE0_REPORT](PHASE0_REPORT.md) → Assumptions → GDD → Story → Scope gate → VS script.
+**Version:** 0.1.0-phase1  
+**Read order:** [PHASE1_REPORT](PHASE1_REPORT.md) → [PHASE0_REPORT](PHASE0_REPORT.md) → GDD → VS script.
 
 The original brief asked for fifteen named documents plus a risk register. They live here.
 
@@ -43,7 +44,8 @@ The original brief asked for fifteen named documents plus a risk register. They 
 | [PERFORMANCE_TARGETS.md](PERFORMANCE_TARGETS.md) | 1080p baselines later |
 | [PHASE0_RISK_REGISTER.md](PHASE0_RISK_REGISTER.md) | Slice-specific risks |
 | [PHASE0_VALIDATION.md](PHASE0_VALIDATION.md) | What was / was not run |
-| [PHASE1_PLAN.md](PHASE1_PLAN.md) | Next phase, not started |
+| [PHASE1_PLAN.md](PHASE1_PLAN.md) | Phase 1 tasks / remaining live compile |
+| [PHASE1_REPORT.md](PHASE1_REPORT.md) | Foundation delivered |
 | [PHASE0_REPORT.md](PHASE0_REPORT.md) | Stop-line summary |
 
 Phase 1 does not start without explicit authorization. The campaign does not start until the Phase 10 Vertical Slice gate passes.

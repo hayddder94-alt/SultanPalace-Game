@@ -47,7 +47,19 @@ From architecture + wing spec:
 
 ---
 
-## 4. Baselines to capture (Phase 1, not now)
+## 4. Baselines to capture (after first PIE on UE 5.7)
+
+Not captured on the planning host (no editor). Fill this table on the first Development Editor session:
+
+| Scene | GPU ms | GT ms | RT ms | Notes |
+|---|---|---|---|---|
+| Empty template + pawn |  |  |  | |
+| Hall (sandbox) |  |  |  | |
+| Annex |  |  |  | |
+| Court |  |  |  | |
+| HUD + flag list |  |  |  | |
+
+## 4b. Original capture list
 
 On `L_Dev_Sandbox`, then on grey `L_VS_Palace`:
 

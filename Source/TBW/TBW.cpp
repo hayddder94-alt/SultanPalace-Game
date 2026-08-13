@@ -2,6 +2,7 @@
 // Copyright (c) 2026. All rights reserved.
 
 #include "TBW.h"
+#include "Core/TBWVersion.h"
 
 DEFINE_LOG_CATEGORY(LogTBW);
 DEFINE_LOG_CATEGORY(LogTBWSave);
@@ -13,7 +14,7 @@ DEFINE_LOG_CATEGORY(LogTBWIdentity);
 
 void FTBWModule::StartupModule()
 {
-	UE_LOG(LogTBW, Log, TEXT("TBW module started (The Betrayed Will). Engine lock: UE 5.7."));
+	UE_LOG(LogTBW, Log, TEXT("TBW module started. Version %s. Engine lock: UE %s."), TBW_VERSION_STRING, TBW_ENGINE_LOCK);
 }
 
 void FTBWModule::ShutdownModule()

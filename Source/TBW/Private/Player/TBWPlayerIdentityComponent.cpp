@@ -4,8 +4,6 @@
 #include "Player/TBWPlayerIdentityComponent.h"
 #include "Player/TBWIdentityData.h"
 #include "Player/TBWPlayerCharacter.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Components/SkeletalMeshComponent.h"
 #include "TBW.h"
 
 UTBWPlayerIdentityComponent::UTBWPlayerIdentityComponent()
@@ -16,7 +14,7 @@ UTBWPlayerIdentityComponent::UTBWPlayerIdentityComponent()
 void UTBWPlayerIdentityComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	if (DefaultIdentity)
+	if (DefaultIdentity && !CurrentIdentity)
 	{
 		ApplyIdentity(DefaultIdentity);
 	}
@@ -32,16 +30,9 @@ void UTBWPlayerIdentityComponent::ApplyIdentity(UTBWIdentityData* NewIdentity)
 
 	CurrentIdentity = NewIdentity;
 
-	ATBWPlayerCharacter* Character = Cast<ATBWPlayerCharacter>(GetOwner());
-	if (!Character)
+	if (ATBWPlayerCharacter* Character = Cast<ATBWPlayerCharacter>(GetOwner()))
 	{
-		return;
-	}
-
-	if (UCharacterMovementComponent* Move = Character->GetCharacterMovement())
-	{
-		Move->MaxWalkSpeed = NewIdentity->MaxWalkSpeed;
-		Move->MaxWalkSpeedCrouched = NewIdentity->MaxCrouchSpeed;
+		Character->ApplyMovementFromIdentity();
 	}
 
 	UE_LOG(LogTBWIdentity, Log, TEXT("Identity applied: %s"), *NewIdentity->IdentityId.ToString());
