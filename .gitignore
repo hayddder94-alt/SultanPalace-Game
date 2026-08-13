@@ -1,3 +1,40 @@
-# Build folder and log file
+# Local build artifacts
 build/
 build.log
+
+# Unreal Engine (project will be created in Phase 0/1)
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Build/
+.vs/
+.idea/
+*.sln
+*.suo
+*.opensdf
+*.sdf
+*.VC.db
+*.VC.opendb
+*.xcodeproj
+*.xcworkspace
+*.VC.opendb
+
+# Compiled
+*.dll
+*.exe
+*.pdb
+*.obj
+*.lib
+*.exp
+*.ilk
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE / agent
+.arena/
+.vscode/
+*.log
