@@ -1,5 +1,8 @@
 # PHASE 1 REPORT — TECHNICAL FOUNDATION
 
+> **HISTORICAL / ARCHIVED.** Written against the 5.7 lock.  
+> **Current active engine is Unreal Engine 5.8.** See `PHASE1_EXECUTION.md` (updated) and `UE58_FULL_MIGRATION_REPORT.md`.
+
 **Project:** The Betrayed Will / وصية الغدر  
 **Version:** `0.1.0-phase1`  
 **Engine lock:** Unreal Engine **5.7** (unchanged)  

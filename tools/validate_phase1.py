@@ -54,10 +54,10 @@ def structural() -> None:
         (ok if (ROOT / rel).is_file() else fail)(rel)
 
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    (ok if version == "0.1.0-phase1" else fail)(f"VERSION {version}")
+    (ok if version == "0.1.0-phase1-ue58" else fail)(f"VERSION {version}")
 
     uproject = (ROOT / "TheBetrayedWill.uproject").read_text(encoding="utf-8")
-    (ok if '"EngineAssociation": "5.7"' in uproject else fail)("engine lock 5.7")
+    (ok if '"EngineAssociation": "5.8"' in uproject else fail)("engine lock 5.8")
 
     build_cs = (ROOT / "Source/TBW/TBW.Build.cs").read_text(encoding="utf-8")
     for banned in ('"GameplayAbilities"', '"OnlineSubsystemSteam"', '"Steamworks"'):

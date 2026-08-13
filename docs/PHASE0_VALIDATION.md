@@ -1,5 +1,8 @@
 # PHASE 0 TECHNICAL VALIDATION
 
+> **HISTORICAL / ARCHIVED.** Snapshot of the 5.7 structural check.  
+> **Current active engine is Unreal Engine 5.8.** Use `tools/validate_ue58.py`.
+
 **Date:** 2026-08-13  
 **Host:** Linux planning sandbox (no Unreal Editor, no Epic Launcher, no MSVC)
 

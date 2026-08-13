@@ -2,10 +2,10 @@
 
 **Project:** The Betrayed Will / وصية الغدر  
 **Code name:** TBW  
-**Engine:** Unreal Engine **5.7** (locked 2026-08-13 — `ENGINE_VERSION_LOCK.md`)  
+**Engine:** Unreal Engine **5.8** (locked — `ENGINE_VERSION_LOCK.md`)  
 **Languages:** C++ for systems, Blueprints for content hookup and iteration  
 **Target:** Windows PC (Steam), 64-bit  
-**Status:** Phase 1 source foundation. Runtime/Editor not yet executed on this host.
+**Status:** UE 5.8-only. Phase 1 source foundation. Runtime/Editor not executed on this host.
 
 ---
 
@@ -443,7 +443,7 @@ Budgets are revisited after the Vertical Slice with actual numbers.
 | Faces | **Hybrid:** MetaHuman DNA for 4 primaries + Orin; custom period clothes; traditional modular for guards/civilians | Phase 2 import test fails non-preset faces |
 | Identity | One pawn + component | Swap bugs exceed possess bugs |
 | Steam | Phase 16 | Publisher demands earlier (none yet) |
-| Engine minor | **5.7** (not 5.8, not 5.5) | Critical 5.7 blocker with no workaround (exception process in ENGINE_VERSION_LOCK) |
+| Engine minor | **5.8 only** (not 5.7, not 5.6) | Production machine already has 5.8; dual-version support is forbidden |
 | Content root | `Content/TBW/...` per Phase 0 brief | — |
 | World flags | FName map + `ETBWWorldFlag` overlay | Quest system would be a different class |
 | Phase 1 default map | Runtime `ATBWDevSandbox` (L_Dev_Sandbox stand-in). East Wing actor exists but is not the default. | First editor session can save a real `.umap` |

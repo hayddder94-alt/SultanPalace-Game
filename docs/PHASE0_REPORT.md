@@ -1,5 +1,9 @@
 # PHASE 0 REPORT — STOP LINE
 
+> **HISTORICAL / ARCHIVED.** Written when the engine lock was 5.7.  
+> **Current active engine is Unreal Engine 5.8.** See `ENGINE_VERSION_LOCK.md` and `UE58_FULL_MIGRATION_REPORT.md`.  
+> Do not install 5.7 from this document.
+
 **Project:** The Betrayed Will / وصية الغدر  
 **Date:** 2026-08-13  
 **Status:** Phase 0 complete. **Phase 1 is not started.** Campaign is not in production.

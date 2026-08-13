@@ -47,7 +47,7 @@ From architecture + wing spec:
 
 ---
 
-## 4. Baselines to capture (after first PIE on UE 5.7)
+## 4. Baselines to capture (after first PIE on UE 5.8)
 
 Not captured on the planning host (no editor). Fill this table on the first Development Editor session:
 

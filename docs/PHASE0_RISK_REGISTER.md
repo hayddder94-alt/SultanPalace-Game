@@ -1,5 +1,8 @@
 # PHASE 0 / VERTICAL SLICE RISK REGISTER
 
+> **HISTORICAL / ARCHIVED** risk notes from the 5.7 lock period.  
+> **Current active engine is Unreal Engine 5.8.**
+
 **Status:** Living. Review weekly once Phase 1 starts.  
 **Parent:** `PROJECT_RISKS.md` (whole project)  
 **This file:** risks that can kill the *slice*, not the 24-month dream.

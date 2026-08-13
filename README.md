@@ -5,7 +5,7 @@ Ancient Babylon. A family. A will. A betrayal.
 
 **Platform:** Windows PC  
 **Distribution:** Steam  
-**Engine:** **Unreal Engine 5.7** (locked — see [`docs/ENGINE_VERSION_LOCK.md`](docs/ENGINE_VERSION_LOCK.md))  
+**ENGINE: Unreal Engine 5.8**  
 **Playtime:** 6–8 hours  
 **Scope:** Small-to-medium independent / AA-style. Not an open world. Not an RPG. Not a live service.
 
@@ -13,43 +13,36 @@ This repository is the production home of the game. It is **not** an Islamic-pal
 
 ## Current status
 
-**Phase 1 — Technical foundation — code-first COMPLETE.**  
-Live Unreal compile and Windows `.exe` require a machine with UE 5.7.  
-Full campaign implementation has **not** started.
+**Authoritative engine: Unreal Engine 5.8 only.**  
+Version: `0.1.0-phase1-ue58`  
+One project: `TheBetrayedWill.uproject` at the repository root.
 
-- Engine: UE **5.7** locked  
-- Version: `0.1.0-phase1`  
+Do **not** install or use Unreal Engine 5.6 or 5.7 for this project.
+
 - Player: walk / sprint / crouch / look / examine  
 - `L_Dev_Sandbox` runtime stand-in (floor, lights, two flag tests)  
 - Console: `tbw.Flags.Set`, `tbw.Flags.List`  
-- Package script: `tools/package_win_dev.ps1`
+- Package script: `tools/package_win_dev.ps1` (requires UE 5.8 on Windows)
 
-Read: [`docs/PHASE1_REPORT.md`](docs/PHASE1_REPORT.md) · [`docs/README.md`](docs/README.md)
+Read: [`docs/UE58_FULL_MIGRATION_REPORT.md`](docs/UE58_FULL_MIGRATION_REPORT.md) · [`docs/README.md`](docs/README.md)
 
 ## Project layout
 
 ```
 TheBetrayedWill.uproject
-Source/TBW/          C++ game module
-Content/TBW/         game content (East Wing only for the slice)
+Source/TBW/
+Content/TBW/
 Config/
-docs/                production bible
-tools/validate_phase0.py
+docs/
+tools/
+VERSION
 ```
 
-## Engine trees
-
-| Tree | Engine | Path |
-|---|---|---|
-| Current source (preserved) | **5.7** | repository root |
-| Frozen snapshot | **5.7** | `backups/UE57_preserved/` |
-| Migration copy | **5.8** | `TheBetrayedWill_UE58/` |
-
-See [`docs/UE58_MIGRATION_REPORT.md`](docs/UE58_MIGRATION_REPORT.md). The root `.uproject` stays on 5.7 until the 5.8 copy compiles, PIE-runs, and packages on a machine that actually has 5.8.
+`backups/` is **ARCHIVED / NON-AUTHORITATIVE**. Do not open those `.uproject` files as the game.
 
 ## Recommended next action
 
-On the production PC (UE **5.8** already installed): open `TheBetrayedWill_UE58/TheBetrayedWill.uproject`, generate files, PIE, package.  
+On a Windows PC with Unreal Engine **5.8**: generate project files for `TheBetrayedWill.uproject`, PIE the sandbox, then `tools/package_win_dev.ps1`.  
 Do not start Phase 2. Do not start combat.
 
 ## License / legal

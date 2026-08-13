@@ -1,3 +1,6 @@
+ARCHIVED / NON-AUTHORITATIVE — UE 5.7 snapshot only.
+Do not open this copy as the game. Authoritative engine is UE 5.8 at repo root.
+
 TBW UE 5.7 preserved snapshot
 Created: 2026-08-13T19:06:25Z
 EngineAssociation: 5.7

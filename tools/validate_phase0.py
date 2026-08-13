@@ -32,10 +32,10 @@ def check_uproject() -> None:
         fail("missing TheBetrayedWill.uproject")
         return
     data = json.loads(path.read_text(encoding="utf-8"))
-    if data.get("EngineAssociation") != "5.7":
-        fail(f"EngineAssociation is {data.get('EngineAssociation')!r}, expected '5.7'")
+    if data.get("EngineAssociation") != "5.8":
+        fail(f"EngineAssociation is {data.get('EngineAssociation')!r}, expected '5.8'")
     else:
-        ok("EngineAssociation == 5.7")
+        ok("EngineAssociation == 5.8")
     modules = [m.get("Name") for m in data.get("Modules", [])]
     if "TBW" not in modules:
         fail("TBW module not listed")

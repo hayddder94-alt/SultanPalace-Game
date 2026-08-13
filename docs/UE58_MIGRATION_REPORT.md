@@ -1,5 +1,8 @@
 # UE 5.8 MIGRATION REPORT
 
+> **HISTORICAL / ARCHIVED.** First dual-tree attempt (root 5.7 + `TheBetrayedWill_UE58/`).  
+> **Superseded** by `UE58_FULL_MIGRATION_REPORT.md`. The repository is now a **single UE 5.8 project** at the root.
+
 **Project:** The Betrayed Will / وصية الغدر  
 **Date:** 2026-08-13  
 **Decision:** Explicit architecture change — target **Unreal Engine 5.8**, not 5.7, not 5.6.  

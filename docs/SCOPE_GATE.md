@@ -11,7 +11,7 @@
 
 Build these. They *are* the slice.
 
-- UE 5.7 project, TBW module, Enhanced Input  
+- UE 5.8 project, TBW module, Enhanced Input  
 - Evan pawn, shared identity component, Evan data  
 - East Ceremonial Wing only  
 - Walk, run, crouch, sprint, look, interact, examine, Focus  

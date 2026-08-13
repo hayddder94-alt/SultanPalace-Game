@@ -171,7 +171,7 @@ The following will not be designed, prototyped, or scheduled:
 
 These do not block planning. They must be answered before full production (Phase 11).
 
-1. ~~Exact Unreal Engine minor version at kickoff~~ **LOCKED: UE 5.7** (`docs/ENGINE_VERSION_LOCK.md`). Hotfix frozen on the day the production machine is imaged.
+1. ~~Exact Unreal Engine minor version at kickoff~~ **LOCKED: UE 5.8 only** (`docs/ENGINE_VERSION_LOCK.md`). Hotfix frozen on the day the production machine is imaged. Do not use 5.6 or 5.7.
 2. Whether Arabic VO ships on day one or as a first patch.
 3. Whether Lord Hazar appears on screen.
 4. Whether the poison-Orin thread survives the first content cut.

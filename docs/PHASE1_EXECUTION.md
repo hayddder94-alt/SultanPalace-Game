@@ -3,9 +3,12 @@
 **Project:** The Betrayed Will / وصية الغدر  
 **Date:** 2026-08-13  
 **Owner:** Technical Director  
-**Version:** `0.1.0-phase1`
+**Version:** `0.1.0-phase1-ue58`  
+**Active engine:** Unreal Engine **5.8 only**
 
 This is the Phase 1 acceptance record. It separates what was implemented from what was actually run.
+
+> Sections that mention the old 5.7 lock are **HISTORICAL**. Current setup is 5.8.
 
 ---
 
@@ -13,12 +16,12 @@ This is the Phase 1 acceptance record. It separates what was implemented from wh
 
 | Field | Value |
 |---|---|
-| Locked minor | **5.7** |
+| Locked minor | **5.8** |
 | Exact hotfix on this host | **NOT INSTALLED — UNKNOWN** |
-| Association | `"5.7"` in `TheBetrayedWill.uproject` |
-| 5.8 | Not used |
+| Association | `"5.8"` in `TheBetrayedWill.uproject` |
+| 5.6 / 5.7 | Not active. Do not install. |
 
-The production machine must write the hotfix here on first install, for example `5.7.2`. Until that happens the lock is the minor version only.
+The production machine must write the 5.8 hotfix here on first install. Until that happens the lock is the minor version only.
 
 ---
 
@@ -33,7 +36,7 @@ The production machine must write the hotfix here on first install, for example 
 | Create / open a test map | **NOT TESTED** — no `.umap` authored; `ATBWDevSandbox` is a runtime stand-in for `L_Dev_Sandbox` |
 | Development build generated | **NOT TESTED** |
 
-Disk on this host: 20 GB free. A UE 5.7 install is larger than that. No Epic Launcher, no MSVC.
+Disk on this host: 20 GB free. A UE 5.8 install is larger than that. No Epic Launcher, no MSVC.
 
 **Editor-dependent work was stopped.** Nothing below claims a live PIE or packaged exe.
 
@@ -154,7 +157,7 @@ Everything that requires Unreal Editor, UBT, MSVC, or a cooked pak.
 | Error | Outcome |
 |---|---|
 | No Unreal binary on host | Stopped Editor-dependent work. Documented. |
-| No disk for a 5.7 install | Did not attempt a partial download. |
+| No disk for a UE install | Did not attempt a partial download. |
 | Previous GameMode spawned the East Wing as the Phase 1 map | Corrected: default is now `ATBWDevSandbox`. |
 
 ---
@@ -172,9 +175,9 @@ Everything that requires Unreal Editor, UBT, MSVC, or a cooked pak.
 ## 11. Remaining risks
 
 1. First UBT compile may need a modifier tweak on WASD swizzle.  
-2. `Template_Default` map path may differ on some 5.7 installs.  
+2. `Template_Default` map path may differ on some 5.8 installs.  
 3. Engine cube `/Engine/BasicShapes/Cube` must cook — listed in `DefaultGame.ini`.  
-4. Exact 5.7.x hotfix still unknown.  
+4. Exact 5.8.x hotfix still unknown.  
 5. Packaging surprises (shader compile, missing default map) will only appear on the Windows machine.  
 6. Identity swap is architecture + console only — not a player-facing feature.
 
@@ -193,7 +196,7 @@ Everything that requires Unreal Editor, UBT, MSVC, or a cooked pak.
 | Shared player + identity + world-state architecture | **Yes, in source** |
 | Phase 1 report + engine version + limitations | **Yes** (hotfix unknown) |
 
-**Phase 1 is NOT fully accepted.** The foundation is implemented and structurally validated. The runtime/build gate remains open until a UE 5.7 Windows machine exists.
+**Phase 1 is NOT fully accepted.** The foundation is implemented and structurally validated. The runtime/build gate remains open until a UE **5.8** Windows machine exists.
 
 Do not start Phase 2, combat, AI, or the Vertical Slice until that gate is actually run.
 

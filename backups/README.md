@@ -1,11 +1,10 @@
-# Backups
+# backups/ — ARCHIVED / NON-AUTHORITATIVE
 
-## `UE57_preserved/`
+These trees are **historical**. Do not open them as the game.
 
-Complete snapshot of the UE **5.7** Phase 1 tree at the moment the 5.8 migration copy was created.
+| Path | What |
+|---|---|
+| `UE57_preserved/` | Frozen UE 5.7 snapshot from before the 5.8-only consolidation |
+| `archives/` | Transfer zips and other non-source artifacts |
 
-- `EngineAssociation` remains `5.7`
-- Do not edit this tree to “fix” the 5.8 copy
-- Restore by copying files back over the repository root if the 5.8 experiment is abandoned
-
-See `BACKUP_MANIFEST.txt` inside the snapshot.
+**Authoritative project:** repository root `TheBetrayedWill.uproject` — Unreal Engine **5.8**.

@@ -1,11 +1,11 @@
 # The Betrayed Will — Windows Development package
-# Run on a Windows machine with Unreal Engine 5.7.x installed.
+# Run on a Windows machine with Unreal Engine 5.8.x installed.
 # Usage:
 #   .\tools\package_win_dev.ps1
-#   .\tools\package_win_dev.ps1 -EngineRoot "C:\Program Files\Epic Games\UE_5.7"
+#   .\tools\package_win_dev.ps1 -EngineRoot "C:\Program Files\Epic Games\UE_5.8"
 
 param(
-    [string]$EngineRoot = $env:UE57_ROOT,
+    [string]$EngineRoot = $env:UE58_ROOT,
     [ValidateSet("Development", "DebugGame", "Shipping")]
     [string]$Config = "Development"
 )
@@ -17,12 +17,17 @@ $Archive = Join-Path $ProjectRoot "Saved\StagedBuilds\Win64"
 $Version = (Get-Content (Join-Path $ProjectRoot "VERSION") -Raw).Trim()
 
 if (-not $EngineRoot) {
-    $Guess = "C:\Program Files\Epic Games\UE_5.7"
-    if (Test-Path $Guess) { $EngineRoot = $Guess }
+    foreach ($Guess in @(
+        "C:\Program Files\Epic Games\UE_5.8",
+        "D:\Epic Games\UE_5.8",
+        $env:UE_ROOT
+    )) {
+        if ($Guess -and (Test-Path $Guess)) { $EngineRoot = $Guess; break }
+    }
 }
 
 if (-not $EngineRoot -or -not (Test-Path $EngineRoot)) {
-    Write-Error "Set UE57_ROOT or pass -EngineRoot to your Unreal Engine 5.7 install."
+    Write-Error "Set UE58_ROOT or pass -EngineRoot to your Unreal Engine 5.8 install."
 }
 
 $RunUAT = Join-Path $EngineRoot "Engine\Build\BatchFiles\RunUAT.bat"
@@ -54,4 +59,4 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host "Staged: $Archive"
-Write-Host "Smoke: launch TheBetrayedWill.exe, walk, press E on the clasp, then: tbw.Flags.List"
+Write-Host "Smoke: launch TheBetrayedWill.exe, walk, press E on a test object, then: tbw.Flags.List"

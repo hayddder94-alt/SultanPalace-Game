@@ -6,7 +6,7 @@
 **Four primaries:** Evan, Raynor, Leila, Nofan  
 **Also needs a face:** Orin (prologue close-ups)
 
-No live MetaHuman import was possible on this host (Unreal Editor is not installed). The comparison is production research against UE 5.7 capabilities, license, and this game’s actual needs. A one-day import test on the production machine is the first character task in Phase 2, not a reason to delay this lock.
+No live MetaHuman import was possible on this host (Unreal Editor is not installed). The comparison is production research against UE 5.8 capabilities (MetaHuman Creator in-editor since 5.6). A one-day import test on the production machine is the first character task in Phase 2, not a reason to delay this lock.
 
 ---
 

@@ -64,7 +64,7 @@ A phase can start when its **dependencies** are met, not when the previous numbe
 
 - [x] A new reader can pitch the game in one minute
 - [x] VS script timed to 30–45 minutes (`VERTICAL_SLICE_SCRIPT.md`, ~34 / ~41)
-- [x] Engine version written in the project README (**UE 5.7**)
+- [x] Engine version written in the project README (**UE 5.8**)
 - [x] No open-world or RPG language remaining in official docs
 - [x] Phase 0 stop line written (`PHASE0_REPORT.md`) — Phase 1 not auto-started
 

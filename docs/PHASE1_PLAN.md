@@ -1,8 +1,10 @@
 # PHASE 1 PLAN — TECHNICAL FOUNDATION
 
-**Status:** Code-first complete 2026-08-13. Live UBT / packaged exe pending a UE 5.7 Windows machine.  
+> **HISTORICAL / ARCHIVED** schedule text. Remaining live compile uses **UE 5.8**, not 5.7.
+
+**Status:** Code-first complete. Live UBT / packaged exe pending a UE **5.8** Windows machine.  
 **Calendar:** 3–4 weeks (remaining: first compile day + smoke)  
-**Depends on:** Engine lock (done), skeleton (done)
+**Depends on:** Engine lock (done — now 5.8), skeleton (done)
 
 ---
 
@@ -14,7 +16,7 @@ A clean UE 5.7 project that boots, compiles, packages a Development Windows buil
 
 ## 2. Tasks
 
-1. ~~Lock UE 5.7~~ Done in Phase 0. Exact hotfix still written on first install day.  
+1. ~~Engine lock~~ Now **UE 5.8 only**. Exact 5.8.x hotfix written on first install day.  
 2. ~~Module + targets~~ Done. First UBT generate/compile is the remaining live step.  
 3. ~~Playable sandbox~~ `ATBWEastWingSandbox` injects the East Wing at runtime. Optional: save `L_Dev_Sandbox` from the editor.  
 4. ~~Enhanced Input~~ Runtime `UTBWInputConfig` (IA + IMC). Editor assets optional later.  
@@ -44,8 +46,8 @@ A clean UE 5.7 project that boots, compiles, packages a Development Windows buil
 
 ## 4. Acceptance criteria
 
-- [x] Engine minor locked at 5.7  
-- [ ] Exact 5.7.x hotfix recorded (first install)  
+- [x] Engine minor locked at **5.8**  
+- [ ] Exact 5.8.x hotfix recorded (first install)  
 - [ ] `TBW` compiles without warnings we do not understand  
 - [ ] Editor opens this project  
 - [ ] PIE into the sandbox, walk the wing  

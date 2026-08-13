@@ -2,9 +2,9 @@
 
 **Title:** The Betrayed Will / **وصية الغدر**  
 **Phase:** Phase 1 code-first complete. Campaign not in production.  
-**Engine:** Unreal Engine **5.7**  
-**Version:** 0.1.0-phase1  
-**Read order:** [PHASE1_REPORT](PHASE1_REPORT.md) → [PHASE0_REPORT](PHASE0_REPORT.md) → GDD → VS script.
+**Engine:** Unreal Engine **5.8 only**  
+**Version:** 0.1.0-phase1-ue58  
+**Read order:** [UE58_FULL_MIGRATION_REPORT](UE58_FULL_MIGRATION_REPORT.md) → GDD → VS script.
 
 The original brief asked for fifteen named documents plus a risk register. They live here.
 
@@ -32,7 +32,7 @@ The original brief asked for fifteen named documents plus a risk register. They 
 
 | Doc | Purpose |
 |---|---|
-| [ENGINE_VERSION_LOCK.md](ENGINE_VERSION_LOCK.md) | UE 5.7 selected and frozen |
+| [ENGINE_VERSION_LOCK.md](ENGINE_VERSION_LOCK.md) | UE **5.8** locked |
 | [VERTICAL_SLICE_SCRIPT.md](VERTICAL_SLICE_SCRIPT.md) | Timed 30–45 min script |
 | [VERTICAL_SLICE_ASSET_BUDGET.md](VERTICAL_SLICE_ASSET_BUDGET.md) | Every VS asset, caps |
 | [PALACE_WING_SPEC.md](PALACE_WING_SPEC.md) | East Ceremonial Wing only |
