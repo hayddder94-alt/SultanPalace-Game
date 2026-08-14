@@ -48,7 +48,9 @@ The original brief asked for fifteen named documents plus a risk register. They 
 | [PHASE1_REPORT.md](PHASE1_REPORT.md) | Earlier foundation note |
 | [PHASE1_EXECUTION.md](PHASE1_EXECUTION.md) | Acceptance record — structural vs runtime |
 | [INPUT_MAP.md](INPUT_MAP.md) | Phase 1 mappings |
-| [UE58_MIGRATION_REPORT.md](UE58_MIGRATION_REPORT.md) | 5.7 preserved; 5.8 copy only |
+| [UE58_MIGRATION_REPORT.md](UE58_MIGRATION_REPORT.md) | HISTORICAL — first 5.8 copy |
+| [UE58_FULL_MIGRATION_REPORT.md](UE58_FULL_MIGRATION_REPORT.md) | Current: single 5.8-only project |
+| [ARABIC_TEXT_PIPELINE.md](ARABIC_TEXT_PIPELINE.md) | Phase 1 HUD Arabic / font |
 | [PHASE0_REPORT.md](PHASE0_REPORT.md) | Stop-line summary |
 
 Phase 1 does not start without explicit authorization. The campaign does not start until the Phase 10 Vertical Slice gate passes.

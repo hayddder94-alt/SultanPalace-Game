@@ -10,7 +10,94 @@
 #include "Core/TBWVersion.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
+#include "Engine/GameViewportClient.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Misc/Paths.h"
+#include "Widgets/SBoxPanel.h"
+#include "Widgets/Text/STextBlock.h"
+#include "Fonts/SlateFontInfo.h"
+#include "Styling/CoreStyle.h"
+
+namespace TBWHudText
+{
+	// ASCII-only source so MSVC cannot mis-decode the Arabic title as CP1252.
+	// وصية الغدر
+	static const TCHAR* ArabicTitle =
+		TEXT("THE BETRAYED WILL  /  \u0648\u0635\u064A\u0629 \u0627\u0644\u063A\u062F\u0631");
+
+	static FString FontFile()
+	{
+		return FPaths::ConvertRelativePathToFull(
+			FPaths::ProjectContentDir() / TEXT("TBW/UI/Fonts/DejaVuSans.ttf"));
+	}
+}
+
+void ATBWHUD::BeginPlay()
+{
+	Super::BeginPlay();
+	AddArabicTitleWidget();
+}
+
+void ATBWHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	RemoveArabicTitleWidget();
+	Super::EndPlay(EndPlayReason);
+}
+
+void ATBWHUD::AddArabicTitleWidget()
+{
+#if !UE_BUILD_SHIPPING
+	if (ArabicTitleHost.IsValid())
+	{
+		return;
+	}
+	if (!GEngine || !GEngine->GameViewport)
+	{
+		return;
+	}
+
+	const FString FontPath = TBWHudText::FontFile();
+	FSlateFontInfo FontInfo;
+	if (FPaths::FileExists(FontPath))
+	{
+		FontInfo = FSlateFontInfo(FontPath, 16);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TBWHUD: Arabic font missing at %s"), *FontPath);
+		FontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 16);
+	}
+
+	TSharedRef<SWidget> Title = SNew(STextBlock)
+		.Text(FText::FromString(TBWHudText::ArabicTitle))
+		.Font(FontInfo)
+		.ColorAndOpacity(FLinearColor(0.75f, 0.82f, 0.95f))
+		.TextShapingMethod(ETextShapingMethod::Auto)
+		.TextFlowDirection(ETextFlowDirection::Auto);
+
+	ArabicTitleHost = SNew(SHorizontalBox)
+		+ SHorizontalBox::Slot()
+		.HAlign(HAlign_Left)
+		.VAlign(VAlign_Top)
+		.Padding(FMargin(24.f, 14.f, 24.f, 0.f))
+		[
+			Title
+		];
+
+	GEngine->GameViewport->AddViewportWidgetContent(ArabicTitleHost.ToSharedRef(), 10000);
+#endif
+}
+
+void ATBWHUD::RemoveArabicTitleWidget()
+{
+#if !UE_BUILD_SHIPPING
+	if (ArabicTitleHost.IsValid() && GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->RemoveViewportWidgetContent(ArabicTitleHost.ToSharedRef());
+	}
+	ArabicTitleHost.Reset();
+#endif
+}
 
 void ATBWHUD::SetPausedBanner(bool bPaused)
 {
@@ -37,7 +124,9 @@ void ATBWHUD::DrawHUD()
 	const float W = Canvas->SizeX;
 	const float H = Canvas->SizeY;
 
-	DrawText(TEXT("THE BETRAYED WILL  /  وصية الغدر"), FLinearColor(0.75f, 0.82f, 0.95f), 24.f, 16.f, nullptr, 1.05f);
+	// Arabic title is a Slate widget (see BeginPlay). Do not Canvas-draw it
+	// through DroidSansFallback — that produced glyph warnings / mojibake.
+
 	DrawText(FString::Printf(TEXT("%s   UE %s   L_Dev_Sandbox"), TBW_VERSION_STRING, TBW_ENGINE_LOCK),
 		FLinearColor(0.55f, 0.55f, 0.55f), 24.f, 36.f, nullptr, 0.85f);
 

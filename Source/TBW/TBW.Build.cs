@@ -35,6 +35,9 @@ public class TBW : ModuleRules
 		{
 		});
 
+		// Loose TTF used by the debug HUD Arabic title (Slate/HarfBuzz).
+		RuntimeDependencies.Add("$(ProjectDir)/Content/TBW/UI/Fonts/DejaVuSans.ttf");
+
 		// Intentionally NOT added in Phase 0 / Vertical Slice:
 		//   GameplayAbilities, GameplayTasks (GAS)
 		//   CommonUI
