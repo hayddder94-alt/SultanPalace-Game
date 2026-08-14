@@ -79,4 +79,4 @@ See `PHASE2_PERFORMANCE_BASELINE.md`. Numbers: **not captured here**.
 
 ## Git
 
-Filled after commit.
+Commit: `ed0419e698e2d582974f6866d2f26a0778c835ec` on `arena/019ffc4c-sultanpalace-game`.
