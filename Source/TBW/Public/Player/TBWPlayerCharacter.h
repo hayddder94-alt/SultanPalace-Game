@@ -15,9 +15,19 @@ class UTBWInteractorComponent;
 class UInputAction;
 struct FInputActionValue;
 
+UENUM(BlueprintType)
+enum class ETBWMoveState : uint8
+{
+	Idle,
+	Walk,
+	Sprint,
+	Crouch,
+	Airborne
+};
+
 /**
  * Single pawn for Evan and Raynor.
- * Phase 1: movement, camera, interact. No combat.
+ * Phase 2: player feel. No combat.
  */
 UCLASS()
 class TBW_API ATBWPlayerCharacter : public ACharacter
@@ -37,7 +47,14 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TBW|Interact")
 	UTBWInteractorComponent* GetInteractor() const { return Interactor; }
 
+	UFUNCTION(BlueprintPure, Category = "TBW|Move")
+	ETBWMoveState GetMoveState() const { return MoveState; }
+
+	UFUNCTION(BlueprintPure, Category = "TBW|Move")
+	FString GetMoveStateName() const;
+
 	void ApplyMovementFromIdentity();
+	void ApplyPresentationFromIdentity();
 
 protected:
 	virtual void BeginPlay() override;
@@ -54,6 +71,7 @@ protected:
 	void PausePressed(const FInputActionValue& Value);
 
 	void UpdateCamera(float DeltaSeconds);
+	void RefreshMoveState();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TBW|Camera")
 	TObjectPtr<USpringArmComponent> CameraBoom;
@@ -80,17 +98,21 @@ protected:
 	float CrouchBoomLength = 230.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Camera")
-	float LookYawScale = 1.0f;
+	float LookYawScale = 0.85f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Camera")
-	float LookPitchScale = 1.0f;
+	float LookPitchScale = 0.70f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Input")
 	bool bCrouchToggle = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Move")
+	float MoveDeadzone = 0.12f;
 
 private:
 	bool bWantsSprint = false;
 	float WalkSpeed = 420.f;
 	float SprintSpeed = 620.f;
 	float CrouchSpeed = 160.f;
+	ETBWMoveState MoveState = ETBWMoveState::Idle;
 };

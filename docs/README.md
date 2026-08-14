@@ -51,6 +51,9 @@ The original brief asked for fifteen named documents plus a risk register. They 
 | [UE58_MIGRATION_REPORT.md](UE58_MIGRATION_REPORT.md) | HISTORICAL — first 5.8 copy |
 | [UE58_FULL_MIGRATION_REPORT.md](UE58_FULL_MIGRATION_REPORT.md) | Current: single 5.8-only project |
 | [ARABIC_TEXT_PIPELINE.md](ARABIC_TEXT_PIPELINE.md) | Phase 1 HUD Arabic / font |
+| [PHASE2_BASELINE.md](PHASE2_BASELINE.md) | Pre-Phase-2 architecture |
+| [PHASE2_EXECUTION.md](PHASE2_EXECUTION.md) | Phase 2 player-feel record |
+| [PHASE2_PERFORMANCE_BASELINE.md](PHASE2_PERFORMANCE_BASELINE.md) | P3000 measure-first |
 | [PHASE0_REPORT.md](PHASE0_REPORT.md) | Stop-line summary |
 
 Phase 1 does not start without explicit authorization. The campaign does not start until the Phase 10 Vertical Slice gate passes.

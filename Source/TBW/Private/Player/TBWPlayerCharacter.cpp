@@ -14,6 +14,8 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Materials/Material.h"
 #include "EnhancedInputComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "TBW.h"
@@ -30,15 +32,20 @@ ATBWPlayerCharacter::ATBWPlayerCharacter()
 
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
 	MoveComp->bOrientRotationToMovement = true;
-	MoveComp->RotationRate = FRotator(0.f, 480.f, 0.f);
+	MoveComp->RotationRate = FRotator(0.f, 520.f, 0.f);
 	MoveComp->MaxWalkSpeed = 420.f;
 	MoveComp->MaxWalkSpeedCrouched = 160.f;
 	MoveComp->NavAgentProps.bCanCrouch = true;
 	MoveComp->SetCrouchedHalfHeight(58.f);
-	MoveComp->BrakingDecelerationWalking = 1400.f;
-	MoveComp->GroundFriction = 8.f;
+	MoveComp->MaxAcceleration = 1800.f;
+	MoveComp->BrakingDecelerationWalking = 2200.f;
+	MoveComp->GroundFriction = 10.f;
+	MoveComp->BrakingFrictionFactor = 1.15f;
+	MoveComp->MaxStepHeight = 32.f;
 	MoveComp->JumpZVelocity = 0.f;
-	MoveComp->AirControl = 0.f;
+	MoveComp->AirControl = 0.05f;
+	MoveComp->bUseSeparateBrakingFriction = false;
+	MoveComp->MinAnalogWalkSpeed = 20.f;
 
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -46,10 +53,12 @@ ATBWPlayerCharacter::ATBWPlayerCharacter()
 	CameraBoom->bUsePawnControlRotation = true;
 	CameraBoom->SocketOffset = FVector(0.f, 55.f, 62.f);
 	CameraBoom->bEnableCameraLag = true;
-	CameraBoom->CameraLagSpeed = 12.f;
+	CameraBoom->CameraLagSpeed = 14.f;
 	CameraBoom->bEnableCameraRotationLag = true;
-	CameraBoom->CameraRotationLagSpeed = 18.f;
-	CameraBoom->ProbeSize = 12.f;
+	CameraBoom->CameraRotationLagSpeed = 22.f;
+	CameraBoom->ProbeSize = 20.f;
+	CameraBoom->bDoCollisionTest = true;
+	CameraBoom->ProbeChannel = ECC_Camera;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -80,8 +89,9 @@ void ATBWPlayerCharacter::BeginPlay()
 		IdentityComponent->ApplyIdentity(FTBWIdentityFactory::MakeEvan(this));
 	}
 	ApplyMovementFromIdentity();
+	ApplyPresentationFromIdentity();
 
-	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 1 movement/camera/interact. No combat."));
+	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 2 feel. No combat."));
 }
 
 void ATBWPlayerCharacter::PossessedBy(AController* NewController)
@@ -100,6 +110,72 @@ void ATBWPlayerCharacter::ApplyMovementFromIdentity()
 		MoveComp->MaxWalkSpeed = WalkSpeed;
 		MoveComp->MaxWalkSpeedCrouched = CrouchSpeed;
 	}
+	ApplyPresentationFromIdentity();
+}
+
+void ATBWPlayerCharacter::ApplyPresentationFromIdentity()
+{
+	if (!PreviewBody)
+	{
+		return;
+	}
+
+	const UTBWIdentityData* Data = IdentityComponent ? IdentityComponent->GetIdentity() : nullptr;
+	const bool bRaynor = Data && Data->IdentityId == TEXT("Raynor");
+	PreviewBody->SetRelativeScale3D(bRaynor ? FVector(0.46f, 0.42f, 1.82f) : FVector(0.38f, 0.38f, 1.72f));
+
+	if (UMaterial* Base = UMaterial::GetDefaultMaterial(MD_Surface))
+	{
+		if (UMaterialInstanceDynamic* Mid = UMaterialInstanceDynamic::Create(Base, this))
+		{
+			const FLinearColor Color = bRaynor
+				? FLinearColor(0.22f, 0.18f, 0.14f)
+				: FLinearColor(0.35f, 0.38f, 0.42f);
+			Mid->SetVectorParameterValue(TEXT("BaseColor"), Color);
+			Mid->SetVectorParameterValue(TEXT("Color"), Color);
+			PreviewBody->SetMaterial(0, Mid);
+		}
+	}
+}
+
+FString ATBWPlayerCharacter::GetMoveStateName() const
+{
+	switch (MoveState)
+	{
+	case ETBWMoveState::Walk: return TEXT("Walk");
+	case ETBWMoveState::Sprint: return TEXT("Sprint");
+	case ETBWMoveState::Crouch: return TEXT("Crouch");
+	case ETBWMoveState::Airborne: return TEXT("Airborne");
+	default: return TEXT("Idle");
+	}
+}
+
+void ATBWPlayerCharacter::RefreshMoveState()
+{
+	const UCharacterMovementComponent* MoveComp = GetCharacterMovement();
+	if (!MoveComp)
+	{
+		MoveState = ETBWMoveState::Idle;
+		return;
+	}
+
+	if (!MoveComp->IsMovingOnGround())
+	{
+		MoveState = ETBWMoveState::Airborne;
+		return;
+	}
+	if (bIsCrouched)
+	{
+		MoveState = ETBWMoveState::Crouch;
+		return;
+	}
+	const bool bMoving = MoveComp->Velocity.Size2D() > 20.f;
+	if (bWantsSprint && bMoving)
+	{
+		MoveState = ETBWMoveState::Sprint;
+		return;
+	}
+	MoveState = bMoving ? ETBWMoveState::Walk : ETBWMoveState::Idle;
 }
 
 void ATBWPlayerCharacter::Tick(float DeltaSeconds)
@@ -107,12 +183,13 @@ void ATBWPlayerCharacter::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
-	if (MoveComp && !bIsCrouched)
+	if (MoveComp && !bIsCrouched && MoveComp->IsMovingOnGround())
 	{
 		const bool bMoving = !MoveComp->Velocity.IsNearlyZero(10.f);
 		MoveComp->MaxWalkSpeed = (bWantsSprint && bMoving) ? SprintSpeed : WalkSpeed;
 	}
 
+	RefreshMoveState();
 	UpdateCamera(DeltaSeconds);
 }
 
@@ -123,12 +200,12 @@ void ATBWPlayerCharacter::UpdateCamera(float DeltaSeconds)
 		return;
 	}
 
-	const bool bSprinting = bWantsSprint && !bIsCrouched;
+	const bool bSprinting = (MoveState == ETBWMoveState::Sprint);
 	const float TargetLength = bIsCrouched ? CrouchBoomLength : (bSprinting ? SprintBoomLength : DefaultBoomLength);
 	const FVector TargetOffset = bIsCrouched ? FVector(0.f, 48.f, 38.f) : FVector(0.f, 55.f, 62.f);
 
-	CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 6.f);
-	CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaSeconds, 6.f);
+	CameraBoom->TargetArmLength = FMath::FInterpTo(CameraBoom->TargetArmLength, TargetLength, DeltaSeconds, 7.f);
+	CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaSeconds, 7.f);
 }
 
 void ATBWPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -166,6 +243,10 @@ void ATBWPlayerCharacter::Move(const FInputActionValue& Value)
 {
 	const FVector2D Axis = Value.Get<FVector2D>();
 	if (Controller == nullptr)
+	{
+		return;
+	}
+	if (Axis.SizeSquared() < FMath::Square(MoveDeadzone))
 	{
 		return;
 	}

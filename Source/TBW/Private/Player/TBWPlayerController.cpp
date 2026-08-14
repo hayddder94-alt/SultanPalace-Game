@@ -49,7 +49,12 @@ void ATBWPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 	PushMapping();
-	UE_LOG(LogTBW, Log, TEXT("PlayerController ready. Input bootstrapped."));
+	if (PlayerCameraManager)
+	{
+		PlayerCameraManager->ViewPitchMin = -55.f;
+		PlayerCameraManager->ViewPitchMax = 70.f;
+	}
+	UE_LOG(LogTBW, Log, TEXT("PlayerController ready. Input bootstrapped. Pitch clamped."));
 }
 
 void ATBWPlayerController::TogglePauseMenu()

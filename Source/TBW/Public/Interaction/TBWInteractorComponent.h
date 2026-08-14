@@ -7,10 +7,8 @@
 #include "Components/ActorComponent.h"
 #include "TBWInteractorComponent.generated.h"
 
-class UCameraComponent;
-
 /**
- * Camera-forward trace. Phase 1 foundation only — no examine turntable.
+ * Camera-forward trace. Phase 2: more reliable focus, no combat.
  */
 UCLASS(ClassGroup = (TBW), meta = (BlueprintSpawnableComponent))
 class TBW_API UTBWInteractorComponent : public UActorComponent
@@ -31,20 +29,28 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TBW|Interact")
 	AActor* GetFocusedActor() const { return FocusedActor.Get(); }
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
-	float TraceDistance = 230.f;
+	UFUNCTION(BlueprintPure, Category = "TBW|Interact")
+	FString GetStatusLine() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
-	float TraceRadius = 22.f;
+	float TraceDistance = 250.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
+	float TraceRadius = 24.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
+	float InteractCooldown = 0.18f;
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	void RefreshFocus();
+	static AActor* ResolveInteractable(AActor* HitActor);
 
 	UPROPERTY()
 	TWeakObjectPtr<AActor> FocusedActor;
 
 	FText CurrentPrompt;
+	float LastInteractTime = -100.f;
 };

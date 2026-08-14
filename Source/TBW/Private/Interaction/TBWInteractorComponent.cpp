@@ -20,10 +20,16 @@ void UTBWInteractorComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UTBWInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+AActor* UTBWInteractorComponent::ResolveInteractable(AActor* HitActor)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	RefreshFocus();
+	for (AActor* Cursor = HitActor; Cursor; Cursor = Cursor->GetOwner())
+	{
+		if (Cursor->Implements<UTBWInteractable>())
+		{
+			return Cursor;
+		}
+	}
+	return nullptr;
 }
 
 void UTBWInteractorComponent::RefreshFocus()
@@ -64,8 +70,8 @@ void UTBWInteractorComponent::RefreshFocus()
 		FCollisionShape::MakeSphere(TraceRadius),
 		Params);
 
-	AActor* Candidate = bHit ? Hit.GetActor() : nullptr;
-	if (!Candidate || !Candidate->Implements<UTBWInteractable>())
+	AActor* Candidate = bHit ? ResolveInteractable(Hit.GetActor()) : nullptr;
+	if (!Candidate)
 	{
 		return;
 	}
@@ -79,6 +85,15 @@ void UTBWInteractorComponent::RefreshFocus()
 	CurrentPrompt = ITBWInteractable::Execute_GetPrompt(Candidate, OwnerPawn);
 }
 
+FString UTBWInteractorComponent::GetStatusLine() const
+{
+	if (AActor* Target = FocusedActor.Get())
+	{
+		return FString::Printf(TEXT("focus %s"), *Target->GetName());
+	}
+	return TEXT("focus none");
+}
+
 void UTBWInteractorComponent::TryInteract()
 {
 	RefreshFocus();
@@ -88,6 +103,13 @@ void UTBWInteractorComponent::TryInteract()
 	{
 		return;
 	}
+
+	const float Now = GetWorld() ? GetWorld()->GetTimeSeconds() : 0.f;
+	if (Now - LastInteractTime < InteractCooldown)
+	{
+		return;
+	}
+	LastInteractTime = Now;
 
 	UE_LOG(LogTBW, Log, TEXT("Interact: %s"), *GetNameSafe(Target));
 	ITBWInteractable::Execute_Interact(Target, OwnerPawn);

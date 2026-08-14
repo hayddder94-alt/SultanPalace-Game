@@ -3,6 +3,7 @@
 
 #include "World/TBWDevSandbox.h"
 #include "Interaction/TBWInteractableActor.h"
+#include "Interaction/TBWTestDoor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/DirectionalLightComponent.h"
 #include "Components/SkyLightComponent.h"
@@ -129,6 +130,34 @@ ATBWInteractableActor* ATBWDevSandbox::AddPickup(
 	Item->SetActorScale3D(ScaleMeters);
 	Spawned.Add(Item);
 	return Item;
+}
+
+void ATBWDevSandbox::AddCrouchGate()
+{
+	// Lintel at 140 cm: standing capsule (~176) blocked, crouched (~116) passes.
+	AddBox(FVector(-700.f, -200.f, 70.f), FVector(0.3f, 0.3f, 1.4f), FLinearColor(0.18f, 0.18f, 0.2f));
+	AddBox(FVector(-700.f, 200.f, 70.f), FVector(0.3f, 0.3f, 1.4f), FLinearColor(0.18f, 0.18f, 0.2f));
+	AddBox(FVector(-700.f, 0.f, 155.f), FVector(0.3f, 4.2f, 0.25f), FLinearColor(0.28f, 0.16f, 0.12f));
+	AddLabel(FVector(-700.f, 0.f, 200.f), TEXT("CROUCH GATE"));
+}
+
+void ATBWDevSandbox::AddTestDoor()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	FActorSpawnParameters Params;
+	Params.Owner = this;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	if (ATBWTestDoor* Door = World->SpawnActor<ATBWTestDoor>(FVector(500.f, -50.f, 110.f), FRotator::ZeroRotator, Params))
+	{
+		Spawned.Add(Door);
+	}
+	AddBox(FVector(500.f, -130.f, 110.f), FVector(0.25f, 0.25f, 2.2f), FLinearColor(0.2f, 0.2f, 0.2f));
+	AddBox(FVector(500.f, 80.f, 110.f), FVector(0.25f, 0.25f, 2.2f), FLinearColor(0.2f, 0.2f, 0.2f));
+	AddLabel(FVector(500.f, -20.f, 240.f), TEXT("TEST DOOR"));
 }
 
 void ATBWDevSandbox::AddLights()

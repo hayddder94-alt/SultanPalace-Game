@@ -186,8 +186,20 @@ void ATBWHUD::DrawHUD()
 		FLinearColor(0.8f, 0.8f, 0.5f), 24.f, 58.f, nullptr, 0.9f);
 	DrawText(FString::Printf(TEXT("XYZ  %.0f  %.0f  %.0f   spd %.0f"), Location.X, Location.Y, Location.Z, Speed),
 		FLinearColor(0.7f, 0.75f, 0.85f), 24.f, 76.f, nullptr, 0.9f);
-	DrawText(FString::Printf(TEXT("Identity  %s   system  WorldState+Input+Interact  OK"), *IdentityName),
+	FString MoveName = TEXT("Idle");
+	FString InteractStatus = TEXT("focus none");
+	if (Pawn)
+	{
+		MoveName = Pawn->GetMoveStateName();
+		if (UTBWInteractorComponent* Interactor = Pawn->GetInteractor())
+		{
+			InteractStatus = Interactor->GetStatusLine();
+		}
+	}
+	DrawText(FString::Printf(TEXT("Identity  %s   move  %s   %s"), *IdentityName, *MoveName, *InteractStatus),
 		FLinearColor(0.7f, 0.8f, 0.7f), 24.f, 94.f, nullptr, 0.9f);
+	DrawText(TEXT("system  WorldState+Input+Interact  OK"),
+		FLinearColor(0.55f, 0.65f, 0.55f), 24.f, 112.f, nullptr, 0.8f);
 
 	if (UWorld* World = GetWorld())
 	{

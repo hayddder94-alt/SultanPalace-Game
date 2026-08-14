@@ -35,6 +35,8 @@ private:
 	void AddLabel(const FVector& Location, const FString& Text);
 	ATBWInteractableActor* AddPickup(const FVector& Location, const FVector& ScaleMeters, const FLinearColor& Color, const FText& Prompt, const FText& Examine, FName Flag);
 	void AddLights();
+	void AddTestDoor();
+	void AddCrouchGate();
 
 	UPROPERTY()
 	TObjectPtr<UStaticMesh> CubeMesh;

@@ -19,6 +19,7 @@ FName FTBWWorldFlags::ToName(ETBWWorldFlag Flag)
 	case ETBWWorldFlag::RosterAltered: return TEXT("RosterAltered");
 	case ETBWWorldFlag::LetterIsFalse: return TEXT("LetterIsFalse");
 	case ETBWWorldFlag::WestArchTouched: return TEXT("WestArchTouched");
+	case ETBWWorldFlag::TestDoorOpen: return TEXT("TestDoorOpen");
 	default: return NAME_None;
 	}
 }
