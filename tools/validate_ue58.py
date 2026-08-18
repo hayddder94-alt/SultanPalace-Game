@@ -188,7 +188,8 @@ def main() -> int:
     check_active_text(files)
 
     required = [
-        "Source/TBW/TBW.cpp",
+        "Source/TBW/Private/TBW.cpp",
+        "Source/TBW/Public/TBW.h",
         "Source/TBW/TBW.Build.cs",
         "Config/DefaultEngine.ini",
         "Config/DefaultGame.ini",
