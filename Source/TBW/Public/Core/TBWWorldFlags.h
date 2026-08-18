@@ -28,6 +28,7 @@ enum class ETBWWorldFlag : uint8
 	LetterIsFalse,
 	WestArchTouched,
 	TestDoorOpen,
+	OrinLastWords,
 	COUNT UMETA(Hidden)
 };
 

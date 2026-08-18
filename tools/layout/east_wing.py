@@ -116,6 +116,23 @@ class Layout:
         piece("sill", a, b, 0.0, sill)
         piece("header", a, b, header, height)
 
+    def stair(self, name, x, y_start, width, rise_total, run_total,
+              riser=0.2 * M, direction=1, base_z=0.0, kind=WALL):
+        """
+        A real flight, not a ramp. Riser is 20 cm against UE's 32 cm step limit,
+        so the character walks it without the movement component fighting.
+        Returns the landing height and the y it ends at.
+        """
+        steps = max(1, int(round(rise_total / riser)))
+        tread = run_total / steps
+        for i in range(steps):
+            h = base_z + riser * (i + 1)
+            cy = y_start + direction * (tread * (i + 0.5))
+            self.box("{0}_{1:02d}".format(name, i),
+                     (x, cy, base_z + h * 0.5 - base_z * 0.5),
+                     (width, tread, h - base_z), kind)
+        return base_z + riser * steps, y_start + direction * run_total
+
     def room(self, name, x, y, w, d, height, doors=(), ceiling=False,
              wall_kind=WALL, floor_kind=FLOOR):
         door_map = dict(doors)
@@ -218,12 +235,73 @@ def build():
     # R8 yard / R9 storage court
     L.box("R8_YardFloor", (30 * M, 12 * M, -0.1 * M), (14 * M, 12 * M, 0.2 * M), GROUND)
     L.wall("R8_YardWall_E", (37 * M, 6 * M), (37 * M, 18 * M), 4.0 * M, WALL_T)
-    L.room("R9_StorageCourt", 24 * M, 19 * M, 12 * M, 10 * M, WALL_H,
+    # Ends exactly where the hall begins: hall y0 = 26 m. It used to run to y = 29
+    # and sat inside the hall's south-east corner.
+    # East of Raynor's chamber (which ends at x = 29.5 m) and south of the hall.
+    L.room("R9_StorageCourt", 29.8 * M, 16 * M, 10 * M, 10 * M, WALL_H,
            doors=(("S", 0.4), ("N", 0.6)))
 
     # R10 barracks annex
-    L.room("R10_BarracksAnnex", 26 * M, 40 * M, 12 * M, 12 * M, WALL_H,
+    # Starts clear of the hall's east wall at x = 29 m; it used to start at 26 m
+    # and overlapped the hall - which is what buried the stair's upper treads.
+    L.room("R10_BarracksAnnex", 29.5 * M, 40 * M, 10 * M, 12 * M, WALL_H,
            doors=(("S", 0.5),), ceiling=True)
+
+    # -----------------------------------------------------------------
+    # R11 upper chamber - Orin dies here (VS-01). One floor above the hall,
+    # reached by a switchback stair against the hall's east wall.
+    #
+    # 9.4 m of rise at a 20 cm riser is 47 treads; at 50 cm each that is 23.5 m
+    # of run, which only fits the 24 m hall as two opposed flights. The first
+    # attempt landed the top flight at y = 30.8 while the slab started at y = 38,
+    # so the stair climbed into thin air - the walkability check caught it. Every
+    # dimension below is now derived, not guessed.
+    # -----------------------------------------------------------------
+    up_z = 9.4 * M
+    flight_run = 11.75 * M
+    stair_a_x = hx + hw - 2.2 * M                      # 26.8 m, hard against the east wall
+    stair_b_x = stair_a_x - 3.2 * M                    # 23.6 m, the return flight
+
+    # Start clear of R9's north wall, which sits exactly on y = hy + 3 m and had
+    # swallowed the first tread - the stair was unclimbable from the ground.
+    stair_a_y = hy + 4.5 * M
+    mid_z, land_y = L.stair("R2_StairA", stair_a_x, stair_a_y, 2.0 * M,
+                            up_z * 0.5, flight_run, direction=1, kind=HERO)
+    L.box("R2_StairLanding_Mid", (stair_a_x - 1.6 * M, land_y + 0.9 * M, mid_z * 0.5),
+          (5.2 * M, 1.8 * M, mid_z), HERO)
+    top_z, top_y = L.stair("R2_StairB", stair_b_x, land_y + 1.8 * M, 2.0 * M,
+                           up_z - mid_z, flight_run, direction=-1, base_z=mid_z, kind=HERO)
+
+    # Upper slab: south half of the hall, stopping short of the stair well so the
+    # flights stay open. Its east edge is placed to meet the top of flight B.
+    slab_w = 9.5 * M
+    slab_x0 = hx + 2.0 * M
+    slab_d = 12.0 * M
+    slab_y0 = hy
+    L.box("R11_Floor", (slab_x0 + slab_w * 0.5, slab_y0 + slab_d * 0.5, up_z - 0.2 * M),
+          (slab_w, slab_d, 0.4 * M), HERO)
+
+    # Bridge from the head of the stair onto the slab - the piece that was missing.
+    bridge_x0 = slab_x0 + slab_w
+    bridge_w = (stair_b_x + 1.0 * M) - bridge_x0
+    # Beyond the last tread, not over it. Placed at top_y + 0.75 m it sat 20 cm
+    # above the final four treads and capped them: the flight became unclimbable
+    # in its last metre. Flight B descends in -Y, so the deck belongs at -Y.
+    L.box("R11_StairHead", (bridge_x0 + bridge_w * 0.5, top_y - 1.25 * M, up_z - 0.2 * M),
+          (bridge_w, 2.5 * M, 0.4 * M), HERO)
+
+    # Chamber walls sit on the slab. Door faces the stair head.
+    door_world_y = top_y - 1.25 * M
+    L.room("R11_UpperChamber", slab_x0, slab_y0, slab_w, slab_d, 3.6 * M,
+           doors=(("E", max(0.1, min(0.9, (door_world_y - slab_y0) / slab_d))),),
+           ceiling=True, wall_kind=HERO, floor_kind=HERO)
+    for b in L.boxes:
+        if b["name"].startswith("R11_UpperChamber"):
+            b["center"][2] += up_z
+    L.boxes = [b for b in L.boxes if b["name"] != "R11_UpperChamber_Floor"]
+
+    # Orin's bed, against the west wall of the chamber
+    orin_bed = [slab_x0 + 3.0 * M, slab_y0 + 6.0 * M, up_z + 0.55 * M]
 
     # soft-walled growth points
     L.box("SoftWall_WestArch", (0.5 * M, 34 * M, 2.0 * M), (1.0 * M, 4.0 * M, 4.0 * M), HERO)
@@ -277,6 +355,11 @@ def build():
          "prompt": "Pick up the clasp", "examine": "A cloak clasp from the house guard, in the water at the gate.",
          "flag": "ClaspFound", "vs": "VS-09"},
 
+        {"id": "OrinBedside", "room": "R11_UpperChamber",
+         "location": orin_bed, "size": [2.1 * M, 1.2 * M, 0.7 * M],
+         "prompt": "Orin's bedside", "examine": "Where the father asked for water, and warned about Nofan.",
+         "flag": "OrinLastWords", "vs": "VS-01"},
+
         {"id": "WestArch", "room": "R3_Terrace",
          "location": [1.6 * M, 34 * M, 1.3 * M], "size": [0.4 * M, 1.6 * M, 2.4 * M],
          "prompt": "Look through the west arch", "examine": "The rest of the palace. Not tonight.",
@@ -297,6 +380,7 @@ def build():
             "R5_EvanChamber": [cx - 4.0 * M, cy0 + 5.5 * M, 1.7 * M],
             "R7_Study": [cx + 1.5 * M, cy0 - 4.0 * M, 1.7 * M],
             "R1_Dock": [6.0 * M, 6.0 * M, 1.7 * M],
+            "R11_UpperChamber": [orin_bed[0] + 2.5 * M, orin_bed[1], up_z + 1.7 * M],
         },
         "boxes": L.boxes,
         "interactables": interactables,

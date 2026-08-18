@@ -106,7 +106,24 @@ def main() -> int:
             if len(owners) > 1:
                 errors.append(f"duplicate {key} '{value}' used by {owners}")
 
-    # 5 — the layout must actually describe a level
+    # 5 — rooms must not intersect each other. Two rooms sharing floor space is
+    #     never intentional here and it silently buries whatever is between them.
+    floors = [b for b in boxes if b["name"].endswith("_Floor") and not b["name"].startswith("R11")]
+    for i in range(len(floors)):
+        for j in range(i + 1, len(floors)):
+            a, b2 = floors[i], floors[j]
+            ax0, ax1 = a["center"][0] - a["size"][0] / 2, a["center"][0] + a["size"][0] / 2
+            ay0, ay1 = a["center"][1] - a["size"][1] / 2, a["center"][1] + a["size"][1] / 2
+            bx0, bx1 = b2["center"][0] - b2["size"][0] / 2, b2["center"][0] + b2["size"][0] / 2
+            by0, by1 = b2["center"][1] - b2["size"][1] / 2, b2["center"][1] + b2["size"][1] / 2
+            ox_ = min(ax1, bx1) - max(ax0, bx0)
+            oy_ = min(ay1, by1) - max(ay0, by0)
+            if ox_ > 50.0 and oy_ > 50.0:
+                errors.append(
+                    f"rooms overlap: {a['name']} and {b2['name']} share "
+                    f"{ox_/100:.1f} x {oy_/100:.1f} m of floor")
+
+    # 6 — the layout must actually describe a level
     if len(boxes) < 50:
         errors.append(f"only {len(boxes)} boxes - the wing did not build")
     if not data.get("player_start"):
