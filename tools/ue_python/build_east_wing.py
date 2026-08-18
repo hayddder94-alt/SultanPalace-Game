@@ -1,0 +1,447 @@
+"""
+The Betrayed Will / وصية الغدر
+Build the East Ceremonial Wing as a REAL, saved level asset.
+
+WHY THIS EXISTS
+    Until now the "world" was primitives spawned at runtime by ATBWDevSandbox.
+    That is a systems test bench, not a game. This script produces an actual
+    .umap with an actual lighting rig and architecture at real dimensions,
+    which is the thing art is applied TO. No AAA scene is ever hand-placed
+    from zero: it starts as a measured blockout exactly like this one.
+
+WHAT IT DOES
+    1. creates /Game/TBW/Maps/L_VS_Palace_EastWing
+    2. builds the wing from docs/PALACE_WING_SPEC.md at true scale
+       (40 x 55 m playable, 2 floors over the hall, doorways with lintels)
+    3. installs a cinematic lighting rig: sun, sky light, sky atmosphere,
+       volumetric fog, and an unbound post-process volume with Lumen tuned
+    4. uses real Megascans/Fab materials automatically if any are present in
+       the project, otherwise falls back to engine materials
+    5. sets the GameMode override and a PlayerStart, then saves the level
+
+HOW TO RUN
+    Unreal Editor 5.8  >  Tools  >  Execute Python Script...
+    pick tools/ue_python/build_east_wing.py
+    (or in the Output Log's Python console:
+        exec(open(r"C:/Dev/SultanPalace-Game/tools/ue_python/build_east_wing.py").read())
+    )
+
+SAFETY
+    Re-running rebuilds the level from scratch. Anything you hand-place in it
+    is lost. Hand dressing belongs in a sublevel or after the blockout is frozen.
+"""
+
+import unreal
+
+# ---------------------------------------------------------------------------
+# configuration
+# ---------------------------------------------------------------------------
+
+MAP_PACKAGE = "/Game/TBW/Maps/L_VS_Palace_EastWing"
+CUBE_PATH   = "/Engine/BasicShapes/Cube.Cube"
+PLANE_PATH  = "/Engine/BasicShapes/Plane.Plane"
+
+M = 100.0            # 1 metre in Unreal units
+WALL_T = 0.35 * M    # mudbrick wall thickness
+WALL_H = 5.5 * M     # standard room height
+HALL_H = 9.0 * M     # audience hall is the hero volume
+DOOR_W = 1.6 * M
+DOOR_H = 2.6 * M
+
+LOG = unreal.log
+
+# ---------------------------------------------------------------------------
+# small helpers
+# ---------------------------------------------------------------------------
+
+editor_actor  = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+level_editor  = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+
+
+def safe_set(obj, prop, value):
+    """set_editor_property that tolerates a property missing in this engine build."""
+    try:
+        obj.set_editor_property(prop, value)
+        return True
+    except Exception as exc:                                   # noqa: BLE001
+        unreal.log_warning("skip {0}.{1}: {2}".format(type(obj).__name__, prop, exc))
+        return False
+
+
+def load(path):
+    return unreal.EditorAssetLibrary.load_asset(path)
+
+
+def find_first_asset(search_paths, class_names, name_hints):
+    """
+    Look for a real art asset (Megascans/Fab) before falling back to engine defaults.
+    name_hints are ordered by preference.
+    """
+    registry = unreal.AssetRegistryHelpers.get_asset_registry()
+    found = []
+    for base in search_paths:
+        if not unreal.EditorAssetLibrary.does_directory_exist(base):
+            continue
+        for data in registry.get_assets_by_path(base, recursive=True):
+            cls = str(data.asset_class_path.asset_name) if hasattr(data, "asset_class_path") else str(data.asset_class)
+            if cls in class_names:
+                found.append(data)
+    if not found:
+        return None
+    for hint in name_hints:
+        for data in found:
+            if hint.lower() in str(data.asset_name).lower():
+                return data.get_asset()
+    return found[0].get_asset()
+
+
+# ---------------------------------------------------------------------------
+# material resolution: real art first, engine grey second
+# ---------------------------------------------------------------------------
+
+ART_PATHS = ["/Game/Megascans", "/Game/Fab", "/Game/TBW/Art", "/Game/MSPresets"]
+MAT_CLASSES = ["MaterialInstanceConstant", "Material"]
+
+
+class Palette(object):
+    def __init__(self):
+        self.wall   = find_first_asset(ART_PATHS, MAT_CLASSES, ["mudbrick", "brick", "plaster", "adobe", "clay", "stucco"])
+        self.floor  = find_first_asset(ART_PATHS, MAT_CLASSES, ["floor", "tile", "stone", "sandstone", "granite"])
+        self.hero   = find_first_asset(ART_PATHS, MAT_CLASSES, ["glazed", "ornament", "marble", "gold", "lapis"])
+        self.ground = find_first_asset(ART_PATHS, MAT_CLASSES, ["sand", "dirt", "ground", "gravel"])
+        self.using_real_art = any([self.wall, self.floor, self.hero, self.ground])
+
+    def report(self):
+        if self.using_real_art:
+            LOG("[TBW] real art materials found:")
+            for name in ("wall", "floor", "hero", "ground"):
+                mat = getattr(self, name)
+                LOG("      {0:6} -> {1}".format(name, mat.get_path_name() if mat else "(none)"))
+        else:
+            unreal.log_warning(
+                "[TBW] no Megascans/Fab materials in this project yet - the wing will be built "
+                "in engine grey. Install an art pack via Fab, then re-run this script and the "
+                "same geometry comes back dressed. See docs/AAA_QUALITY_PLAN.md."
+            )
+
+
+# ---------------------------------------------------------------------------
+# geometry primitives
+# ---------------------------------------------------------------------------
+
+_spawned = []
+
+
+def spawn_box(name, center, size, material=None, tag="Blockout"):
+    """center and size are (x, y, z) in Unreal units. Box is axis aligned."""
+    cube = load(CUBE_PATH)
+    actor = editor_actor.spawn_actor_from_class(
+        unreal.StaticMeshActor,
+        unreal.Vector(center[0], center[1], center[2]),
+        unreal.Rotator(0.0, 0.0, 0.0),
+    )
+    actor.set_actor_label(name)
+    comp = actor.static_mesh_component
+    comp.set_mobility(unreal.ComponentMobility.MOVABLE)
+    comp.set_static_mesh(cube)
+    # engine cube is 100 uu, so scale == size in metres
+    actor.set_actor_scale3d(unreal.Vector(size[0] / 100.0, size[1] / 100.0, size[2] / 100.0))
+    if material:
+        comp.set_material(0, material)
+    comp.set_mobility(unreal.ComponentMobility.STATIC)
+    actor.tags = [tag]
+    _spawned.append(actor)
+    return actor
+
+
+def wall_with_door(name, p0, p1, height, thickness, material, door_at=None, door_w=DOOR_W, door_h=DOOR_H):
+    """
+    Straight wall from p0 to p1 (2D, metres already converted to uu).
+    door_at is a 0..1 position along the wall; None means solid.
+    Produces up to three boxes: left, right, lintel.
+    """
+    x0, y0 = p0
+    x1, y1 = p1
+    dx, dy = x1 - x0, y1 - y0
+    length = (dx * dx + dy * dy) ** 0.5
+    if length <= 1.0:
+        return
+    horizontal = abs(dx) >= abs(dy)
+
+    def seg(tag, start, end):
+        if end - start < 1.0:
+            return
+        mid = (start + end) * 0.5
+        if horizontal:
+            cx = x0 + (dx / length) * mid
+            cy = y0
+            size = (end - start, thickness, height)
+        else:
+            cx = x0
+            cy = y0 + (dy / length) * mid
+            size = (thickness, end - start, height)
+        spawn_box("{0}_{1}".format(name, tag), (cx, cy, height * 0.5), size, material)
+
+    if door_at is None:
+        seg("solid", 0.0, length)
+        return
+
+    opening_c = length * door_at
+    a = max(0.0, opening_c - door_w * 0.5)
+    b = min(length, opening_c + door_w * 0.5)
+    seg("a", 0.0, a)
+    seg("b", b, length)
+
+    # lintel above the opening
+    if height > door_h:
+        mid = (a + b) * 0.5
+        if horizontal:
+            cx = x0 + (dx / length) * mid
+            cy = y0
+            size = (b - a, thickness, height - door_h)
+        else:
+            cx = x0
+            cy = y0 + (dy / length) * mid
+            size = (thickness, b - a, height - door_h)
+        spawn_box("{0}_lintel".format(name), (cx, cy, door_h + (height - door_h) * 0.5), size, material)
+
+
+def room(name, x, y, w, d, height, material_wall, material_floor, doors=(), ceiling=False):
+    """
+    x, y = south-west corner. w, d = width (X) and depth (Y). All in uu.
+    doors: iterable of ('N'|'S'|'E'|'W', position 0..1)
+    """
+    door_map = dict(doors)
+
+    spawn_box("{0}_Floor".format(name), (x + w * 0.5, y + d * 0.5, -0.1 * M),
+              (w, d, 0.2 * M), material_floor)
+
+    wall_with_door("{0}_S".format(name), (x, y), (x + w, y), height, WALL_T, material_wall, door_map.get("S"))
+    wall_with_door("{0}_N".format(name), (x, y + d), (x + w, y + d), height, WALL_T, material_wall, door_map.get("N"))
+    wall_with_door("{0}_W".format(name), (x, y), (x, y + d), height, WALL_T, material_wall, door_map.get("W"))
+    wall_with_door("{0}_E".format(name), (x + w, y), (x + w, y + d), height, WALL_T, material_wall, door_map.get("E"))
+
+    if ceiling:
+        spawn_box("{0}_Ceiling".format(name), (x + w * 0.5, y + d * 0.5, height + 0.1 * M),
+                  (w, d, 0.2 * M), material_wall)
+
+
+def column(name, x, y, radius, height, material):
+    spawn_box(name, (x, y, height * 0.5), (radius * 2.0, radius * 2.0, height), material)
+
+
+# ---------------------------------------------------------------------------
+# the wing
+# ---------------------------------------------------------------------------
+
+def build_wing(pal):
+    """
+    Layout from docs/PALACE_WING_SPEC.md. Origin is the south-west corner of the
+    playable footprint. Playable box is 40 m (X) by 55 m (Y).
+    """
+    w = pal.wall
+    f = pal.floor
+    hero = pal.hero or pal.wall
+
+    # ---- R2 audience hall: the hero volume, 18 x 24 m, double height ----
+    hall_x, hall_y, hall_w, hall_d = 11 * M, 26 * M, 18 * M, 24 * M
+    room("R2_AudienceHall", hall_x, hall_y, hall_w, hall_d, HALL_H, hero, f,
+         doors=(("S", 0.5), ("W", 0.5), ("E", 0.35)))
+
+    # colonnade: two rows of six, the rhythm the camera reads first
+    for i in range(6):
+        cy = hall_y + 3.0 * M + i * 3.6 * M
+        column("R2_ColW_{0}".format(i), hall_x + 4.0 * M, cy, 0.55 * M, HALL_H, hero)
+        column("R2_ColE_{0}".format(i), hall_x + hall_w - 4.0 * M, cy, 0.55 * M, HALL_H, hero)
+
+    # dais and the empty chair plinth - story-critical silhouette
+    spawn_box("R2_Dais", (hall_x + hall_w * 0.5, hall_y + hall_d - 4.0 * M, 0.3 * M),
+              (7.0 * M, 4.0 * M, 0.6 * M), hero)
+    spawn_box("R2_ChairPlinth", (hall_x + hall_w * 0.5, hall_y + hall_d - 3.2 * M, 0.9 * M),
+              (1.2 * M, 1.2 * M, 0.6 * M), hero)
+
+    # ---- R4 family corridor: 3.5 m wide spine running south from the hall ----
+    cor_x, cor_y, cor_w, cor_d = 18 * M, 12 * M, 3.5 * M, 14 * M
+    room("R4_FamilyCorridor", cor_x, cor_y, cor_w, cor_d, WALL_H, w, f,
+         doors=(("N", 0.5), ("W", 0.35), ("E", 0.35), ("S", 0.5)), ceiling=True)
+
+    # ---- R5 Evan's chamber (west of corridor) and R6 Raynor's (east) ----
+    room("R5_EvanChamber", cor_x - 8.0 * M, cor_y + 2.0 * M, 8.0 * M, 7.0 * M, WALL_H, w, f,
+         doors=(("E", 0.35),), ceiling=True)
+    room("R6_RaynorChamber", cor_x + cor_w, cor_y + 2.0 * M, 8.0 * M, 7.0 * M, WALL_H, w, f,
+         doors=(("W", 0.35),), ceiling=True)
+
+    # ---- R7 steward study, south end of the corridor: the letter room ----
+    room("R7_Study", cor_x - 3.0 * M, cor_y - 8.0 * M, 9.0 * M, 8.0 * M, WALL_H, w, f,
+         doors=(("N", 0.6),), ceiling=True)
+
+    # ---- R3 terrace: open to sky, west of the hall ----
+    spawn_box("R3_Terrace_Floor", (6.0 * M, 34 * M, -0.1 * M), (10 * M, 16 * M, 0.2 * M), f)
+    wall_with_door("R3_Terrace_Parapet_W", (1.0 * M, 26 * M), (1.0 * M, 42 * M), 1.1 * M, 0.4 * M, w)
+    wall_with_door("R3_Terrace_Parapet_N", (1.0 * M, 42 * M), (11 * M, 42 * M), 1.1 * M, 0.4 * M, w)
+
+    # ---- R1 canal gate and dock: south-west water entrance ----
+    spawn_box("R1_Dock", (6.0 * M, 6.0 * M, -0.1 * M), (10 * M, 10 * M, 0.2 * M), f)
+    spawn_box("R1_Water", (6.0 * M, -3.0 * M, -0.6 * M), (18 * M, 8 * M, 0.2 * M), pal.ground or f)
+    wall_with_door("R1_GateWall", (1.0 * M, 11 * M), (11 * M, 11 * M), 4.5 * M, WALL_T, w, door_at=0.5,
+                   door_w=2.4 * M, door_h=3.4 * M)
+
+    # ---- R8 kitchen yard edge / R9 storage court: the work side, east ----
+    spawn_box("R8_YardFloor", (30 * M, 12 * M, -0.1 * M), (14 * M, 12 * M, 0.2 * M), pal.ground or f)
+    wall_with_door("R8_YardWall_E", (37 * M, 6 * M), (37 * M, 18 * M), 4.0 * M, WALL_T, w)
+    room("R9_StorageCourt", 24 * M, 19 * M, 12 * M, 10 * M, WALL_H, w, f,
+         doors=(("S", 0.4), ("N", 0.6)))
+
+    # ---- R10 barracks annex: restricted, north-east ----
+    room("R10_BarracksAnnex", 26 * M, 40 * M, 12 * M, 12 * M, WALL_H, w, f,
+         doors=(("S", 0.5),), ceiling=True)
+
+    # ---- soft-walled growth points: doorways to wings we are NOT building ----
+    spawn_box("SoftWall_WestArch", (0.5 * M, 34 * M, 2.0 * M), (1.0 * M, 4.0 * M, 4.0 * M), hero)
+    spawn_box("SoftWall_NorthProcessional", (20 * M, 54.5 * M, 2.0 * M), (5.0 * M, 1.0 * M, 4.0 * M), hero)
+
+    # ---- perimeter so the player cannot walk into the void ----
+    for name, p0, p1 in (
+        ("Perim_S", (0.0, 0.0), (40 * M, 0.0)),
+        ("Perim_N", (0.0, 55 * M), (40 * M, 55 * M)),
+        ("Perim_W", (0.0, 0.0), (0.0, 55 * M)),
+        ("Perim_E", (40 * M, 0.0), (40 * M, 55 * M)),
+    ):
+        wall_with_door(name, p0, p1, 8.0 * M, 0.6 * M, w)
+
+
+# ---------------------------------------------------------------------------
+# lighting and post
+# ---------------------------------------------------------------------------
+
+def build_lighting():
+    """
+    Late-afternoon Babylon: low warm sun, strong sky bounce, dusty volumetrics.
+    Everything movable so Lumen does the work - no bake on a 6 GB laptop GPU.
+    """
+    sun = editor_actor.spawn_actor_from_class(
+        unreal.DirectionalLight, unreal.Vector(0, 0, 12 * M), unreal.Rotator(-14.0, 125.0, 0.0))
+    sun.set_actor_label("Sun_LateAfternoon")
+    sun_c = sun.directional_light_component
+    sun_c.set_mobility(unreal.ComponentMobility.MOVABLE)
+    safe_set(sun_c, "intensity", 6.0)
+    safe_set(sun_c, "light_color", unreal.Color(255, 214, 170, 255))
+    safe_set(sun_c, "atmosphere_sun_light", True)
+    safe_set(sun_c, "dynamic_shadow_distance_movable_light", 15000.0)
+    safe_set(sun_c, "cascade_distribution_exponent", 2.5)
+    safe_set(sun_c, "volumetric_scattering_intensity", 2.0)
+    _spawned.append(sun)
+
+    sky = editor_actor.spawn_actor_from_class(
+        unreal.SkyLight, unreal.Vector(20 * M, 27 * M, 10 * M), unreal.Rotator(0, 0, 0))
+    sky.set_actor_label("SkyLight_Bounce")
+    sky_c = sky.sky_light_component
+    sky_c.set_mobility(unreal.ComponentMobility.MOVABLE)
+    safe_set(sky_c, "real_time_capture", True)
+    safe_set(sky_c, "intensity", 1.0)
+    _spawned.append(sky)
+
+    atmo = editor_actor.spawn_actor_from_class(
+        unreal.SkyAtmosphere, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+    atmo.set_actor_label("SkyAtmosphere")
+    _spawned.append(atmo)
+
+    fog = editor_actor.spawn_actor_from_class(
+        unreal.ExponentialHeightFog, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
+    fog.set_actor_label("Fog_Dust")
+    fog_c = fog.component
+    safe_set(fog_c, "fog_density", 0.035)
+    safe_set(fog_c, "fog_height_falloff", 0.15)
+    safe_set(fog_c, "volumetric_fog", True)
+    safe_set(fog_c, "volumetric_fog_scattering_distribution", 0.6)
+    safe_set(fog_c, "volumetric_fog_extinction_scale", 1.2)
+    _spawned.append(fog)
+
+    ppv = editor_actor.spawn_actor_from_class(
+        unreal.PostProcessVolume, unreal.Vector(20 * M, 27 * M, 3 * M), unreal.Rotator(0, 0, 0))
+    ppv.set_actor_label("PP_Global")
+    safe_set(ppv, "unbound", True)
+    settings = ppv.get_editor_property("settings")
+
+    # fixed exposure: auto exposure hides lighting mistakes during art review
+    safe_set(settings, "override_auto_exposure_method", True)
+    safe_set(settings, "auto_exposure_method", unreal.AutoExposureMethod.AEM_MANUAL)
+    safe_set(settings, "override_auto_exposure_bias", True)
+    safe_set(settings, "auto_exposure_bias", 11.0)
+
+    # Lumen: quality that a P3000 can still turn, raised later on better hardware
+    safe_set(settings, "override_lumen_scene_lighting_quality", True)
+    safe_set(settings, "lumen_scene_lighting_quality", 1.0)
+    safe_set(settings, "override_lumen_final_gather_quality", True)
+    safe_set(settings, "lumen_final_gather_quality", 1.0)
+    safe_set(settings, "override_lumen_scene_detail", True)
+    safe_set(settings, "lumen_scene_detail", 1.0)
+    safe_set(settings, "override_lumen_max_trace_distance", True)
+    safe_set(settings, "lumen_max_trace_distance", 12000.0)
+    safe_set(settings, "override_reflection_method", True)
+
+    # filmic look
+    safe_set(settings, "override_film_slope", True)
+    safe_set(settings, "film_slope", 0.9)
+    safe_set(settings, "override_film_toe", True)
+    safe_set(settings, "film_toe", 0.62)
+    safe_set(settings, "override_bloom_intensity", True)
+    safe_set(settings, "bloom_intensity", 0.45)
+    safe_set(settings, "override_vignette_intensity", True)
+    safe_set(settings, "vignette_intensity", 0.32)
+
+    ppv.set_editor_property("settings", settings)
+    _spawned.append(ppv)
+
+
+# ---------------------------------------------------------------------------
+# gameplay bootstrap inside the level
+# ---------------------------------------------------------------------------
+
+def build_gameplay():
+    start = editor_actor.spawn_actor_from_class(
+        unreal.PlayerStart, unreal.Vector(19.5 * M, 15.0 * M, 1.2 * M), unreal.Rotator(0, 90, 0))
+    start.set_actor_label("PlayerStart_EvanChamberDoor")
+    _spawned.append(start)
+
+    game_mode = unreal.load_class(None, "/Script/TBW.TBWGameMode")
+    if not game_mode:
+        unreal.log_warning("[TBW] TBWGameMode class not found - compile the project first.")
+        return
+    for actor in editor_actor.get_all_level_actors():
+        if isinstance(actor, unreal.WorldSettings):
+            if safe_set(actor, "default_game_mode", game_mode):
+                LOG("[TBW] World Settings GameMode override -> TBWGameMode")
+            break
+
+
+# ---------------------------------------------------------------------------
+# main
+# ---------------------------------------------------------------------------
+
+def main():
+    LOG("=" * 70)
+    LOG("[TBW] Building L_VS_Palace_EastWing")
+    LOG("=" * 70)
+
+    if not level_editor.new_level(MAP_PACKAGE):
+        unreal.log_error("[TBW] could not create {0}. Is it open and dirty?".format(MAP_PACKAGE))
+        return
+
+    pal = Palette()
+    pal.report()
+
+    build_wing(pal)
+    build_lighting()
+    build_gameplay()
+
+    level_editor.save_current_level()
+
+    LOG("-" * 70)
+    LOG("[TBW] actors placed : {0}".format(len(_spawned)))
+    LOG("[TBW] level saved   : {0}".format(MAP_PACKAGE))
+    LOG("[TBW] art materials : {0}".format("Megascans/Fab" if pal.using_real_art else "engine grey (install an art pack, re-run)"))
+    LOG("-" * 70)
+
+
+main()

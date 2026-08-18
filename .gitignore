@@ -46,3 +46,12 @@ desktop.ini
 # Per-user editor
 *EditorPerProjectUserSettings.ini
 Config/DefaultEditorPerProjectUserSettings.ini
+
+# Third-party art packs: acquired per machine from your Fab library, never committed.
+# A single Megascans pack can exceed the size of this entire repository.
+Content/Megascans/
+Content/MSPresets/
+Content/MetaHumans/
+Content/Fab/
+Content/Marketplace/
+Content/StarterContent/
