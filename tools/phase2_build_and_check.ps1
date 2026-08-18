@@ -67,15 +67,35 @@ if (Test-Path $VersionH) {
     $EngineVersion = "$major.$minor.$patch"
 }
 
+$IsInstalledBuild = Test-InstalledEngineBuild $EngineRoot
+$EngineKind       = if ($IsInstalledBuild) { "installed (Epic Launcher)" } else { "source build" }
+$EngineIds        = @(Get-EngineIdentifiers $EngineRoot)
+$Association      = (Get-Content $UProject -Raw | ConvertFrom-Json).EngineAssociation
+
 Write-Host ""
 Write-Host "=============================================================="
 Write-Host " THE BETRAYED WILL - PHASE 2 BUILD CHECK"
 Write-Host "=============================================================="
 Write-Host " Engine root    : $EngineRoot"
 Write-Host " Engine version : $EngineVersion   (project is locked to 5.8)"
+Write-Host " Engine kind    : $EngineKind"
+Write-Host " Registered as  : $(if ($EngineIds.Count) { $EngineIds -join ', ' } else { '(not registered)' })"
 Write-Host " Project        : $UProject"
+Write-Host " EngineAssoc.   : $Association"
 Write-Host " Log            : $BuildLog"
 Write-Host ""
+
+# A source build is registered under a name of its own. If that name is not the
+# project's EngineAssociation, the command line below still builds fine, but
+# double-clicking the .uproject in Explorer will fail to find an engine.
+if ($EngineIds.Count -gt 0 -and ($EngineIds -notcontains $Association)) {
+    Write-Host " NOTE: this engine is registered as '$($EngineIds -join "', '")' but the project asks" -ForegroundColor Yellow
+    Write-Host "       for '$Association'. Building from the command line works either way." -ForegroundColor Yellow
+    Write-Host "       To make double-clicking TheBetrayedWill.uproject work too, run:" -ForegroundColor Yellow
+    Write-Host "         .\tools\find_ue58.cmd -RegisterAs58" -ForegroundColor Yellow
+    Write-Host "       (adds one per-user registry value, no admin, fully reversible)" -ForegroundColor Yellow
+    Write-Host ""
+}
 
 if ($EngineVersion -ne "unknown" -and -not $EngineVersion.StartsWith("5.8")) {
     Write-Host ""
@@ -101,8 +121,16 @@ if ($Clean) {
 if (-not $SkipGenerate) {
     Write-Host "[1/2] generating project files ..."
     if (Test-Path $UBTExe) {
-        & $UBTExe -projectfiles -project="$UProject" -game -rocket -progress 2>&1 |
-            Tee-Object -FilePath $BuildLog
+        # -rocket is only valid for installed builds. Passing it to a source build
+        # produces a solution that points at the wrong engine layout.
+        $GenArgs = @("-projectfiles", "-project=$UProject", "-game", "-progress")
+        # Installed builds want -rocket. For a source build we deliberately do NOT add
+        # -engine: that would regenerate the whole UE5 solution and cost minutes.
+        if ($IsInstalledBuild) { $GenArgs += "-rocket" }
+        & $UBTExe @GenArgs 2>&1 | Tee-Object -FilePath $BuildLog
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "Project file generation returned $LASTEXITCODE. Continuing - the build below does not depend on it."
+        }
     } else {
         Write-Warning "UnrealBuildTool.exe not found; skipping project file generation."
     }

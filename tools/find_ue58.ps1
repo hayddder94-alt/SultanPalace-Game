@@ -9,7 +9,7 @@
 #   .\tools\find_ue58.cmd -Quick       skip the disk sweep
 #   .\tools\find_ue58.cmd -Remember    save the 5.8 path as UE58_ROOT
 
-param([switch]$Remember, [switch]$Quick)
+param([switch]$Remember, [switch]$Quick, [switch]$RegisterAs58)
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "ue58_common.ps1")
@@ -57,9 +57,32 @@ if (-not $five8) {
     exit 1
 }
 
+$kind = if (Test-InstalledEngineBuild $five8.Path) { "installed (Epic Launcher)" } else { "source build" }
+$ids  = @(Get-EngineIdentifiers $five8.Path)
+
 Write-Host " RESULT: UE $($five8.Version)" -ForegroundColor Green
 Write-Host " Path   : $($five8.Path)"
+Write-Host " Kind   : $kind"
+Write-Host " Ident  : $(if ($ids.Count) { $ids -join ', ' } else { '(not registered)' })"
 Write-Host ""
+
+if ($RegisterAs58) {
+    if ($ids -contains "5.8") {
+        Write-Host " Already registered as '5.8'. Nothing to do."
+    } else {
+        Register-EngineAs58 $five8.Path | Out-Null
+        Write-Host " Registered $($five8.Path) as engine identifier '5.8'." -ForegroundColor Green
+        Write-Host " Double-clicking TheBetrayedWill.uproject will now resolve to it."
+        Write-Host " Reversible: delete the '5.8' value under"
+        Write-Host "   HKCU\SOFTWARE\Epic Games\Unreal Engine\Builds"
+    }
+    Write-Host ""
+} elseif ($ids.Count -and ($ids -notcontains "5.8")) {
+    Write-Host " NOTE: this engine is registered as '$($ids -join "', '")', but the project's" -ForegroundColor Yellow
+    Write-Host "       EngineAssociation is '5.8'. Command-line builds are unaffected." -ForegroundColor Yellow
+    Write-Host "       For Explorer double-click support run: .\tools\find_ue58.cmd -RegisterAs58" -ForegroundColor Yellow
+    Write-Host ""
+}
 
 if ($Remember) {
     [Environment]::SetEnvironmentVariable("UE58_ROOT", $five8.Path, "User")

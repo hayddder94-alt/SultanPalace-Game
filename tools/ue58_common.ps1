@@ -78,7 +78,9 @@ function Find-UnrealEngines {
     if (Test-Path $hkcu) {
         $props = Get-ItemProperty $hkcu -ErrorAction SilentlyContinue
         foreach ($p in $props.PSObject.Properties) {
-            if ($p.Name -notlike "PS*") { Add-Candidate $p.Value "registry HKCU source build" }
+            if ($p.Name -notlike "PS*") {
+                Add-Candidate $p.Value "source build registered as '$($p.Name)'"
+            }
         }
     }
 
@@ -186,4 +188,65 @@ function Show-UnrealEngines {
         Write-Host ("   {0,-9} {1}{2}" -f $ver, $e.Path, $mark)
         Write-Host ("             source: {0}" -f $e.Source) -ForegroundColor DarkGray
     }
+}
+
+
+<#
+    Installed (Launcher/Rocket) build or a build compiled from source?
+    Installed builds ship Engine\Build\InstalledBuild.txt; source builds do not.
+    This matters: UBT's -rocket switch is only correct for installed builds.
+#>
+function Test-InstalledEngineBuild {
+    param([string]$EngineRoot)
+    return (Test-Path (Join-Path $EngineRoot "Engine\Build\InstalledBuild.txt"))
+}
+
+<#
+    The identifier a .uproject EngineAssociation must contain for Windows to resolve
+    this engine on a double-click. Installed builds use "5.6"/"5.8"; source builds use
+    whatever name (often a GUID) they were registered under in
+    HKCU\SOFTWARE\Epic Games\Unreal Engine\Builds.
+#>
+function Get-EngineIdentifiers {
+    param([string]$EngineRoot)
+
+    $ids = @()
+    $full = (Resolve-Path $EngineRoot -ErrorAction SilentlyContinue).Path
+    if (-not $full) { return $ids }
+
+    $hklm = "HKLM:\SOFTWARE\EpicGames\Unreal Engine"
+    if (Test-Path $hklm) {
+        foreach ($key in (Get-ChildItem $hklm -ErrorAction SilentlyContinue)) {
+            $dir = (Get-ItemProperty $key.PSPath -ErrorAction SilentlyContinue).InstalledDirectory
+            if ($dir -and ((Resolve-Path $dir -ErrorAction SilentlyContinue).Path -ieq $full)) {
+                $ids += $key.PSChildName
+            }
+        }
+    }
+
+    $hkcu = "HKCU:\SOFTWARE\Epic Games\Unreal Engine\Builds"
+    if (Test-Path $hkcu) {
+        $props = Get-ItemProperty $hkcu -ErrorAction SilentlyContinue
+        foreach ($p in $props.PSObject.Properties) {
+            if ($p.Name -like "PS*") { continue }
+            if ((Resolve-Path $p.Value -ErrorAction SilentlyContinue).Path -ieq $full) {
+                $ids += $p.Name
+            }
+        }
+    }
+    return ($ids | Select-Object -Unique)
+}
+
+<#
+    Registers the source build under the identifier "5.8" so that the repo's
+    EngineAssociation "5.8" resolves without editing the .uproject. HKCU only:
+    per-user, no admin, reversible by deleting that one value.
+#>
+function Register-EngineAs58 {
+    param([string]$EngineRoot)
+
+    $hkcu = "HKCU:\SOFTWARE\Epic Games\Unreal Engine\Builds"
+    if (-not (Test-Path $hkcu)) { New-Item -Path $hkcu -Force | Out-Null }
+    New-ItemProperty -Path $hkcu -Name "5.8" -Value $EngineRoot -PropertyType String -Force | Out-Null
+    return $true
 }
