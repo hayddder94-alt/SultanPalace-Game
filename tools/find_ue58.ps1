@@ -57,7 +57,7 @@ if (-not $five8) {
     exit 1
 }
 
-$kind = if (Test-InstalledEngineBuild $five8.Path) { "installed (Epic Launcher)" } else { "source build" }
+$kind = if (Test-InstalledEngineBuild $five8.Path) { "installed build (InstalledBuild.txt present)" } else { "source build (compiled from GitHub)" }
 $ids  = @(Get-EngineIdentifiers $five8.Path)
 
 Write-Host " RESULT: UE $($five8.Version)" -ForegroundColor Green

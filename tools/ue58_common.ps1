@@ -250,3 +250,25 @@ function Register-EngineAs58 {
     New-ItemProperty -Path $hkcu -Name "5.8" -Value $EngineRoot -PropertyType String -Force | Out-Null
     return $true
 }
+
+
+<#
+    Unreal ships its own .NET runtime under Engine\Binaries\ThirdParty\DotNet.
+    Running UnrealBuildTool.exe directly needs a SYSTEM-wide .NET and fails with
+    "You must install or update .NET to run this application." on machines that
+    do not have one. The bundled runtime always matches the engine.
+#>
+function Get-BundledDotnet {
+    param([string]$EngineRoot)
+
+    $base = Join-Path $EngineRoot "Engine\Binaries\ThirdParty\DotNet"
+    if (-not (Test-Path $base)) { return $null }
+
+    $hits = Get-ChildItem -Path $base -Filter "dotnet.exe" -Recurse -ErrorAction SilentlyContinue |
+            Sort-Object FullName -Descending
+    # Prefer a win-x64 flavour when several are present.
+    $x64 = $hits | Where-Object { $_.FullName -match "win-?x64|windows" } | Select-Object -First 1
+    if ($x64) { return $x64.FullName }
+    if ($hits) { return $hits[0].FullName }
+    return $null
+}
