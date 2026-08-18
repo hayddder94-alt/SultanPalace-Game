@@ -25,24 +25,58 @@ fatal: 'origin' does not appear to be a git repository
 ```powershell
 git clone --branch arena/019ffc4c-sultanpalace-game https://github.com/hayddder94-alt/SultanPalace-Game.git C:\Dev\SultanPalace-Game
 cd C:\Dev\SultanPalace-Game
-powershell -ExecutionPolicy Bypass -File .\tools\phase2_build_and_check.ps1
+.\tools\build_phase2.cmd
 ```
 
 هذا كل شيء. حجم المستودع أقل من 5 ميغابايت.
 
-- إن ظهر `git is not recognized` → ثبّت Git من https://git-scm.com/download/win ثم أعد فتح PowerShell.
-- إن ظهر `running scripts is disabled on this system` → استخدم صيغة `powershell -ExecutionPolicy Bypass -File` كما في الأعلى (هي مكتوبة هكذا لهذا السبب).
-- إن لم يجد السكربت المحرك → مرّر مساره:
-  ```powershell
-  powershell -ExecutionPolicy Bypass -File .\tools\phase2_build_and_check.ps1 -EngineRoot "C:\Program Files\Epic Games\UE_5.8"
-  ```
+> **لماذا `.cmd` وليس `.ps1`؟** ويندوز يرفض تشغيل سكربتات PowerShell غير الموقّعة رقميًا:
+> `... is not digitally signed. You cannot run this script on the current system.`
+> ملف `build_phase2.cmd` يشغّل نفس السكربت مع تجاوز السياسة **لهذه العملية فقط** — لا يغيّر
+> أي إعداد دائم على جهازك، ولا يحتاج صلاحيات مدير. يمكنك أيضًا **النقر عليه مرتين** من مستكشف الملفات.
 
-### أو بسكربت الإقلاع (يستنسخ أو يحدّث، ثم يبني)
+### إن أردت البقاء داخل PowerShell بدل `.cmd`
+
+نفّذ هذا السطر مرة واحدة في نافذة PowerShell الحالية (يزول أثره بإغلاق النافذة):
 
 ```powershell
-curl.exe -L -o $env:TEMP\windows_bootstrap.ps1 https://raw.githubusercontent.com/hayddder94-alt/SultanPalace-Game/arena/019ffc4c-sultanpalace-game/tools/windows_bootstrap.ps1
-powershell -ExecutionPolicy Bypass -File $env:TEMP\windows_bootstrap.ps1 -Build
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 ```
+
+ثم:
+
+```powershell
+.\tools\phase2_build_and_check.ps1
+```
+
+### إعداد آلي كامل
+
+انقر مرتين على `tools\setup_windows.cmd` — يستنسخ أو يحدّث المشروع في `C:\Dev\SultanPalace-Game`
+ويضبط الفرع تلقائيًا. أضف `-Build` ليبني مباشرة بعد ذلك.
+
+---
+
+## مجلدك الحالي ليس نسخة git
+
+الرسالة `fatal: 'origin' does not appear to be a git repository` في
+`C:\Users\dell\Desktop\a\aa` تعني أن هذا المجلد ملفات مفكوكة من ZIP، وليس نسخة مستنسخة.
+لذلك `git pull` لن يعمل فيه أبدًا، وستضطر لإعادة التنزيل يدويًا في كل تحديث.
+
+للتحقق بنفسك:
+
+```powershell
+git -C C:\Users\dell\Desktop\a\aa remote -v
+```
+
+فراغ = ليست نسخة git.
+
+**التوصية:** استنسخ إلى `C:\Dev\SultanPalace-Game` واترك مجلد سطح المكتب كما هو. سببان:
+
+1. `git pull` سيجلب كل تحديث بأمر واحد.
+2. سطح المكتب في ويندوز غالبًا مُزامن مع OneDrive. بناء Unreal داخل مجلد مُزامن يولّد
+   مجلدات `Binaries` و `Intermediate` بمئات الميغابايت، فتحدث أخطاء قفل ملفات وبطء شديد.
+   ابقِ المشروع خارج OneDrive دائمًا.
+
 
 ---
 
@@ -51,8 +85,14 @@ powershell -ExecutionPolicy Bypass -File $env:TEMP\windows_bootstrap.ps1 -Build
 ```powershell
 cd C:\Dev\SultanPalace-Game
 git pull origin arena/019ffc4c-sultanpalace-game
-powershell -ExecutionPolicy Bypass -File .\tools\phase2_build_and_check.ps1
+.\tools\build_phase2.cmd
 ```
+
+- إن ظهر `git is not recognized` → ثبّت Git من https://git-scm.com/download/win ثم أعد فتح PowerShell.
+- إن لم يجد السكربت المحرك → مرّر مساره:
+  ```powershell
+  .\tools\build_phase2.cmd -EngineRoot "C:\Program Files\Epic Games\UE_5.8"
+  ```
 
 ---
 
