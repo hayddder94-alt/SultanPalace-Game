@@ -1,3 +1,7 @@
+> **HISTORICAL DOCUMENT.** Kept as a record of the 5.7 to 5.8 migration.
+> The engine is now locked to **5.8.1** and every 5.6/5.7 file has been deleted
+> from the repository. See `docs/ENGINE_VERSION_LOCK.md` for the live truth.
+
 # UE 5.8 MIGRATION REPORT
 
 > **HISTORICAL / ARCHIVED.** First dual-tree attempt (root 5.7 + `TheBetrayedWill_UE58/`).  
@@ -15,7 +19,7 @@
 | Tree | Path | EngineAssociation | Role |
 |---|---|---|---|
 | Live 5.7 source | repository root | **5.7** | Untouched gameplay/config lock |
-| 5.7 backup | `backups/UE57_preserved/` | **5.7** | Frozen snapshot + `BACKUP_MANIFEST.txt` |
+| 5.7 backup | `backups/UE57_preserved/ (DELETED 2026-08-18)` | **5.7** | Frozen snapshot + `BACKUP_MANIFEST.txt` |
 | 5.8 migration copy | `TheBetrayedWill_UE58/` | **5.8** | Only place EngineAssociation was changed |
 
 The 5.7 source state was **not** overwritten.

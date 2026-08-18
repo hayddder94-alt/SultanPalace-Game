@@ -38,7 +38,7 @@ tools/
 VERSION
 ```
 
-`backups/` is **ARCHIVED / NON-AUTHORITATIVE**. Do not open those `.uproject` files as the game.
+There is exactly one project file: `TheBetrayedWill.uproject` at the repository root, engine **5.8.1**. The old 5.7 snapshot and the migration ZIP were deleted on 2026-08-18; they survive only in git history.
 
 ## Recommended next action
 

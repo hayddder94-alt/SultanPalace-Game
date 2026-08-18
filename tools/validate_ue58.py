@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-ARCHIVE_ROOTS = ("backups/",)
+ARCHIVE_ROOTS = ()  # backups/ deleted 2026-08-18 - no archived engine trees are allowed
 ERRORS: list[str] = []
 
 

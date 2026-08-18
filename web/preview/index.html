@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>وصية الغدر — معاينة الجناح الشرقي</title>
+<style>
+  :root {
+    --ink: #e8e2d6;
+    --dim: #8d8577;
+    --gold: #d8b26a;
+    --bg: #0d0c0b;
+    --panel: rgba(14, 13, 12, 0.86);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", Tahoma, system-ui, sans-serif; overflow: hidden; }
+  #view { position: fixed; inset: 0; display: block; }
+
+  .panel { position: fixed; background: var(--panel); border: 1px solid #2a2620;
+    border-radius: 10px; padding: 14px 16px; backdrop-filter: blur(6px); }
+
+  #hud { top: 14px; right: 14px; min-width: 236px; }
+  #hud h1 { margin: 0 0 2px; font-size: 17px; letter-spacing: .3px; color: var(--gold); }
+  #hud .sub { font-size: 11px; color: var(--dim); margin-bottom: 10px; }
+  #hud .row { display: flex; justify-content: space-between; font-size: 12px;
+    padding: 2px 0; color: var(--dim); }
+  #hud .row b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  #rooms { top: 14px; left: 14px; max-width: 210px; }
+  #rooms h2 { margin: 0 0 8px; font-size: 12px; color: var(--dim); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1px; }
+  #rooms button { display: block; width: 100%; margin: 4px 0; padding: 7px 10px;
+    background: #17150f; color: var(--ink); border: 1px solid #2f2a22; border-radius: 6px;
+    font-size: 12px; cursor: pointer; text-align: right; font-family: inherit; }
+  #rooms button:hover { border-color: var(--gold); color: var(--gold); }
+
+  #help { bottom: 14px; right: 14px; font-size: 12px; color: var(--dim); line-height: 1.85; }
+  #help b { color: var(--ink); }
+
+  #gate { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(6,6,5,.86); cursor: pointer; z-index: 5; text-align: center; }
+  #gate div { max-width: 460px; padding: 26px 30px; }
+  #gate h2 { color: var(--gold); margin: 0 0 10px; font-size: 22px; }
+  #gate p { color: var(--dim); font-size: 13px; line-height: 1.9; margin: 6px 0; }
+  #gate .go { margin-top: 16px; display: inline-block; padding: 10px 22px; border: 1px solid var(--gold);
+    color: var(--gold); border-radius: 6px; font-size: 13px; }
+  .warn { color: #c98b5a; }
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="rooms" class="panel">
+  <h2>الغرف</h2>
+  <div id="roomButtons"></div>
+</div>
+
+<div id="hud" class="panel">
+  <h1>وصية الغدر</h1>
+  <div class="sub">الجناح الشرقي — معاينة تخطيط</div>
+  <div class="row"><span>الغرفة</span><b id="hRoom">—</b></div>
+  <div class="row"><span>الموضع</span><b id="hPos">—</b></div>
+  <div class="row"><span>مجسّمات</span><b id="hBoxes">—</b></div>
+  <div class="row"><span>إطار/ث</span><b id="hFps">—</b></div>
+  <div class="row"><span>الوضع</span><b id="hMode">مشي</b></div>
+</div>
+
+<div id="help" class="panel">
+  <b>W A S D</b> حركة · <b>الفأرة</b> نظر · <b>Shift</b> ركض<br />
+  <b>C</b> انحناء · <b>Space</b> صعود · <b>F</b> منظر علوي · <b>Esc</b> تحرير المؤشر
+</div>
+
+<div id="gate">
+  <div>
+    <h2>معاينة الجناح الشرقي</h2>
+    <p>هذه <b>معاينة تخطيط معماري</b> بنفس أبعاد قصر اللعبة بالضبط، مولّدة من نفس ملف البيانات
+       الذي يبنيه Unreal. تصلح لفحص الأحجام والمسافات وخطوط الرؤية من أي جهاز.</p>
+    <p class="warn">ليست اللعبة نفسها: لا Lumen ولا مواد ولا شخصيات. اللعبة الحقيقية تعمل في
+       Unreal 5.8، ولبثّها إلى المتصفح انظر docs/BROWSER_PREVIEW.md.</p>
+    <span class="go">انقر للدخول</span>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
+} }
+</script>
+<script type="module" src="./main.js"></script>
+</body>
+</html>

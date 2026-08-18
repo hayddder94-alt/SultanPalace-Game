@@ -327,10 +327,10 @@ def check_include_resolution() -> None:
 
 def check_project_lock() -> None:
     projects = sorted(ROOT.glob("*.uproject")) + sorted(
-        p for p in ROOT.rglob("*.uproject") if p.parent != ROOT and "backups" not in p.parts
+        p for p in ROOT.rglob("*.uproject") if p.parent != ROOT
     )
     if len(projects) != 1:
-        err("E6", f"expected exactly one .uproject outside backups/, found {len(projects)}: {projects}")
+        err("E6", f"expected exactly one .uproject in the repository, found {len(projects)}: {projects}")
         return
     data = json.loads(projects[0].read_text(encoding="utf-8"))
     if data.get("EngineAssociation") != "5.8":

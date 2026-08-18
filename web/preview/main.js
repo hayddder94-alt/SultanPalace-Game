@@ -1,0 +1,350 @@
+// The Betrayed Will / وصية الغدر — East Wing layout previewer.
+//
+// Reads data/east_wing.json, the same file tools/ue_python/build_east_wing.py
+// feeds to Unreal. This is an architectural walkthrough, not the game: no Lumen,
+// no materials, no characters. Its job is to let anyone check scale, sightlines
+// and circulation from a browser on any device.
+//
+// Unreal is Z-up and centimetre based. Three.js is Y-up and we work in metres,
+// so every position goes through ueToThree().
+
+import * as THREE from "three";
+
+const CM = 0.01;                    // Unreal cm -> metres
+const EYE = 1.7;                    // standing eye height, m
+const EYE_CROUCH = 1.05;
+const WALK = 4.2;                   // m/s, matches the 420 uu/s pawn
+const RUN = 6.2;
+const GRAVITY = 18.0;
+const JUMP = 5.2;
+const RADIUS = 0.38;                // capsule radius, matches the pawn
+
+// Unreal (x east, y north, z up) -> Three (x east, y up, z south)
+function ueToThree(x, y, z) {
+  return new THREE.Vector3(x * CM, z * CM, -y * CM);
+}
+
+const canvas = document.getElementById("view");
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0e0d0b);
+scene.fog = new THREE.FogExp2(0x1b1710, 0.006);
+
+const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.1, 2000);
+const topCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 3000);
+let usingTop = false;
+
+// ---------------------------------------------------------------- materials
+// Colours stand in for the material families the Unreal build resolves to real
+// Megascans surfaces. Same names, so a mental map carries over.
+const MATERIALS = {
+  wall:   new THREE.MeshStandardMaterial({ color: 0x8a7458, roughness: 0.95, metalness: 0.0 }),
+  floor:  new THREE.MeshStandardMaterial({ color: 0x6f6252, roughness: 0.88 }),
+  hero:   new THREE.MeshStandardMaterial({ color: 0xb99a63, roughness: 0.62, metalness: 0.12 }),
+  ground: new THREE.MeshStandardMaterial({ color: 0x7a6a4e, roughness: 1.0 }),
+  water:  new THREE.MeshStandardMaterial({ color: 0x2c4a52, roughness: 0.15, metalness: 0.5,
+                                           transparent: true, opacity: 0.85 }),
+};
+
+// ---------------------------------------------------------------- lighting
+function buildLighting(layout) {
+  const sunCfg = layout.sun || { pitch: -14, yaw: 125, intensity: 6, color: [1, 0.85, 0.7] };
+  const sun = new THREE.DirectionalLight(
+    new THREE.Color(sunCfg.color[0], sunCfg.color[1], sunCfg.color[2]), 2.6);
+
+  // same low late-afternoon angle as the Unreal rig
+  const pitch = THREE.MathUtils.degToRad(sunCfg.pitch);
+  const yaw = THREE.MathUtils.degToRad(sunCfg.yaw);
+  const dist = 120;
+  sun.position.set(
+    Math.cos(pitch) * Math.cos(yaw) * -dist,
+    Math.sin(-pitch) * dist,
+    Math.cos(pitch) * Math.sin(yaw) * dist
+  );
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  const s = 45;
+  sun.shadow.camera.left = -s; sun.shadow.camera.right = s;
+  sun.shadow.camera.top = s; sun.shadow.camera.bottom = -s;
+  sun.shadow.camera.far = 400;
+  sun.shadow.bias = -0.0006;
+  sun.target.position.set(20, 0, -27);
+  scene.add(sun, sun.target);
+
+  scene.add(new THREE.HemisphereLight(0x9fb6d8, 0x3a2f22, 0.85));
+
+  const bounce = new THREE.PointLight(0xffd9a0, 22, 60, 2);
+  bounce.position.set(20, 5, -38);
+  scene.add(bounce);
+}
+
+// ---------------------------------------------------------------- geometry
+const colliders = [];      // axis-aligned boxes in Three space, for walking
+let boxCount = 0;
+
+function buildGeometry(layout) {
+  const unit = new THREE.BoxGeometry(1, 1, 1);
+  const byKind = new Map();
+
+  for (const b of layout.boxes) {
+    const [cx, cy, cz] = b.center;
+    const [sx, sy, sz] = b.size;
+    if (!byKind.has(b.kind)) byKind.set(b.kind, []);
+    byKind.get(b.kind).push({ cx, cy, cz, sx, sy, sz });
+  }
+
+  for (const [kind, items] of byKind) {
+    const mat = MATERIALS[kind] || MATERIALS.wall;
+    const mesh = new THREE.InstancedMesh(unit, mat, items.length);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    const m = new THREE.Matrix4();
+
+    items.forEach((it, i) => {
+      const p = ueToThree(it.cx, it.cy, it.cz);
+      m.compose(
+        p,
+        new THREE.Quaternion(),
+        new THREE.Vector3(it.sx * CM, it.sz * CM, it.sy * CM)   // note: UE Y -> Three Z
+      );
+      mesh.setMatrixAt(i, m);
+
+      // collider, half extents in Three space
+      if (kind !== "water") {
+        colliders.push({
+          min: new THREE.Vector3(p.x - it.sx * CM / 2, p.y - it.sz * CM / 2, p.z - it.sy * CM / 2),
+          max: new THREE.Vector3(p.x + it.sx * CM / 2, p.y + it.sz * CM / 2, p.z + it.sy * CM / 2),
+        });
+      }
+      boxCount++;
+    });
+
+    mesh.instanceMatrix.needsUpdate = true;
+    scene.add(mesh);
+  }
+
+  // ground plane well under the wing so the eye has a horizon
+  const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(600, 600),
+    new THREE.MeshStandardMaterial({ color: 0x241d15, roughness: 1 })
+  );
+  ground.rotation.x = -Math.PI / 2;
+  ground.position.y = -0.25;
+  ground.receiveShadow = true;
+  scene.add(ground);
+}
+
+// ---------------------------------------------------------------- player
+const player = {
+  pos: new THREE.Vector3(0, EYE, 0),
+  vel: new THREE.Vector3(),
+  yaw: 0,
+  pitch: 0,
+  grounded: true,
+  crouch: false,
+};
+
+const keys = new Set();
+addEventListener("keydown", (e) => {
+  keys.add(e.code);
+  if (e.code === "KeyF") toggleTop();
+  if (e.code === "Space") e.preventDefault();
+});
+addEventListener("keyup", (e) => keys.delete(e.code));
+
+const gate = document.getElementById("gate");
+gate.addEventListener("click", () => canvas.requestPointerLock());
+document.addEventListener("pointerlockchange", () => {
+  gate.style.display = document.pointerLockElement === canvas ? "none" : "flex";
+});
+addEventListener("mousemove", (e) => {
+  if (document.pointerLockElement !== canvas) return;
+  player.yaw -= e.movementX * 0.0022;
+  player.pitch -= e.movementY * 0.0019;
+  const lim = THREE.MathUtils.degToRad(70);
+  const limDown = THREE.MathUtils.degToRad(55);
+  player.pitch = Math.max(-limDown, Math.min(lim, player.pitch));
+});
+
+// Axis-separated resolution against the box set. Crude on purpose: this is a
+// layout walkthrough, and crude is predictable.
+function collide(next, height) {
+  const feet = next.y - height;
+  const head = next.y + 0.15;
+  for (const c of colliders) {
+    if (next.x + RADIUS < c.min.x || next.x - RADIUS > c.max.x) continue;
+    if (next.z + RADIUS < c.min.z || next.z - RADIUS > c.max.z) continue;
+    if (head < c.min.y || feet > c.max.y) continue;
+    return true;
+  }
+  return false;
+}
+
+function groundHeightAt(x, z) {
+  let best = 0;
+  for (const c of colliders) {
+    if (x < c.min.x - RADIUS || x > c.max.x + RADIUS) continue;
+    if (z < c.min.z - RADIUS || z > c.max.z + RADIUS) continue;
+    if (c.max.y <= player.pos.y - (player.crouch ? EYE_CROUCH : EYE) + 0.45) {
+      best = Math.max(best, c.max.y);
+    }
+  }
+  return best;
+}
+
+function updatePlayer(dt) {
+  player.crouch = keys.has("KeyC");
+  const height = player.crouch ? EYE_CROUCH : EYE;
+  const speed = (keys.has("ShiftLeft") || keys.has("ShiftRight")) && !player.crouch
+    ? RUN : (player.crouch ? WALK * 0.4 : WALK);
+
+  const fwd = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
+  const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+
+  const wish = new THREE.Vector3();
+  if (keys.has("KeyW")) wish.add(fwd);
+  if (keys.has("KeyS")) wish.sub(fwd);
+  if (keys.has("KeyD")) wish.add(right);
+  if (keys.has("KeyA")) wish.sub(right);
+  if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
+
+  if (keys.has("Space") && player.grounded) {
+    player.vel.y = JUMP;
+    player.grounded = false;
+  }
+  player.vel.y -= GRAVITY * dt;
+
+  const step = new THREE.Vector3(wish.x * dt, player.vel.y * dt, wish.z * dt);
+
+  const tryX = player.pos.clone(); tryX.x += step.x;
+  if (!collide(tryX, height)) player.pos.x = tryX.x;
+
+  const tryZ = player.pos.clone(); tryZ.z += step.z;
+  if (!collide(tryZ, height)) player.pos.z = tryZ.z;
+
+  player.pos.y += step.y;
+  const floor = groundHeightAt(player.pos.x, player.pos.z) + height;
+  if (player.pos.y <= floor) {
+    player.pos.y = floor;
+    player.vel.y = 0;
+    player.grounded = true;
+  }
+
+  camera.position.copy(player.pos);
+  camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
+}
+
+// ---------------------------------------------------------------- rooms
+let roomsOfInterest = {};
+const ROOM_LABELS = {
+  R2_AudienceHall: "قاعة الاستقبال",
+  R4_FamilyCorridor: "ممر العائلة",
+  R5_EvanChamber: "غرفة إيفان",
+  R7_Study: "غرفة الكاتب",
+  R1_Dock: "بوابة القناة",
+};
+
+function teleport(key) {
+  const p = roomsOfInterest[key];
+  if (!p) return;
+  const v = ueToThree(p[0], p[1], p[2]);
+  player.pos.set(v.x, v.y, v.z);
+  player.vel.set(0, 0, 0);
+}
+
+function currentRoom() {
+  let best = "—";
+  let bestD = 14;
+  for (const [key, p] of Object.entries(roomsOfInterest)) {
+    const v = ueToThree(p[0], p[1], p[2]);
+    const d = Math.hypot(v.x - player.pos.x, v.z - player.pos.z);
+    if (d < bestD) { bestD = d; best = ROOM_LABELS[key] || key; }
+  }
+  return best;
+}
+
+function toggleTop() {
+  usingTop = !usingTop;
+  document.getElementById("hMode").textContent = usingTop ? "منظر علوي" : "مشي";
+}
+
+// ---------------------------------------------------------------- loop
+const hPos = document.getElementById("hPos");
+const hRoom = document.getElementById("hRoom");
+const hFps = document.getElementById("hFps");
+let last = performance.now();
+let frames = 0, fpsClock = 0;
+
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  const half = 34;
+  topCamera.left = -half * (w / h); topCamera.right = half * (w / h);
+  topCamera.top = half; topCamera.bottom = -half;
+  topCamera.updateProjectionMatrix();
+}
+addEventListener("resize", resize);
+
+function frame(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  updatePlayer(dt);
+
+  if (usingTop) {
+    topCamera.position.set(20, 90, -27);
+    topCamera.lookAt(20, 0, -27);
+    topCamera.up.set(0, 0, -1);
+    renderer.render(scene, topCamera);
+  } else {
+    renderer.render(scene, camera);
+  }
+
+  frames++; fpsClock += dt;
+  if (fpsClock >= 0.5) {
+    hFps.textContent = Math.round(frames / fpsClock);
+    frames = 0; fpsClock = 0;
+    hPos.textContent = `${player.pos.x.toFixed(1)}, ${(-player.pos.z).toFixed(1)} م`;
+    hRoom.textContent = currentRoom();
+  }
+  requestAnimationFrame(frame);
+}
+
+// ---------------------------------------------------------------- boot
+fetch("./data/east_wing.json")
+  .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+  .then((layout) => {
+    buildLighting(layout);
+    buildGeometry(layout);
+    roomsOfInterest = layout.rooms_of_interest || {};
+
+    const holder = document.getElementById("roomButtons");
+    for (const key of Object.keys(roomsOfInterest)) {
+      const b = document.createElement("button");
+      b.textContent = ROOM_LABELS[key] || key;
+      b.onclick = () => { teleport(key); canvas.requestPointerLock(); };
+      holder.appendChild(b);
+    }
+
+    const ps = layout.player_start.location;
+    const v = ueToThree(ps[0], ps[1], ps[2] + 50);
+    player.pos.set(v.x, EYE, v.z);
+    player.yaw = THREE.MathUtils.degToRad(-layout.player_start.yaw);
+
+    document.getElementById("hBoxes").textContent = boxCount;
+    resize();
+    requestAnimationFrame(frame);
+  })
+  .catch((err) => {
+    document.getElementById("gate").innerHTML =
+      `<div><h2>تعذّر تحميل التخطيط</h2><p>${err}</p>
+       <p>شغّل: <code>python tools/layout/east_wing.py</code></p></div>`;
+  });

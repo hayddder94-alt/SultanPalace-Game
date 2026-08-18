@@ -1,3 +1,7 @@
+> **HISTORICAL DOCUMENT.** Kept as a record of the 5.7 to 5.8 migration.
+> The engine is now locked to **5.8.1** and every 5.6/5.7 file has been deleted
+> from the repository. See `docs/ENGINE_VERSION_LOCK.md` for the live truth.
+
 # UE 5.8 FULL MIGRATION REPORT
 
 **Project:** The Betrayed Will / وصية الغدر  
@@ -12,7 +16,7 @@ Dual tree:
 
 - Repository root `TheBetrayedWill.uproject` → `EngineAssociation` **5.7**
 - `TheBetrayedWill_UE58/TheBetrayedWill.uproject` → **5.8**
-- Snapshot `backups/UE57_preserved/` → 5.7 archive
+- Snapshot `backups/UE57_preserved/ (DELETED 2026-08-18)` → 5.7 archive
 
 ## 2. Final engine state
 
@@ -76,8 +80,8 @@ Labelled **HISTORICAL:** Phase 0 reports, Phase 1 report/plan, first `UE58_MIGRA
 
 ## 12. Files archived
 
-- `backups/UE57_preserved/` — 5.7 snapshot, marked non-authoritative
-- `backups/archives/TheBetrayedWill_UE58_Migration.zip` — transfer artifact only
+- `backups/UE57_preserved/ (DELETED 2026-08-18)` — 5.7 snapshot, marked non-authoritative
+- `backups/archives/TheBetrayedWill_UE58_Migration.zip (DELETED 2026-08-18)` — transfer artifact only
 
 ## 13. Validation results (structural)
 
@@ -104,7 +108,7 @@ Runtime tests: **NOT RUN — UE5.8 unavailable**.
 
 ## 18. Remaining risks
 
-Same as Phase 1: WASD swizzle, Template_Default path, BasicShapes cook, packaging surprises. Dual-version confusion is **closed** if nobody opens `backups/`.
+Same as Phase 1: WASD swizzle, Template_Default path, BasicShapes cook, packaging surprises. Dual-version confusion is **closed** if nobody opens `backups/` (deleted).
 
 ---
 
@@ -139,7 +143,7 @@ Filled after push.
 | Push result | **SUCCESS** `b0ca838..5fe3247` |
 | Post-push EngineAssociation | **5.8** (verified via GitHub API) |
 | Authoritative `.uproject` count | **1** (root). `TheBetrayedWill_UE58/` is 404 on the remote. |
-| Remote root contents | `.uproject`, `Source/`, `Config/`, `Content/`, `docs/`, `tools/`, `README.md`, `VERSION`, `.gitignore`, `backups/` |
+| Remote root contents | `.uproject`, `Source/`, `Config/`, `Content/`, `docs/`, `tools/`, `README.md`, `VERSION`, `.gitignore`, `backups/` (deleted) |
 
 **GitHub now contains the final UE5.8-only project.**
 
