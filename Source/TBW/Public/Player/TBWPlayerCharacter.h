@@ -56,6 +56,18 @@ public:
 	void ApplyMovementFromIdentity();
 	void ApplyPresentationFromIdentity();
 
+	/**
+	 * Swaps the placeholder cube for a real skeletal character when one is
+	 * available in the project, and hides the cube. Free sources, in order:
+	 *   1. /Game/Characters/Mannequins  (Content Browser > Add > Third Person feature pack)
+	 *   2. /Game/TBW/Characters         (our own imported or MetaHuman-derived meshes)
+	 * If nothing is found the cube stays, so the project always boots.
+	 */
+	void ResolveCharacterVisual();
+
+	UFUNCTION(BlueprintPure, Category = "TBW|Presentation")
+	bool IsUsingRealCharacterMesh() const { return bUsingRealMesh; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -115,4 +127,5 @@ private:
 	float SprintSpeed = 620.f;
 	float CrouchSpeed = 160.f;
 	ETBWMoveState MoveState = ETBWMoveState::Idle;
+	bool bUsingRealMesh = false;
 };

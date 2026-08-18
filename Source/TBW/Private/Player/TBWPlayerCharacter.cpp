@@ -13,6 +13,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Animation/AnimInstance.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/Material.h"
@@ -88,10 +91,12 @@ void ATBWPlayerCharacter::BeginPlay()
 	{
 		IdentityComponent->ApplyIdentity(FTBWIdentityFactory::MakeEvan(this));
 	}
+	ResolveCharacterVisual();
 	ApplyMovementFromIdentity();
 	ApplyPresentationFromIdentity();
 
-	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 2 feel. No combat."));
+	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 2 feel. Body: %s. No combat."),
+		bUsingRealMesh ? TEXT("skeletal") : TEXT("placeholder cube"));
 }
 
 void ATBWPlayerCharacter::PossessedBy(AController* NewController)
@@ -113,9 +118,84 @@ void ATBWPlayerCharacter::ApplyMovementFromIdentity()
 	ApplyPresentationFromIdentity();
 }
 
+void ATBWPlayerCharacter::ResolveCharacterVisual()
+{
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	if (!MeshComp)
+	{
+		return;
+	}
+
+	// Candidate skeletal meshes, best first. All are free: the Third Person
+	// feature pack ships with the editor, our own imports land under TBW.
+	static const TCHAR* MeshCandidates[] =
+	{
+		TEXT("/Game/TBW/Characters/Evan/SKM_Evan.SKM_Evan"),
+		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny.SKM_Manny"),
+		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn"),
+		TEXT("/Game/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin")
+	};
+
+	USkeletalMesh* Chosen = nullptr;
+	for (const TCHAR* Path : MeshCandidates)
+	{
+		Chosen = LoadObject<USkeletalMesh>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet);
+		if (Chosen)
+		{
+			UE_LOG(LogTBW, Display, TEXT("Character mesh: %s"), Path);
+			break;
+		}
+	}
+
+	if (!Chosen)
+	{
+		UE_LOG(LogTBW, Warning,
+			TEXT("No skeletal character found. Still using the placeholder cube. "
+				 "Add the free Third Person feature pack: Content Browser > Add > "
+				 "Add Feature or Content Pack > Blueprint Feature > Third Person."));
+		return;
+	}
+
+	MeshComp->SetSkeletalMesh(Chosen);
+	// Unreal characters author facing +X while the capsule faces +X too, but the
+	// mesh pivot sits at the feet: drop by half height and yaw -90.
+	MeshComp->SetRelativeLocationAndRotation(
+		FVector(0.f, 0.f, -88.f), FRotator(0.f, -90.f, 0.f));
+	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	MeshComp->SetCollisionProfileName(TEXT("CharacterMesh"));
+
+	static const TCHAR* AnimCandidates[] =
+	{
+		TEXT("/Game/TBW/Characters/Evan/ABP_Evan.ABP_Evan_C"),
+		TEXT("/Game/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C"),
+		TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C")
+	};
+
+	for (const TCHAR* Path : AnimCandidates)
+	{
+		if (UClass* AnimClass = LoadObject<UClass>(nullptr, Path, nullptr, LOAD_NoWarn | LOAD_Quiet))
+		{
+			MeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+			MeshComp->SetAnimInstanceClass(AnimClass);
+			UE_LOG(LogTBW, Display, TEXT("Character anim blueprint: %s"), Path);
+			break;
+		}
+	}
+
+	bUsingRealMesh = true;
+
+	// The cube was only ever a stand-in for a body. Retire it, do not delete it:
+	// tbw.Identity.Set still uses it when no skeletal mesh exists.
+	if (PreviewBody)
+	{
+		PreviewBody->SetVisibility(false, true);
+		PreviewBody->SetHiddenInGame(true, true);
+	}
+}
+
 void ATBWPlayerCharacter::ApplyPresentationFromIdentity()
 {
-	if (!PreviewBody)
+	if (!PreviewBody || bUsingRealMesh)
 	{
 		return;
 	}

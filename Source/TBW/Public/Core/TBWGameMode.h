@@ -23,6 +23,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
 	ATBWDevSandbox* GetDevSandbox() const { return DevSandbox; }
 
+	/** True when the current map ships its own geometry and PlayerStart. */
+	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
+	bool IsAuthoredLevel() const;
+
 private:
 	void EnsureSandbox();
 

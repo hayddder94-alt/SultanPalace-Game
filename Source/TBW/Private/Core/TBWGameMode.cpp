@@ -8,6 +8,7 @@
 #include "World/TBWDevSandbox.h"
 #include "UI/TBWHUD.h"
 #include "EngineUtils.h"
+#include "GameFramework/PlayerStart.h"
 #include "TBW.h"
 
 ATBWGameMode::ATBWGameMode()
@@ -17,9 +18,31 @@ ATBWGameMode::ATBWGameMode()
 	HUDClass = ATBWHUD::StaticClass();
 }
 
+bool ATBWGameMode::IsAuthoredLevel() const
+{
+	// An authored map ships its own geometry and at least one PlayerStart.
+	// The runtime greybox must never be spawned into it, or the palace fills
+	// with debug boxes and a second floor at Z=0.
+	const UWorld* World = GetWorld();
+	if (!World)
+	{
+		return false;
+	}
+	for (TActorIterator<APlayerStart> It(*const_cast<UWorld*>(World)); It; ++It)
+	{
+		return true;
+	}
+	return false;
+}
+
 void ATBWGameMode::EnsureSandbox()
 {
 	if (DevSandbox)
+	{
+		return;
+	}
+
+	if (IsAuthoredLevel())
 	{
 		return;
 	}
@@ -44,10 +67,11 @@ void ATBWGameMode::EnsureSandbox()
 void ATBWGameMode::StartPlay()
 {
 	EnsureSandbox();
-	UE_LOG(LogTBW, Display, TEXT("The Betrayed Will %s starting. Engine lock %s. L_Dev_Sandbox %s."),
+	UE_LOG(LogTBW, Display, TEXT("The Betrayed Will %s starting. Engine lock %s. Level %s. Greybox %s."),
 		TBW_VERSION_STRING,
 		TBW_ENGINE_LOCK,
-		DevSandbox ? TEXT("ready") : TEXT("MISSING"));
+		IsAuthoredLevel() ? TEXT("AUTHORED") : TEXT("dev"),
+		DevSandbox ? TEXT("ready") : (IsAuthoredLevel() ? TEXT("suppressed (authored level)") : TEXT("MISSING")));
 	Super::StartPlay();
 }
 
