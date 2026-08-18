@@ -13,6 +13,7 @@ It catches the classes of mistake that would otherwise only surface after a
   E5  file is not valid UTF-8
   E6  more than one .uproject, or EngineAssociation != 5.8
   E7  module used in an #include but missing from TBW.Build.cs
+  E8  #include of a project header that no module include path can reach -> C1083
 
   W1  private helper defined but never called                 -> dead feature
   W2  known deprecated API still in use                       -> tracked debt
@@ -25,7 +26,7 @@ from __future__ import annotations
 import json
 import re
 import sys
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "Source"
@@ -273,6 +274,53 @@ def check_definitions() -> None:
             )
 
 
+
+# --------------------------------------------------------------------------
+# E8 — project includes must resolve the way UBT resolves them
+# --------------------------------------------------------------------------
+
+def check_include_resolution() -> None:
+    """
+    UBT exposes a module's Public/ and Private/ folders as include roots (plus the
+    directory of the including file). The module root itself is NOT an include root
+    once Public/Private exist. An #include that only resolves relative to the module
+    root compiles nowhere and fails as:
+        fatal error C1083: Cannot open include file
+    """
+    module = SRC / "TBW"
+    public = module / "Public"
+    private = module / "Private"
+
+    project_headers: dict[str, list[Path]] = {}
+    for h in module.rglob("*.h"):
+        project_headers.setdefault(h.name.lower(), []).append(h)
+
+    for path in source_files((".h", ".cpp")):
+        text = re.sub(r"//[^\n]*", "", path.read_text(encoding="utf-8"))
+        for lineno, line in enumerate(text.splitlines(), 1):
+            m = re.match(r'\s*#include\s+"([^"]+)"', line)
+            if not m:
+                continue
+            inc = m.group(1)
+            if inc.endswith(".generated.h"):
+                continue
+
+            roots = [public, private, path.parent]
+            if any((root / inc).is_file() for root in roots):
+                continue
+
+            # Not reachable. Is it one of ours (a real bug) or an engine header?
+            owners = project_headers.get(PurePosixPath(inc).name.lower(), [])
+            if owners:
+                where = ", ".join(str(o.relative_to(ROOT)) for o in owners)
+                err(
+                    "E8",
+                    f"{path.relative_to(ROOT)}:{lineno} #include \"{inc}\" cannot be resolved from "
+                    f"Public/, Private/ or the file's own folder. The header exists at {where} "
+                    "-> fatal error C1083 at compile time.",
+                )
+
+
 # --------------------------------------------------------------------------
 # E6 — project / engine lock
 # --------------------------------------------------------------------------
@@ -353,6 +401,7 @@ def main() -> int:
     check_uht_rules()
     check_definitions()
     check_build_deps()
+    check_include_resolution()
     check_deprecations()
 
     print("=" * 72)

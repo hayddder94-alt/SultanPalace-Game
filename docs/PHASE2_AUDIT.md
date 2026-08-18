@@ -47,6 +47,35 @@ RESULT   PASS (structural only)
 
 Also re-ran: `tools/validate_ue58.py` → PASS, `tools/validate_phase1.py` → 0 structural failures.
 
+## Second pass — first real compile on the target machine (2026-08-18)
+
+The Windows build finally reached the compiler and failed on one thing:
+
+```
+Source\TBW\Private\Core\TBWConsoleCommands.cpp(16,1):
+fatal error C1083: Cannot open include file: 'TBW.h': No such file or directory
+```
+
+**Cause.** `TBW.h` and `TBW.cpp` sat at the module root, `Source/TBW/`. UBT publishes a
+module's `Public/` and `Private/` folders as include roots — never the module root itself
+once those folders exist. So `#include "TBW.h"` resolved for nobody. Fourteen files did it.
+
+**Fix.** Moved to the standard layout, no Build.cs hacks:
+
+| Was | Now |
+|---|---|
+| `Source/TBW/TBW.h` | `Source/TBW/Public/TBW.h` |
+| `Source/TBW/TBW.cpp` | `Source/TBW/Private/TBW.cpp` |
+
+**Audit rule added — E8.** The offline checker now resolves every project `#include` the
+way UBT does (Public/, Private/, the including file's own folder). Verified by reintroducing
+the bug: it reports all 14 failures and names the unreachable header. This class of error
+will never again reach the build machine.
+
+Confirmed working on the target machine in this run: UE 5.8.1 at `E:\UE_5.8`, bundled
+.NET 10.0 win-x64, MSVC 14.44, Windows SDK 10.0.22621, UHT, UBA local executor,
+project file generation (`Result: Succeeded`).
+
 ## What this audit does NOT prove
 
 - It is **not** a compile. MSVC and UHT can still reject something a regex cannot see.
