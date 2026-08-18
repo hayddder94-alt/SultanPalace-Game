@@ -257,6 +257,47 @@ def load_layout():
     return data
 
 
+def build_interactables(layout):
+    """
+    Place the story beats as ATBWInteractableActor instances and configure them
+    from data. Every flag is already in ETBWWorldFlag, so the existing interaction
+    system and the debug HUD pick them up with no new C++.
+    """
+    cls = unreal.load_class(None, "/Script/TBW.TBWInteractableActor")
+    if not cls:
+        unreal.log_warning("[TBW] ATBWInteractableActor not found - build the project first.")
+        return 0
+
+    cube = load(CUBE_PATH)
+    placed = 0
+    for item in layout.get("interactables", []):
+        loc = item["location"]
+        actor = editor_actor.spawn_actor_from_class(
+            cls, unreal.Vector(loc[0], loc[1], loc[2]), unreal.Rotator(0, 0, 0))
+        if not actor:
+            continue
+        actor.set_actor_label("INT_{0}".format(item["id"]))
+        size = item["size"]
+        actor.set_actor_scale3d(unreal.Vector(size[0] / 100.0, size[1] / 100.0, size[2] / 100.0))
+
+        safe_set(actor, "prompt_text", unreal.Text(item["prompt"]))
+        safe_set(actor, "examine_text", unreal.Text(item["examine"]))
+        safe_set(actor, "sets_flag", unreal.Name(item["flag"]))
+        safe_set(actor, "flag_value", 1)
+
+        comp = actor.get_component_by_class(unreal.StaticMeshComponent)
+        if comp and cube:
+            comp.set_mobility(unreal.ComponentMobility.MOVABLE)
+            comp.set_static_mesh(cube)
+
+        actor.tags = ["Interactable", item.get("vs", "VS")]
+        _spawned.append(actor)
+        placed += 1
+
+    LOG("[TBW] story interactables placed: {0}".format(placed))
+    return placed
+
+
 def build_wing(pal, layout):
     kind_to_material = {
         "wall":   pal.wall,
@@ -403,6 +444,7 @@ def main():
     pal.report()
 
     build_wing(pal, layout)
+    build_interactables(layout)
     build_lighting()
     build_gameplay(layout)
 
@@ -410,6 +452,7 @@ def main():
 
     LOG("-" * 70)
     LOG("[TBW] actors placed : {0}".format(len(_spawned)))
+    LOG("[TBW] story beats   : {0}".format(len(layout.get("interactables", []))))
     LOG("[TBW] level saved   : {0}".format(MAP_PACKAGE))
     LOG("[TBW] art materials : {0}".format("Megascans/Fab" if pal.using_real_art else "engine grey (install an art pack, re-run)"))
     LOG("-" * 70)

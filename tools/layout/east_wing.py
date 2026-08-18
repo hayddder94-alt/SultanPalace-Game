@@ -82,6 +82,40 @@ class Layout:
                 size = (thickness, b - a, height - door_h)
             self.box("{0}_lintel".format(name), (cx, cy, door_h + (height - door_h) * 0.5), size, kind)
 
+    def window_wall(self, name, p0, p1, height, thickness, kind=WALL,
+                    at=0.5, width=1.8 * M, sill=3.2 * M, header=4.6 * M):
+        """
+        Wall pierced by a high window. Clerestory light is the whole reason the
+        audience hall reads as a hall and not a box: sun enters above head height,
+        hits the floor in bars, and Lumen bounces it into the room.
+        """
+        x0, y0 = p0
+        x1, y1 = p1
+        dx, dy = x1 - x0, y1 - y0
+        length = (dx * dx + dy * dy) ** 0.5
+        if length <= 1.0:
+            return
+        horizontal = abs(dx) >= abs(dy)
+        a = max(0.0, length * at - width * 0.5)
+        b = min(length, length * at + width * 0.5)
+
+        def piece(tag, start, end, z0, z1):
+            if end - start < 1.0 or z1 - z0 < 1.0:
+                return
+            mid = (start + end) * 0.5
+            if horizontal:
+                cx, cy = x0 + (dx / length) * mid, y0
+                size = (end - start, thickness, z1 - z0)
+            else:
+                cx, cy = x0, y0 + (dy / length) * mid
+                size = (thickness, end - start, z1 - z0)
+            self.box("{0}_{1}".format(name, tag), (cx, cy, (z0 + z1) * 0.5), size, kind)
+
+        piece("left", 0.0, a, 0.0, height)
+        piece("right", b, length, 0.0, height)
+        piece("sill", a, b, 0.0, sill)
+        piece("header", a, b, header, height)
+
     def room(self, name, x, y, w, d, height, doors=(), ceiling=False,
              wall_kind=WALL, floor_kind=FLOOR):
         door_map = dict(doors)
@@ -111,6 +145,21 @@ def build():
         L.box("R2_ColE_{0}".format(i), (hx + hw - 4.0 * M, cy, HALL_H * 0.5), (1.1 * M, 1.1 * M, HALL_H), HERO)
     L.box("R2_Dais", (hx + hw * 0.5, hy + hd - 4.0 * M, 0.3 * M), (7.0 * M, 4.0 * M, 0.6 * M), HERO)
     L.box("R2_ChairPlinth", (hx + hw * 0.5, hy + hd - 3.2 * M, 0.9 * M), (1.2 * M, 1.2 * M, 0.6 * M), HERO)
+
+    # Clerestory band: six high windows down each long wall of the hall, above
+    # the colonnade. Replaces the solid east/west walls built by room().
+    L.boxes = [b for b in L.boxes if not (b["name"].startswith("R2_AudienceHall_W")
+                                          or b["name"].startswith("R2_AudienceHall_E"))]
+    for i in range(4):
+        y_a = hy + 2.0 * M + i * 6.0 * M
+        y_b = y_a + 6.0 * M
+        L.window_wall("R2_ClerestoryW_{0}".format(i), (hx, y_a), (hx, y_b), HALL_H, WALL_T,
+                      HERO, at=0.5, width=2.4 * M, sill=5.4 * M, header=7.6 * M)
+        L.window_wall("R2_ClerestoryE_{0}".format(i), (hx + hw, y_a), (hx + hw, y_b), HALL_H, WALL_T,
+                      HERO, at=0.5, width=2.4 * M, sill=5.4 * M, header=7.6 * M)
+    # the two doorways the room() call used to carve
+    L.wall("R2_DoorW", (hx, hy), (hx, hy + 2.0 * M), HALL_H, WALL_T, HERO, door_at=0.5, door_h=3.2 * M)
+    L.wall("R2_DoorE", (hx + hw, hy), (hx + hw, hy + 2.0 * M), HALL_H, WALL_T, HERO, door_at=0.5, door_h=3.2 * M)
 
     # R4 family corridor
     cx, cy0, cw, cd = 18 * M, 12 * M, 3.5 * M, 14 * M
@@ -158,6 +207,54 @@ def build():
     L.wall("Perim_W", (0.0, 0.0), (0.0, 55 * M), 8.0 * M, 0.6 * M)
     L.wall("Perim_E", (40 * M, 0.0), (40 * M, 55 * M), 8.0 * M, 0.6 * M)
 
+    # -----------------------------------------------------------------
+    # Story beats. Every flag here already exists in ETBWWorldFlag (C++),
+    # so the interaction system and the debug HUD light up with no new code.
+    # Prompts stay English for now: the Arabic HUD path is Slate-only, and the
+    # Canvas prompt line is the one place Arabic still mojibakes.
+    # -----------------------------------------------------------------
+    interactables = [
+        {"id": "WillTablet", "room": "R2_AudienceHall",
+         "location": [hx + hw * 0.5, hy + hd - 3.2 * M, 1.45 * M], "size": [0.5 * M, 0.35 * M, 0.5 * M],
+         "prompt": "Read the will", "examine": "The tablet names Raynor. The clay is newer than the seal.",
+         "flag": "WillWasRead", "vs": "VS-02"},
+
+        {"id": "EmptyChair", "room": "R2_AudienceHall",
+         "location": [hx + hw * 0.5 + 2.4 * M, hy + hd - 4.0 * M, 1.25 * M], "size": [0.8 * M, 0.8 * M, 1.2 * M],
+         "prompt": "Examine the empty chair", "examine": "Cloth laid for an heir who has not sat down.",
+         "flag": "EmptyChairExamined", "vs": "VS-05"},
+
+        {"id": "UnusedBed", "room": "R6_RaynorChamber",
+         "location": [cx + cw + 5.5 * M, cy0 + 5.5 * M, 0.35 * M], "size": [2.0 * M, 1.1 * M, 0.7 * M],
+         "prompt": "Examine the bed", "examine": "Slept in once, then straightened by someone in a hurry.",
+         "flag": "UnusedBed", "vs": "VS-06"},
+
+        {"id": "ScarOil", "room": "R6_RaynorChamber",
+         "location": [cx + cw + 1.4 * M, cy0 + 7.6 * M, 0.95 * M], "size": [0.3 * M, 0.3 * M, 0.35 * M],
+         "prompt": "Examine the oil jar", "examine": "Scar oil. Raynor stopped needing it years ago.",
+         "flag": "ScarOil", "vs": "VS-06"},
+
+        {"id": "Roster", "room": "R7_Study",
+         "location": [cx + 1.2 * M, cy0 - 5.5 * M, 1.05 * M], "size": [0.6 * M, 0.45 * M, 0.1 * M],
+         "prompt": "Read the guard roster", "examine": "Two names on the canal gate were scraped and rewritten.",
+         "flag": "RosterAltered", "vs": "VS-09"},
+
+        {"id": "FalseLetter", "room": "R7_Study",
+         "location": [cx + 3.0 * M, cy0 - 4.2 * M, 1.05 * M], "size": [0.4 * M, 0.3 * M, 0.06 * M],
+         "prompt": "Read the letter", "examine": "Orin's hand, but the pressure is wrong. Someone practised it.",
+         "flag": "LetterIsFalse", "vs": "VS-09"},
+
+        {"id": "CanalClasp", "room": "R1_Dock",
+         "location": [4.0 * M, 8.4 * M, 0.25 * M], "size": [0.22 * M, 0.22 * M, 0.12 * M],
+         "prompt": "Pick up the clasp", "examine": "A cloak clasp from the house guard, in the water at the gate.",
+         "flag": "ClaspFound", "vs": "VS-09"},
+
+        {"id": "WestArch", "room": "R3_Terrace",
+         "location": [1.6 * M, 34 * M, 1.3 * M], "size": [0.4 * M, 1.6 * M, 2.4 * M],
+         "prompt": "Look through the west arch", "examine": "The rest of the palace. Not tonight.",
+         "flag": "WestArchTouched", "vs": "VS-05"},
+    ]
+
     return {
         "name": "L_VS_Palace_EastWing",
         "spec": "docs/PALACE_WING_SPEC.md",
@@ -174,6 +271,7 @@ def build():
             "R1_Dock": [6.0 * M, 6.0 * M, 1.7 * M],
         },
         "boxes": L.boxes,
+        "interactables": interactables,
     }
 
 

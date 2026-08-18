@@ -101,6 +101,22 @@ check("ceilings hidden by default so sun reaches rooms", ceilingsHidden);
 const worstCaseSurface = ambient + hemi * 0.5;   // wall normal, half sky visibility
 check("unlit-surface floor above black", worstCaseSurface > 0.8, `~${worstCaseSurface.toFixed(2)} before albedo`);
 
+// ---------------------------------------------------------------- story beats
+const beats = layout.interactables || [];
+check("story beats present", beats.length >= 6, `${beats.length} beats`);
+check("every beat has prompt, examine and flag",
+  beats.every((b) => b.prompt && b.examine && b.flag));
+
+const beatsReachable = beats.every((b) => {
+  const p = ueToThree(b.location[0], b.location[1], b.location[2]);
+  const half = [b.size[0] * CM / 2, b.size[2] * CM / 2, b.size[1] * CM / 2];
+  return !colliders.some((c) =>
+    p.x + half[0] > c.min.x + 0.01 && p.x - half[0] < c.max.x - 0.01 &&
+    p.y + half[1] > c.min.y + 0.01 && p.y - half[1] < c.max.y - 0.01 &&
+    p.z + half[2] > c.min.z + 0.01 && p.z - half[2] < c.max.z - 0.01);
+});
+check("no beat is buried inside geometry", beatsReachable);
+
 // ---------------------------------------------------------------- no CDN
 const html = readFileSync(join(here, "index.html"), "utf8");
 check("no external CDN dependency", !/unpkg|jsdelivr|cdnjs/.test(html));

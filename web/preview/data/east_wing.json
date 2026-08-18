@@ -127,90 +127,6 @@
    "kind": "hero"
   },
   {
-   "name": "R2_AudienceHall_W_a",
-   "center": [
-    1100.0,
-    3160.0,
-    450.0
-   ],
-   "size": [
-    35.0,
-    1120.0,
-    900.0
-   ],
-   "kind": "hero"
-  },
-  {
-   "name": "R2_AudienceHall_W_b",
-   "center": [
-    1100.0,
-    4440.0,
-    450.0
-   ],
-   "size": [
-    35.0,
-    1120.0,
-    900.0
-   ],
-   "kind": "hero"
-  },
-  {
-   "name": "R2_AudienceHall_W_lintel",
-   "center": [
-    1100.0,
-    3800.0,
-    580.0
-   ],
-   "size": [
-    35.0,
-    160.0,
-    640.0
-   ],
-   "kind": "hero"
-  },
-  {
-   "name": "R2_AudienceHall_E_a",
-   "center": [
-    2900.0,
-    2980.0,
-    450.0
-   ],
-   "size": [
-    35.0,
-    760.0,
-    900.0
-   ],
-   "kind": "hero"
-  },
-  {
-   "name": "R2_AudienceHall_E_b",
-   "center": [
-    2900.0,
-    4260.0,
-    450.0
-   ],
-   "size": [
-    35.0,
-    1480.0,
-    900.0
-   ],
-   "kind": "hero"
-  },
-  {
-   "name": "R2_AudienceHall_E_lintel",
-   "center": [
-    2900.0,
-    3440.0,
-    580.0
-   ],
-   "size": [
-    35.0,
-    160.0,
-    640.0
-   ],
-   "kind": "hero"
-  },
-  {
    "name": "R2_ColW_0",
    "center": [
     1500.0,
@@ -403,6 +319,538 @@
     120.0,
     120.0,
     60.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_0_left",
+   "center": [
+    1100.0,
+    2890.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_0_right",
+   "center": [
+    1100.0,
+    3310.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_0_sill",
+   "center": [
+    1100.0,
+    3100.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_0_header",
+   "center": [
+    1100.0,
+    3100.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_0_left",
+   "center": [
+    2900.0,
+    2890.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_0_right",
+   "center": [
+    2900.0,
+    3310.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_0_sill",
+   "center": [
+    2900.0,
+    3100.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_0_header",
+   "center": [
+    2900.0,
+    3100.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_1_left",
+   "center": [
+    1100.0,
+    3490.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_1_right",
+   "center": [
+    1100.0,
+    3910.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_1_sill",
+   "center": [
+    1100.0,
+    3700.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_1_header",
+   "center": [
+    1100.0,
+    3700.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_1_left",
+   "center": [
+    2900.0,
+    3490.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_1_right",
+   "center": [
+    2900.0,
+    3910.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_1_sill",
+   "center": [
+    2900.0,
+    3700.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_1_header",
+   "center": [
+    2900.0,
+    3700.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_2_left",
+   "center": [
+    1100.0,
+    4090.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_2_right",
+   "center": [
+    1100.0,
+    4510.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_2_sill",
+   "center": [
+    1100.0,
+    4300.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_2_header",
+   "center": [
+    1100.0,
+    4300.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_2_left",
+   "center": [
+    2900.0,
+    4090.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_2_right",
+   "center": [
+    2900.0,
+    4510.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_2_sill",
+   "center": [
+    2900.0,
+    4300.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_2_header",
+   "center": [
+    2900.0,
+    4300.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_3_left",
+   "center": [
+    1100.0,
+    4690.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_3_right",
+   "center": [
+    1100.0,
+    5110.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_3_sill",
+   "center": [
+    1100.0,
+    4900.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryW_3_header",
+   "center": [
+    1100.0,
+    4900.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_3_left",
+   "center": [
+    2900.0,
+    4690.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_3_right",
+   "center": [
+    2900.0,
+    5110.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    180.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_3_sill",
+   "center": [
+    2900.0,
+    4900.0,
+    270.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    540.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_ClerestoryE_3_header",
+   "center": [
+    2900.0,
+    4900.0,
+    830.0
+   ],
+   "size": [
+    35.0,
+    240.0,
+    140.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_DoorW_a",
+   "center": [
+    1100.0,
+    2610.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    20.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_DoorW_b",
+   "center": [
+    1100.0,
+    2790.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    20.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_DoorW_lintel",
+   "center": [
+    1100.0,
+    2700.0,
+    610.0
+   ],
+   "size": [
+    35.0,
+    160.0,
+    580.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_DoorE_a",
+   "center": [
+    2900.0,
+    2610.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    20.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_DoorE_b",
+   "center": [
+    2900.0,
+    2790.0,
+    450.0
+   ],
+   "size": [
+    35.0,
+    20.0,
+    900.0
+   ],
+   "kind": "hero"
+  },
+  {
+   "name": "R2_DoorE_lintel",
+   "center": [
+    2900.0,
+    2700.0,
+    610.0
+   ],
+   "size": [
+    35.0,
+    160.0,
+    580.0
    ],
    "kind": "hero"
   },
@@ -1399,6 +1847,152 @@
     800.0
    ],
    "kind": "wall"
+  }
+ ],
+ "interactables": [
+  {
+   "id": "WillTablet",
+   "room": "R2_AudienceHall",
+   "location": [
+    2000.0,
+    4680.0,
+    145.0
+   ],
+   "size": [
+    50.0,
+    35.0,
+    50.0
+   ],
+   "prompt": "Read the will",
+   "examine": "The tablet names Raynor. The clay is newer than the seal.",
+   "flag": "WillWasRead",
+   "vs": "VS-02"
+  },
+  {
+   "id": "EmptyChair",
+   "room": "R2_AudienceHall",
+   "location": [
+    2240.0,
+    4600.0,
+    125.0
+   ],
+   "size": [
+    80.0,
+    80.0,
+    120.0
+   ],
+   "prompt": "Examine the empty chair",
+   "examine": "Cloth laid for an heir who has not sat down.",
+   "flag": "EmptyChairExamined",
+   "vs": "VS-05"
+  },
+  {
+   "id": "UnusedBed",
+   "room": "R6_RaynorChamber",
+   "location": [
+    2700.0,
+    1750.0,
+    35.0
+   ],
+   "size": [
+    200.0,
+    110.00000000000001,
+    70.0
+   ],
+   "prompt": "Examine the bed",
+   "examine": "Slept in once, then straightened by someone in a hurry.",
+   "flag": "UnusedBed",
+   "vs": "VS-06"
+  },
+  {
+   "id": "ScarOil",
+   "room": "R6_RaynorChamber",
+   "location": [
+    2290.0,
+    1960.0,
+    95.0
+   ],
+   "size": [
+    30.0,
+    30.0,
+    35.0
+   ],
+   "prompt": "Examine the oil jar",
+   "examine": "Scar oil. Raynor stopped needing it years ago.",
+   "flag": "ScarOil",
+   "vs": "VS-06"
+  },
+  {
+   "id": "Roster",
+   "room": "R7_Study",
+   "location": [
+    1920.0,
+    650.0,
+    105.0
+   ],
+   "size": [
+    60.0,
+    45.0,
+    10.0
+   ],
+   "prompt": "Read the guard roster",
+   "examine": "Two names on the canal gate were scraped and rewritten.",
+   "flag": "RosterAltered",
+   "vs": "VS-09"
+  },
+  {
+   "id": "FalseLetter",
+   "room": "R7_Study",
+   "location": [
+    2100.0,
+    780.0,
+    105.0
+   ],
+   "size": [
+    40.0,
+    30.0,
+    6.0
+   ],
+   "prompt": "Read the letter",
+   "examine": "Orin's hand, but the pressure is wrong. Someone practised it.",
+   "flag": "LetterIsFalse",
+   "vs": "VS-09"
+  },
+  {
+   "id": "CanalClasp",
+   "room": "R1_Dock",
+   "location": [
+    400.0,
+    840.0,
+    25.0
+   ],
+   "size": [
+    22.0,
+    22.0,
+    12.0
+   ],
+   "prompt": "Pick up the clasp",
+   "examine": "A cloak clasp from the house guard, in the water at the gate.",
+   "flag": "ClaspFound",
+   "vs": "VS-09"
+  },
+  {
+   "id": "WestArch",
+   "room": "R3_Terrace",
+   "location": [
+    160.0,
+    3400.0,
+    130.0
+   ],
+   "size": [
+    40.0,
+    160.0,
+    240.0
+   ],
+   "prompt": "Look through the west arch",
+   "examine": "The rest of the palace. Not tonight.",
+   "flag": "WestArchTouched",
+   "vs": "VS-05"
   }
  ]
 }

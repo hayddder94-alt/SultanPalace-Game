@@ -27,7 +27,7 @@
     padding: 2px 0; color: var(--dim); }
   #hud .row b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
-  #rooms { top: 14px; left: 14px; max-width: 210px; }
+  #rooms { top: 14px; left: 14px; max-width: 232px; max-height: calc(100vh - 28px); overflow-y: auto; }
   #rooms h2 { margin: 0 0 8px; font-size: 12px; color: var(--dim); font-weight: 600;
     text-transform: uppercase; letter-spacing: 1px; }
   #rooms button { display: block; width: 100%; margin: 4px 0; padding: 7px 10px;
@@ -54,6 +54,8 @@
 <div id="rooms" class="panel">
   <h2>الغرف</h2>
   <div id="roomButtons"></div>
+  <h2 style="margin-top:12px">مشاهد القصة</h2>
+  <div id="beatButtons"></div>
 </div>
 
 <div id="hud" class="panel">
@@ -62,6 +64,8 @@
   <div class="row"><span>الغرفة</span><b id="hRoom">—</b></div>
   <div class="row"><span>الموضع</span><b id="hPos">—</b></div>
   <div class="row"><span>مجسّمات</span><b id="hBoxes">—</b></div>
+  <div class="row"><span>مشاهد القصة</span><b id="hBeats">—</b></div>
+  <div class="row"><span>قريب منك</span><b id="hBeat">—</b></div>
   <div class="row"><span>إطار/ث</span><b id="hFps">—</b></div>
   <div class="row"><span>الوضع</span><b id="hMode">مشي</b></div>
   <div class="row"><span>الأسقف</span><b id="hCeil">مخفية</b></div>

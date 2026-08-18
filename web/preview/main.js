@@ -166,6 +166,48 @@ function buildGeometry(layout) {
   scene.add(ground);
 }
 
+// ---------------------------------------------------------------- story beats
+// The same interactables the Unreal build spawns, shown as glowing markers so a
+// layout review also answers "can the player find this?".
+
+const beats = [];
+
+function buildInteractables(layout) {
+  const items = layout.interactables || [];
+  const geo = new THREE.BoxGeometry(1, 1, 1);
+  const mat = new THREE.MeshStandardMaterial({
+    color: 0xffcf7a, emissive: 0xd8a24a, emissiveIntensity: 0.9, roughness: 0.4,
+  });
+
+  for (const it of items) {
+    const p = ueToThree(it.location[0], it.location[1], it.location[2]);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.copy(p);
+    mesh.scale.set(it.size[0] * CM, it.size[2] * CM, it.size[1] * CM);
+    mesh.castShadow = true;
+    scene.add(mesh);
+
+    // a soft light so the beat is findable in a dark room, exactly the question
+    // this preview exists to answer
+    const glow = new THREE.PointLight(0xffc978, 6, 9, 1.6);
+    glow.position.copy(p).add(new THREE.Vector3(0, 0.6, 0));
+    scene.add(glow);
+
+    beats.push({ ...it, pos: p });
+  }
+  return items.length;
+}
+
+function nearestBeat() {
+  let best = null;
+  let bestD = 6.0;
+  for (const b of beats) {
+    const d = Math.hypot(b.pos.x - player.pos.x, b.pos.z - player.pos.z);
+    if (d < bestD) { bestD = d; best = b; }
+  }
+  return best;
+}
+
 // ---------------------------------------------------------------- player
 const player = {
   pos: new THREE.Vector3(0, EYE, 0),
@@ -366,6 +408,8 @@ function frame(now) {
     frames = 0; fpsClock = 0;
     hPos.textContent = `${player.pos.x.toFixed(1)}, ${(-player.pos.z).toFixed(1)} م`;
     hRoom.textContent = currentRoom();
+    const b = nearestBeat();
+    document.getElementById("hBeat").textContent = b ? `[E] ${b.prompt}` : "—";
   }
   requestAnimationFrame(frame);
 }
@@ -376,6 +420,7 @@ fetch("./data/east_wing.json")
   .then((layout) => {
     buildLighting(layout);
     buildGeometry(layout);
+    const beatCount = buildInteractables(layout);
     roomsOfInterest = layout.rooms_of_interest || {};
 
     const holder = document.getElementById("roomButtons");
@@ -392,6 +437,19 @@ fetch("./data/east_wing.json")
     player.yaw = THREE.MathUtils.degToRad(-layout.player_start.yaw);
 
     document.getElementById("hBoxes").textContent = boxCount;
+    document.getElementById("hBeats").textContent = beatCount;
+
+    for (const b of beats) {
+      const btn = document.createElement("button");
+      btn.textContent = "◆ " + (b.prompt || b.id);
+      btn.title = b.examine || "";
+      btn.onclick = () => {
+        player.pos.set(b.pos.x, EYE, b.pos.z + 2.2);
+        player.vel.set(0, 0, 0);
+        canvas.requestPointerLock();
+      };
+      document.getElementById("beatButtons").appendChild(btn);
+    }
     resize();
     requestAnimationFrame(frame);
   })
