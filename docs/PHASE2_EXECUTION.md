@@ -35,14 +35,33 @@
 - `docs/PHASE2_PERFORMANCE_BASELINE.md`
 - `docs/INPUT_MAP.md`
 
-## Build result
+## Build result — **SUCCEEDED** (2026-08-18, user's Windows machine)
 
-**NOT RUN — Unreal Editor / UBT not available on this host.**  
-User machine previously compiled Phase 1 successfully. Phase 2 is incremental C++ on the same module.
+```
+Engine         : 5.8.1  at  E:\UE_5.8   (installed build, InstalledBuild.txt present)
+Target         : TheBetrayedWillEditor Win64 Development
+Exit code      : 0  ->  BUILD SUCCEEDED
+Duration       : 0.6 min (incremental; the first attempt built SharedPCH.UnrealEd)
+Errors         : 0
+Warnings       : 1  (FSlateFontInfo deprecation, known)
+Output         : UnrealEditor-TBW.dll
+```
+
+Toolchain confirmed on the target machine: bundled .NET 10.0 win-x64, MSVC 14.44.35228,
+Windows SDK 10.0.22621, ISPC 1.24, UHT, Unreal Build Accelerator local executor
+(4 physical cores, 3 parallel actions under a 4.5 GB memory budget).
+
+Two defects had to be cleared to get here, both found by real compilation, not guesswork:
+
+1. `fatal error C1083: Cannot open include file: 'TBW.h'` — module header lived at the
+   module root, which UBT does not publish as an include path. Moved to `Public/`/`Private/`.
+   Offline audit rule **E8** now catches this class before it ever reaches a build machine.
+2. Build tooling defects on the harness side (system .NET assumption, terminating
+   NativeCommandError, Tee-Object leaking into a return value). See `docs/WINDOWS_SETUP.md`.
 
 ## PIE result
 
-**NOT RUN** on this host.
+**PENDING.** The build is done; the gameplay pass is not. Checklist: `docs/PHASE2_PIE_CHECKLIST.md`.
 
 ## Tests performed
 

@@ -83,7 +83,9 @@ project file generation (`Result: Succeeded`).
   judgements only a human can make, on the target hardware.
 - Performance numbers remain empty.
 
-Build status on this host: **NOT RUN.** PIE status: **NOT RUN.**
+Build status on this host: **NOT RUN** (no toolchain here).
+Build status on the target machine: **SUCCEEDED**, exit code 0, 0 errors, 1 known warning.
+PIE status: **PENDING** — that is the next gate.
 
 ## Next step (single, concrete)
 
