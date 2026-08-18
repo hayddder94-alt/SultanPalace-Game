@@ -16,10 +16,13 @@
 param(
     [string]$EngineRoot = $env:UE58_ROOT,
     [switch]$Clean,
-    [switch]$SkipGenerate
+    [switch]$SkipGenerate,
+    [switch]$AllowWrongEngineVersion
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "ue58_common.ps1")
+
 $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $UProject    = Join-Path $ProjectRoot "TheBetrayedWill.uproject"
 $LogDir      = Join-Path $ProjectRoot "Saved\Logs"
@@ -29,18 +32,23 @@ $BuildLog    = Join-Path $LogDir "Phase2_Build_$Stamp.log"
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 # ---------------------------------------------------------------- engine root
+$EngineRoot = Resolve-UE58Root -Preferred $EngineRoot
+
 if (-not $EngineRoot) {
-    foreach ($Guess in @(
-        "C:\Program Files\Epic Games\UE_5.8",
-        "D:\Epic Games\UE_5.8",
-        "D:\UE_5.8",
-        $env:UE_ROOT
-    )) {
-        if ($Guess -and (Test-Path $Guess)) { $EngineRoot = $Guess; break }
-    }
-}
-if (-not $EngineRoot -or -not (Test-Path $EngineRoot)) {
-    Write-Error "Unreal Engine 5.8 not found. Pass -EngineRoot ""C:\path\to\UE_5.8"" or set UE58_ROOT."
+    Write-Host ""
+    Write-Host "Unreal Engine 5.8 was not found on this PC." -ForegroundColor Red
+    Write-Host ""
+    Show-UnrealEngines
+    Write-Host ""
+    Write-Host "Options:"
+    Write-Host "  1. If 5.8 is installed somewhere unusual, pass its folder:"
+    Write-Host '       .\tools\build_phase2.cmd -EngineRoot "D:\your\path\UE_5.8"'
+    Write-Host "     (the right folder is the one containing Engine\Build\BatchFiles\Build.bat)"
+    Write-Host "  2. Run .\tools\find_ue58.cmd for a full report."
+    Write-Host "  3. If 5.8 is not installed: Epic Games Launcher > Library > '+' > 5.8."
+    Write-Host ""
+    Write-Host "This project is locked to UE 5.8. Do not build it with another version."
+    exit 1
 }
 
 $BuildBat   = Join-Path $EngineRoot "Engine\Build\BatchFiles\Build.bat"
@@ -70,7 +78,14 @@ Write-Host " Log            : $BuildLog"
 Write-Host ""
 
 if ($EngineVersion -ne "unknown" -and -not $EngineVersion.StartsWith("5.8")) {
-    Write-Warning "This engine is $EngineVersion but the project is locked to 5.8. Stop and point -EngineRoot at UE 5.8."
+    Write-Host ""
+    Write-Host "ENGINE MISMATCH: this install is $EngineVersion, the project is locked to 5.8." -ForegroundColor Red
+    Write-Host "Building would produce a wall of unrelated errors. Stopping." -ForegroundColor Red
+    Write-Host ""
+    Write-Host "Run .\tools\find_ue58.cmd to list every engine on this PC,"
+    Write-Host "or override deliberately with -AllowWrongEngineVersion (not recommended)."
+    if (-not $AllowWrongEngineVersion) { exit 2 }
+    Write-Warning "Continuing on $EngineVersion because -AllowWrongEngineVersion was passed."
 }
 
 # --------------------------------------------------------------------- clean

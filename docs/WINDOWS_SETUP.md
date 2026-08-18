@@ -89,10 +89,32 @@ git pull origin arena/019ffc4c-sultanpalace-game
 ```
 
 - إن ظهر `git is not recognized` → ثبّت Git من https://git-scm.com/download/win ثم أعد فتح PowerShell.
-- إن لم يجد السكربت المحرك → مرّر مساره:
+
+---
+
+## إذا قال السكربت `Unreal Engine 5.8 not found`
+
+السكربت الآن يبحث عن المحرك في أربعة مصادر: متغير `UE58_ROOT`، وملف Epic Launcher
+`LauncherInstalled.dat`، وسجل ويندوز (تثبيتات Launcher وبناءات المصدر)، ثم المجلدات
+المعتادة على كل أقراصك. إن لم يجده، شغّل:
+
+```powershell
+.\tools\find_ue58.cmd
+```
+
+يطبع لك **كل** نسخ Unreal الموجودة على الجهاز مع رقم إصدار كل واحدة ومصدر اكتشافها، ثم:
+
+- إن وجد 5.8 → احفظ مساره دائمًا: `.\tools\find_ue58.cmd -Remember` ثم أعد فتح PowerShell.
+- إن كان المحرك مثبّتًا في مكان غريب → مرّر مساره يدويًا (المجلد الصحيح هو الذي يحتوي
+  `Engine\Build\BatchFiles\Build.bat`):
   ```powershell
-  .\tools\build_phase2.cmd -EngineRoot "C:\Program Files\Epic Games\UE_5.8"
+  .\tools\build_phase2.cmd -EngineRoot "D:\your\path\UE_5.8"
   ```
+- إن لم يكن 5.8 مثبّتًا أصلًا → Epic Games Launcher ◂ Unreal Engine ◂ Library ◂ زر `+` ◂ اختر **5.8**.
+  يحتاج نحو 60 غيغابايت مساحة حرة. لا تُثبّت رموز التنقيح (Editor symbols) إلا إن احتجتها.
+
+**مهم:** المشروع مقفول على 5.8. إذا اكتشف السكربت إصدارًا آخر (5.5 أو 5.6 أو 5.7) فسيتوقف
+عمدًا برمز خروج `2` بدل أن يغرقك بجدار أخطاء لا علاقة لها بالشيفرة.
 
 ---
 
