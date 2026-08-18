@@ -8,6 +8,7 @@
 #include "TBWHUD.generated.h"
 
 class SWidget;
+class STextBlock;
 
 /**
  * Phase 1 HUD. Shipping strips the debug overlay.
@@ -28,11 +29,33 @@ public:
 	void SetDebugVisible(bool bVisible);
 	bool IsDebugVisible() const { return bDebugVisible; }
 
+	/** Language for subtitles and objectives. Arabic is the default. */
+	UFUNCTION(BlueprintCallable, Category = "TBW|UI")
+	void SetArabicUI(bool bInArabic);
+
+	UFUNCTION(BlueprintPure, Category = "TBW|UI")
+	bool IsArabicUI() const { return bArabicUI; }
+
 private:
 	void AddArabicTitleWidget();
 	void RemoveArabicTitleWidget();
 
+	/**
+	 * Subtitles and the objective line are Slate, not Canvas DrawText.
+	 * Canvas goes through DroidSansFallback and cannot shape Arabic; Slate uses
+	 * HarfBuzz and can. This is the same reason the title moved to Slate in Phase 1.
+	 */
+	void AddNarrativeWidgets();
+	void RemoveNarrativeWidgets();
+	void RefreshNarrativeText();
+
+	bool bArabicUI = true;
+
 	bool bShowPaused = false;
+
+	TSharedPtr<SWidget> NarrativeHost;
+	TSharedPtr<STextBlock> SubtitleText;
+	TSharedPtr<STextBlock> ObjectiveText;
 
 #if !UE_BUILD_SHIPPING
 	bool bDebugVisible = true;

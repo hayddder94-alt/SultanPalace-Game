@@ -3,6 +3,9 @@
 
 #include "Core/TBWWorldStateSubsystem.h"
 #include "Core/TBWWorldFlags.h"
+#include "Narrative/TBWDialogueSubsystem.h"
+#include "Narrative/TBWObjectiveSubsystem.h"
+#include "UI/TBWHUD.h"
 #include "Core/TBWVersion.h"
 #include "UI/TBWHUD.h"
 #include "Player/TBWPlayerCharacter.h"
@@ -94,6 +97,122 @@ static FAutoConsoleCommandWithWorld CVarFlagsList(
 				}
 			}
 		}
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarDialoguePlay(
+	TEXT("tbw.Dialogue.Play"),
+	TEXT("Play an authored scene. Usage: tbw.Dialogue.Play VS01_OrinLastWords"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			return;
+		}
+		UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>();
+		if (!Dialogue)
+		{
+			return;
+		}
+		if (Args.Num() < 1)
+		{
+			TArray<FName> Ids;
+			Dialogue->GetSceneIds(Ids);
+			UE_LOG(LogTBW, Display, TEXT("Scenes (%d):"), Ids.Num());
+			for (const FName& Id : Ids)
+			{
+				UE_LOG(LogTBW, Display, TEXT("  %s"), *Id.ToString());
+			}
+			return;
+		}
+		Dialogue->PlayScene(FName(*Args[0]));
+	}));
+
+static FAutoConsoleCommandWithWorld CVarDialogueSkip(
+	TEXT("tbw.Dialogue.Skip"),
+	TEXT("Skip the current line, or the scene if it is skippable."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			return;
+		}
+		if (UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>())
+		{
+			if (Dialogue->CanSkip())
+			{
+				Dialogue->Stop(true);
+			}
+			else
+			{
+				Dialogue->Advance();
+			}
+		}
+	}));
+
+static FAutoConsoleCommandWithWorld CVarDialogueReload(
+	TEXT("tbw.Dialogue.Reload"),
+	TEXT("Re-read every dialogue and objective file from disk."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			return;
+		}
+		int32 Scenes = 0;
+		int32 Rules = 0;
+		if (UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>())
+		{
+			Scenes = Dialogue->ReloadScenes();
+		}
+		if (UTBWObjectiveSubsystem* Objectives = World->GetSubsystem<UTBWObjectiveSubsystem>())
+		{
+			Rules = Objectives->ReloadRules();
+		}
+		UE_LOG(LogTBW, Display, TEXT("Reloaded %d scene(s), %d objective rule(s)."), Scenes, Rules);
+	}));
+
+static FAutoConsoleCommandWithWorld CVarObjective(
+	TEXT("tbw.Objective"),
+	TEXT("Print the current objective and story progress."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			return;
+		}
+		if (UTBWObjectiveSubsystem* Objectives = World->GetSubsystem<UTBWObjectiveSubsystem>())
+		{
+			UE_LOG(LogTBW, Display, TEXT("[%s]  %s   (%.0f%% of authored rules)"),
+				*Objectives->GetCurrentSegment().ToString(),
+				*Objectives->GetCurrentObjective(false),
+				Objectives->GetProgress() * 100.f);
+		}
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarLanguage(
+	TEXT("tbw.Lang"),
+	TEXT("Subtitle language. Usage: tbw.Lang ar | en"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World || Args.Num() < 1)
+		{
+			UE_LOG(LogTBW, Warning, TEXT("Usage: tbw.Lang ar | en"));
+			return;
+		}
+		const bool bArabic = Args[0].StartsWith(TEXT("ar"));
+		if (APlayerController* PC = World->GetFirstPlayerController())
+		{
+			if (ATBWHUD* Hud = Cast<ATBWHUD>(PC->GetHUD()))
+			{
+				Hud->SetArabicUI(bArabic);
+			}
+		}
+		UE_LOG(LogTBW, Display, TEXT("Subtitle language: %s"), bArabic ? TEXT("Arabic") : TEXT("English"));
 	}));
 
 static FAutoConsoleCommandWithWorldAndArgs CVarIdentitySet(

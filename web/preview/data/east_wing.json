@@ -2851,7 +2851,8 @@
    "prompt": "Orin's bedside",
    "examine": "Where the father asked for water, and warned about Nofan.",
    "flag": "OrinLastWords",
-   "vs": "VS-01"
+   "vs": "VS-01",
+   "scene": "VS01_OrinLastWords"
   },
   {
    "id": "WestArch",

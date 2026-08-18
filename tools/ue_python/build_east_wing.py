@@ -284,6 +284,8 @@ def build_interactables(layout):
         safe_set(actor, "examine_text", unreal.Text(item["examine"]))
         safe_set(actor, "sets_flag", unreal.Name(item["flag"]))
         safe_set(actor, "flag_value", 1)
+        if item.get("scene"):
+            safe_set(actor, "plays_dialogue_scene", unreal.Name(item["scene"]))
 
         comp = actor.get_component_by_class(unreal.StaticMeshComponent)
         if comp and cube:

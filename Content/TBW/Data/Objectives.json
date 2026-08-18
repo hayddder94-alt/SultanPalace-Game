@@ -1,0 +1,68 @@
+{
+  "_note": "Evaluated top to bottom; the first rule whose conditions hold is the current objective. Flags must exist in ETBWWorldFlag - tools/validate_dialogue.py enforces that.",
+  "objectives": [
+    {
+      "segment": "VS-01",
+      "en": "Watch. Learn the father's fear.",
+      "ar": "شاهد. اعرف خوف الأب.",
+      "requires": [],
+      "blocked_by": ["OrinLastWords"]
+    },
+    {
+      "segment": "VS-02",
+      "en": "Attend the reading of the will in the audience hall.",
+      "ar": "احضر قراءة الوصية في قاعة الاستقبال.",
+      "requires": ["OrinLastWords"],
+      "blocked_by": ["WillWasRead"]
+    },
+    {
+      "segment": "VS-05",
+      "en": "Learn the house. Look at the chair no one sits in.",
+      "ar": "اعرف البيت. انظر إلى الكرسي الذي لا يجلس عليه أحد.",
+      "requires": ["WillWasRead"],
+      "blocked_by": ["EmptyChairExamined"]
+    },
+    {
+      "segment": "VS-06",
+      "en": "Raynor is gone. Search his chamber.",
+      "ar": "اختفى رينور. فتّش غرفته.",
+      "requires": ["EmptyChairExamined"],
+      "blocked_by": ["UnusedBed", "ScarOil"]
+    },
+    {
+      "segment": "VS-06",
+      "en": "The bed says one night. Find what else the room hides.",
+      "ar": "السرير يقول ليلة واحدة. جد ما تخفيه الغرفة أيضًا.",
+      "requires": ["UnusedBed"],
+      "blocked_by": ["ScarOil"]
+    },
+    {
+      "segment": "VS-09",
+      "en": "Read the steward's papers. Someone rewrote the gate watch.",
+      "ar": "اقرأ أوراق الكاتب. أحدهم أعاد كتابة حراسة البوابة.",
+      "requires": ["ScarOil"],
+      "blocked_by": ["RosterAltered"]
+    },
+    {
+      "segment": "VS-09",
+      "en": "The roster was altered. Compare it with the letter.",
+      "ar": "السجل مُعدَّل. قارنه بالرسالة.",
+      "requires": ["RosterAltered"],
+      "blocked_by": ["LetterIsFalse"]
+    },
+    {
+      "segment": "VS-09",
+      "en": "The letter is a forgery. Go down to the canal gate.",
+      "ar": "الرسالة مزوّرة. انزل إلى بوابة القناة.",
+      "requires": ["LetterIsFalse"],
+      "blocked_by": ["ClaspFound"]
+    },
+    {
+      "segment": "VS-10",
+      "en": "A house guard's clasp, in the water. Raynor did not leave alone.",
+      "ar": "مشبك حارس من البيت، في الماء. لم يغادر رينور وحده.",
+      "requires": ["ClaspFound"],
+      "blocked_by": ["EvanInvestigating"]
+    }
+  ]
+}

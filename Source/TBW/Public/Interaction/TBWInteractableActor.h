@@ -46,6 +46,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
 	bool bOnce = true;
 
+	/** Optional authored scene to play on interact, e.g. VS01_OrinLastWords. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
+	FName PlaysDialogueScene;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
 	bool bConsumed = false;
 };

@@ -3,6 +3,7 @@
 
 #include "Interaction/TBWInteractableActor.h"
 #include "Core/TBWWorldStateSubsystem.h"
+#include "Narrative/TBWDialogueSubsystem.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
 #include "UObject/ConstructorHelpers.h"
@@ -58,6 +59,14 @@ void ATBWInteractableActor::Interact_Implementation(APawn* InstigatorPawn)
 
 	if (UWorld* World = GetWorld())
 	{
+		if (!PlaysDialogueScene.IsNone())
+		{
+			if (UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>())
+			{
+				Dialogue->PlayScene(PlaysDialogueScene);
+			}
+		}
+
 		if (UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
 		{
 			if (!SetsFlag.IsNone())

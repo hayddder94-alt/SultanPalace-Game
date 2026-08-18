@@ -25,6 +25,8 @@ public class TBW : ModuleRules
 			"Slate",
 			"SlateCore",
 			"GameplayTags",
+			"Json",
+			"JsonUtilities",
 			"NavigationSystem",
 			"LevelSequence",
 			"MovieScene",

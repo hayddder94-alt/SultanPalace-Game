@@ -1,0 +1,88 @@
+{
+  "scene_id": "VS01_OrinLastWords",
+  "title": "Orin's last words",
+  "segment": "VS-01",
+  "completion_flag": "OrinLastWords",
+  "skippable_first_time": false,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source.",
+  "lines": [
+    {
+      "speaker": "Orin",
+      "en": "Water first. Always water. A house that forgets the ditches can keep its gold for a season.",
+      "ar": "الماء أولًا. الماء دائمًا. بيت ينسى السواقي يحتفظ بذهبه موسمًا واحدًا فقط.",
+      "seconds": 6.0
+    },
+    {
+      "speaker": "Raynor",
+      "en": "The southern cuts are holding.",
+      "ar": "القنوات الجنوبية صامدة.",
+      "seconds": 2.6
+    },
+    {
+      "speaker": "Orin",
+      "en": "I am not talking about mud.",
+      "ar": "لست أتحدث عن الطين.",
+      "seconds": 2.8
+    },
+    {
+      "en": "Orin takes a breath.",
+      "ar": "يأخذ أورين نفسًا.",
+      "action": true,
+      "seconds": 2.0
+    },
+    {
+      "speaker": "Orin",
+      "en": "Nofan has spent his life in rooms I sent him to. I used him. Then I looked away.",
+      "ar": "قضى نوفان عمره في غرف أرسلته إليها. استعملته، ثم أشحت بوجهي.",
+      "seconds": 6.0
+    },
+    {
+      "speaker": "Orin",
+      "en": "If I name him, he will eat the house to prove he deserved it.",
+      "ar": "إن سمّيته وريثًا، سيأكل البيت ليثبت أنه كان يستحقه.",
+      "seconds": 5.0
+    },
+    {
+      "speaker": "Raynor",
+      "en": "Then name me and be done.",
+      "ar": "إذن سمّني أنا وانتهِ.",
+      "seconds": 2.6
+    },
+    {
+      "speaker": "Orin",
+      "en": "I will. And you will hate me for the peace it steals.",
+      "ar": "سأفعل. وستكرهني على السلام الذي يسرقه ذلك منك.",
+      "seconds": 5.0
+    },
+    {
+      "speaker": "Orin",
+      "en": "Protect Evan. He hears what you walk past.",
+      "ar": "احمِ إيفان. إنه يسمع ما تمرّ أنت بجانبه.",
+      "seconds": 4.2
+    },
+    {
+      "speaker": "Orin",
+      "en": "Protect Soren. He still thinks blood is a kindness.",
+      "ar": "احمِ سورين. ما زال يظن أن الدم رحمة.",
+      "seconds": 4.4
+    },
+    {
+      "en": "Orin takes Raynor's hand.",
+      "ar": "يمسك أورين يد رينور.",
+      "action": true,
+      "seconds": 2.4
+    },
+    {
+      "speaker": "Orin",
+      "en": "Do not be merciful with the wrong son.",
+      "ar": "لا تكن رحيمًا مع الابن الخطأ.",
+      "seconds": 4.5
+    },
+    {
+      "en": "Orin's eyes close. The nurse covers his mouth. Raynor does not stand yet.",
+      "ar": "تُغمض عينا أورين. تغطي الخادمة فمه. لا ينهض رينور بعد.",
+      "action": true,
+      "seconds": 5.0
+    }
+  ]
+}

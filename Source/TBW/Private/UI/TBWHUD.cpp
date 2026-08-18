@@ -7,6 +7,8 @@
 #include "Player/TBWPlayerIdentityComponent.h"
 #include "Player/TBWIdentityData.h"
 #include "Core/TBWWorldStateSubsystem.h"
+#include "Narrative/TBWDialogueSubsystem.h"
+#include "Narrative/TBWObjectiveSubsystem.h"
 #include "Core/TBWVersion.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
@@ -14,6 +16,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Misc/Paths.h"
 #include "Widgets/SBoxPanel.h"
+#include "Widgets/Layout/SBorder.h"
+#include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
 #include "Fonts/SlateFontInfo.h"
 #include "Styling/CoreStyle.h"
@@ -36,12 +40,124 @@ void ATBWHUD::BeginPlay()
 {
 	Super::BeginPlay();
 	AddArabicTitleWidget();
+	AddNarrativeWidgets();
 }
 
 void ATBWHUD::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
+	RemoveNarrativeWidgets();
 	RemoveArabicTitleWidget();
 	Super::EndPlay(EndPlayReason);
+}
+
+void ATBWHUD::SetArabicUI(bool bInArabic)
+{
+	bArabicUI = bInArabic;
+	if (UWorld* World = GetWorld())
+	{
+		if (UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>())
+		{
+			Dialogue->SetArabic(bArabicUI);
+		}
+	}
+	RefreshNarrativeText();
+}
+
+void ATBWHUD::AddNarrativeWidgets()
+{
+	if (NarrativeHost.IsValid() || !GEngine || !GEngine->GameViewport)
+	{
+		return;
+	}
+
+	const FString FontPath = TBWHudText::FontFile();
+	FSlateFontInfo Body = FPaths::FileExists(FontPath)
+		? FSlateFontInfo(FontPath, 22)
+		: FCoreStyle::GetDefaultFontStyle("Regular", 22);
+	FSlateFontInfo Small = FPaths::FileExists(FontPath)
+		? FSlateFontInfo(FontPath, 16)
+		: FCoreStyle::GetDefaultFontStyle("Regular", 16);
+
+	SAssignNew(SubtitleText, STextBlock)
+		.Text(FText::GetEmpty())
+		.Font(Body)
+		.ColorAndOpacity(FLinearColor(0.96f, 0.94f, 0.88f))
+		.Justification(ETextJustify::Center)
+		.AutoWrapText(true)
+		.TextShapingMethod(ETextShapingMethod::Auto)
+		.TextFlowDirection(ETextFlowDirection::Auto);
+
+	SAssignNew(ObjectiveText, STextBlock)
+		.Text(FText::GetEmpty())
+		.Font(Small)
+		.ColorAndOpacity(FLinearColor(0.82f, 0.72f, 0.45f))
+		.TextShapingMethod(ETextShapingMethod::Auto)
+		.TextFlowDirection(ETextFlowDirection::Auto);
+
+	NarrativeHost = SNew(SVerticalBox)
+
+		+ SVerticalBox::Slot()
+		.AutoHeight()
+		.HAlign(HAlign_Right)
+		.Padding(FMargin(0.f, 46.f, 28.f, 0.f))
+		[
+			ObjectiveText.ToSharedRef()
+		]
+
+		+ SVerticalBox::Slot()
+		.FillHeight(1.f)
+		.VAlign(VAlign_Bottom)
+		.HAlign(HAlign_Center)
+		.Padding(FMargin(0.f, 0.f, 0.f, 96.f))
+		[
+			SNew(SBox)
+			.WidthOverride(980.f)
+			[
+				SubtitleText.ToSharedRef()
+			]
+		];
+
+	GEngine->GameViewport->AddViewportWidgetContent(NarrativeHost.ToSharedRef(), 9000);
+}
+
+void ATBWHUD::RemoveNarrativeWidgets()
+{
+	if (NarrativeHost.IsValid() && GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->RemoveViewportWidgetContent(NarrativeHost.ToSharedRef());
+	}
+	NarrativeHost.Reset();
+	SubtitleText.Reset();
+	ObjectiveText.Reset();
+}
+
+void ATBWHUD::RefreshNarrativeText()
+{
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+
+	if (SubtitleText.IsValid())
+	{
+		FString Line;
+		if (UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>())
+		{
+			Line = Dialogue->GetSubtitle();
+		}
+		SubtitleText->SetText(FText::FromString(Line));
+	}
+
+	if (ObjectiveText.IsValid())
+	{
+		FString Objective;
+		if (UTBWObjectiveSubsystem* Objectives = World->GetSubsystem<UTBWObjectiveSubsystem>())
+		{
+			Objective = Objectives->GetCurrentObjective(bArabicUI);
+		}
+		ObjectiveText->SetText(FText::FromString(Objective));
+	}
 }
 
 void ATBWHUD::AddArabicTitleWidget()
@@ -123,6 +239,9 @@ void ATBWHUD::DrawHUD()
 
 	const float W = Canvas->SizeX;
 	const float H = Canvas->SizeY;
+
+	// Slate widgets do not poll; the HUD is the one thing that ticks every frame.
+	RefreshNarrativeText();
 
 	// Arabic title is a Slate widget (see BeginPlay). Do not Canvas-draw it
 	// through DroidSansFallback — that produced glyph warnings / mojibake.

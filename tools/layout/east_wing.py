@@ -358,7 +358,7 @@ def build():
         {"id": "OrinBedside", "room": "R11_UpperChamber",
          "location": orin_bed, "size": [2.1 * M, 1.2 * M, 0.7 * M],
          "prompt": "Orin's bedside", "examine": "Where the father asked for water, and warned about Nofan.",
-         "flag": "OrinLastWords", "vs": "VS-01"},
+         "flag": "OrinLastWords", "vs": "VS-01", "scene": "VS01_OrinLastWords"},
 
         {"id": "WestArch", "room": "R3_Terrace",
          "location": [1.6 * M, 34 * M, 1.3 * M], "size": [0.4 * M, 1.6 * M, 2.4 * M],
