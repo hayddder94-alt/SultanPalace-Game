@@ -64,11 +64,15 @@
   <div class="row"><span>مجسّمات</span><b id="hBoxes">—</b></div>
   <div class="row"><span>إطار/ث</span><b id="hFps">—</b></div>
   <div class="row"><span>الوضع</span><b id="hMode">مشي</b></div>
+  <div class="row"><span>الأسقف</span><b id="hCeil">مخفية</b></div>
+  <div class="row"><span>كشّاف</span><b id="hLamp">مشغّل</b></div>
+  <div class="row"><span>التعريض</span><b id="hExp">1.05</b></div>
 </div>
 
 <div id="help" class="panel">
-  <b>W A S D</b> حركة · <b>الفأرة</b> نظر · <b>Shift</b> ركض<br />
-  <b>C</b> انحناء · <b>Space</b> صعود · <b>F</b> منظر علوي · <b>Esc</b> تحرير المؤشر
+  <b>W A S D</b> حركة · <b>الفأرة</b> نظر · <b>Shift</b> ركض · <b>C</b> انحناء<br />
+  <b>Space</b> قفز · <b>F</b> منظر علوي · <b>H</b> إظهار الأسقف · <b>L</b> كشّاف<br />
+  <b>[</b> و <b>]</b> سطوع · <b>Esc</b> تحرير المؤشر
 </div>
 
 <div id="gate">
@@ -76,18 +80,42 @@
     <h2>معاينة الجناح الشرقي</h2>
     <p>هذه <b>معاينة تخطيط معماري</b> بنفس أبعاد قصر اللعبة بالضبط، مولّدة من نفس ملف البيانات
        الذي يبنيه Unreal. تصلح لفحص الأحجام والمسافات وخطوط الرؤية من أي جهاز.</p>
+    <p>الأسقف <b>مخفية افتراضيًا</b> ليدخل الضوء ويظهر التخطيط — اضغط <b>H</b> لإظهارها،
+       و<b>[</b> <b>]</b> للسطوع.</p>
     <p class="warn">ليست اللعبة نفسها: لا Lumen ولا مواد ولا شخصيات. اللعبة الحقيقية تعمل في
        Unreal 5.8، ولبثّها إلى المتصفح انظر docs/BROWSER_PREVIEW.md.</p>
     <span class="go">انقر للدخول</span>
   </div>
 </div>
 
+<!-- three.js r169 is vendored locally: the preview must work with no internet,
+     on a locked-down network, and offline on a laptop. -->
 <script type="importmap">
-{ "imports": {
-  "three": "https://unpkg.com/three@0.169.0/build/three.module.js",
-  "three/addons/": "https://unpkg.com/three@0.169.0/examples/jsm/"
-} }
+{ "imports": { "three": "./vendor/three.module.js" } }
 </script>
 <script type="module" src="./main.js"></script>
+<script>
+  // If the module fails for any reason the user must be told, not shown a black rectangle.
+  window.addEventListener("error", (e) => {
+    const g = document.getElementById("gate");
+    if (!g || g.dataset.failed) return;
+    g.dataset.failed = "1";
+    g.style.display = "flex";
+    g.innerHTML = '<div><h2>خطأ في تشغيل المعاينة</h2><p class="warn">' +
+      (e.message || e.error || "unknown") + '</p><p>أعد تحميل الصفحة. إن تكرر الخطأ أرسل لي هذا النص.</p></div>';
+  });
+  setTimeout(() => {
+    const hud = document.getElementById("hBoxes");
+    if (hud && hud.textContent === "—") {
+      const g = document.getElementById("gate");
+      if (g && !g.dataset.failed) {
+        g.dataset.failed = "1";
+        g.style.display = "flex";
+        g.innerHTML = '<div><h2>لم يبدأ المشهد</h2><p class="warn">لم تُحمَّل بيانات التخطيط أو مكتبة العرض.</p>' +
+          '<p>تأكد أن الخادم يقدّم مجلد web/preview كاملًا بما فيه vendor/ و data/.</p></div>';
+      }
+    }
+  }, 6000);
+</script>
 </body>
 </html>

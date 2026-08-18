@@ -53,39 +53,56 @@ const MATERIALS = {
 };
 
 // ---------------------------------------------------------------- lighting
+// A blockout viewer has one duty: never show the user a black screen. Interiors
+// here are sealed rooms with ceilings, so sunlight alone leaves them pitch dark.
+// The rig is therefore deliberately over-lit compared to the Unreal scene:
+// strong sky ambient, a fill light, and a camera headlamp that is on by default.
+
+let headlamp = null;
+let sunLight = null;
+
 function buildLighting(layout) {
   const sunCfg = layout.sun || { pitch: -14, yaw: 125, intensity: 6, color: [1, 0.85, 0.7] };
-  const sun = new THREE.DirectionalLight(
-    new THREE.Color(sunCfg.color[0], sunCfg.color[1], sunCfg.color[2]), 2.6);
+  sunLight = new THREE.DirectionalLight(
+    new THREE.Color(sunCfg.color[0], sunCfg.color[1], sunCfg.color[2]), 3.4);
 
-  // same low late-afternoon angle as the Unreal rig
   const pitch = THREE.MathUtils.degToRad(sunCfg.pitch);
   const yaw = THREE.MathUtils.degToRad(sunCfg.yaw);
   const dist = 120;
-  sun.position.set(
+  sunLight.position.set(
     Math.cos(pitch) * Math.cos(yaw) * -dist,
     Math.sin(-pitch) * dist,
     Math.cos(pitch) * Math.sin(yaw) * dist
   );
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sunLight.castShadow = true;
+  sunLight.shadow.mapSize.set(2048, 2048);
   const s = 45;
-  sun.shadow.camera.left = -s; sun.shadow.camera.right = s;
-  sun.shadow.camera.top = s; sun.shadow.camera.bottom = -s;
-  sun.shadow.camera.far = 400;
-  sun.shadow.bias = -0.0006;
-  sun.target.position.set(20, 0, -27);
-  scene.add(sun, sun.target);
+  sunLight.shadow.camera.left = -s; sunLight.shadow.camera.right = s;
+  sunLight.shadow.camera.top = s; sunLight.shadow.camera.bottom = -s;
+  sunLight.shadow.camera.far = 400;
+  sunLight.shadow.bias = -0.0006;
+  sunLight.target.position.set(20, 0, -27);
+  scene.add(sunLight, sunLight.target);
 
-  scene.add(new THREE.HemisphereLight(0x9fb6d8, 0x3a2f22, 0.85));
+  // sky/ground ambient - the main reason interiors stay readable
+  scene.add(new THREE.HemisphereLight(0xbcd3f0, 0x6b5a42, 2.4));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-  const bounce = new THREE.PointLight(0xffd9a0, 22, 60, 2);
-  bounce.position.set(20, 5, -38);
-  scene.add(bounce);
+  // warm fill over the hall so the hero volume reads first
+  const fill = new THREE.PointLight(0xffd9a0, 60, 90, 1.6);
+  fill.position.set(20, 6, -38);
+  scene.add(fill);
+
+  // headlamp: rides the camera, guarantees a lit surface wherever you look
+  headlamp = new THREE.PointLight(0xfff2dd, 26, 34, 1.4);
+  headlamp.position.set(0, 0, 0);
+  camera.add(headlamp);
+  scene.add(camera);
 }
 
 // ---------------------------------------------------------------- geometry
 const colliders = [];      // axis-aligned boxes in Three space, for walking
+const ceilingMeshes = [];  // toggled with H
 let boxCount = 0;
 
 function buildGeometry(layout) {
@@ -95,13 +112,22 @@ function buildGeometry(layout) {
   for (const b of layout.boxes) {
     const [cx, cy, cz] = b.center;
     const [sx, sy, sz] = b.size;
-    if (!byKind.has(b.kind)) byKind.set(b.kind, []);
-    byKind.get(b.kind).push({ cx, cy, cz, sx, sy, sz });
+    // Ceilings get their own batch so they can be hidden - standard practice in
+    // architectural review, and the only way sunlight reaches a sealed room.
+    const key = b.name.endsWith("_Ceiling") ? "ceiling:" + b.kind : b.kind;
+    if (!byKind.has(key)) byKind.set(key, []);
+    byKind.get(key).push({ cx, cy, cz, sx, sy, sz });
   }
 
-  for (const [kind, items] of byKind) {
+  for (const [key, items] of byKind) {
+    const isCeiling = key.startsWith("ceiling:");
+    const kind = isCeiling ? key.slice(8) : key;
     const mat = MATERIALS[kind] || MATERIALS.wall;
     const mesh = new THREE.InstancedMesh(unit, mat, items.length);
+    if (isCeiling) {
+      mesh.visible = false;          // hidden by default: light in, layout readable
+      ceilingMeshes.push(mesh);
+    }
     mesh.castShadow = true;
     mesh.receiveShadow = true;
     const m = new THREE.Matrix4();
@@ -154,8 +180,34 @@ const keys = new Set();
 addEventListener("keydown", (e) => {
   keys.add(e.code);
   if (e.code === "KeyF") toggleTop();
+  if (e.code === "KeyH") toggleCeilings();
+  if (e.code === "KeyL") toggleHeadlamp();
+  if (e.code === "BracketRight") setExposure(renderer.toneMappingExposure + 0.15);
+  if (e.code === "BracketLeft") setExposure(renderer.toneMappingExposure - 0.15);
   if (e.code === "Space") e.preventDefault();
 });
+
+let ceilingsVisible = false;
+function toggleCeilings() {
+  ceilingsVisible = !ceilingsVisible;
+  ceilingMeshes.forEach((m) => { m.visible = ceilingsVisible; });
+  const el = document.getElementById("hCeil");
+  if (el) el.textContent = ceilingsVisible ? "ظاهرة" : "مخفية";
+}
+
+let headlampOn = true;
+function toggleHeadlamp() {
+  headlampOn = !headlampOn;
+  if (headlamp) headlamp.intensity = headlampOn ? 26 : 0;
+  const el = document.getElementById("hLamp");
+  if (el) el.textContent = headlampOn ? "مشغّل" : "مطفأ";
+}
+
+function setExposure(v) {
+  renderer.toneMappingExposure = Math.max(0.3, Math.min(3.0, v));
+  const el = document.getElementById("hExp");
+  if (el) el.textContent = renderer.toneMappingExposure.toFixed(2);
+}
 addEventListener("keyup", (e) => keys.delete(e.code));
 
 const gate = document.getElementById("gate");
