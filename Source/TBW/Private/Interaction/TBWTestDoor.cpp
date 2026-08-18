@@ -15,6 +15,8 @@ ATBWTestDoor::ATBWTestDoor()
 
 	DoorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DoorMesh"));
 	SetRootComponent(DoorMesh);
+	// The door is rotated every tick, so it must never be Static.
+	DoorMesh->SetMobility(EComponentMobility::Movable);
 	DoorMesh->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeFinder(TEXT("/Engine/BasicShapes/Cube.Cube"));
@@ -30,6 +32,10 @@ void ATBWTestDoor::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	const float TargetYaw = bOpen ? OpenYaw : ClosedYaw;
 	const FRotator Now = GetActorRotation();
+	if (FMath::IsNearlyEqual(FRotator::NormalizeAxis(Now.Yaw), TargetYaw, 0.05f))
+	{
+		return; // settled — stop moving a physics-blocking actor every frame
+	}
 	const FRotator Goal(Now.Pitch, TargetYaw, Now.Roll);
 	SetActorRotation(FMath::RInterpTo(Now, Goal, DeltaSeconds, 8.f));
 }

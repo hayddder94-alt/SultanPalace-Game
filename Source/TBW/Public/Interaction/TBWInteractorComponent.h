@@ -41,6 +41,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
 	float InteractCooldown = 0.18f;
 
+	/** Seconds between focus sweeps. 0.05 = 20 Hz, cheap and visually instant. */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Interact")
+	float FocusRefreshInterval = 0.05f;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -53,4 +57,5 @@ private:
 
 	FText CurrentPrompt;
 	float LastInteractTime = -100.f;
+	float TimeSinceFocusRefresh = 0.f;
 };

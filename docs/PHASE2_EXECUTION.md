@@ -77,6 +77,27 @@ User machine previously compiled Phase 1 successfully. Phase 2 is incremental C+
 
 See `PHASE2_PERFORMANCE_BASELINE.md`. Numbers: **not captured here**.
 
+## Follow-up pass — 2026-08-18 (offline audit)
+
+Phase 2 source was audited before spending a build slot on the laptop. See
+`docs/PHASE2_AUDIT.md`. Four real defects were found and fixed:
+
+1. `UTBWInteractorComponent::TickComponent()` was declared but never defined — that alone
+   would have failed the link (`LNK2019`).
+2. Interact focus was never refreshed outside `TryInteract()`, so the prompt could not appear.
+3. `AddCrouchGate()` and `AddTestDoor()` were never called — the two Phase 2 test rigs did
+   not exist at runtime.
+4. Runtime greybox boxes were transformed after being made `Static` (mobility log spam), and
+   the test door never stopped interpolating.
+
+New tooling:
+
+- `tools/validate_phase2.py` — offline pre-compile audit (link completeness, UHT structure,
+  UTF-8 / CP1252 traps, Build.cs module coverage, dead wiring). Currently **PASS**.
+- `tools/phase2_build_and_check.ps1` — one command on Windows: generate project files, build
+  `TheBetrayedWillEditor Win64 Development`, save the log, print a copy-pasteable summary.
+- `docs/PHASE2_PIE_CHECKLIST.md` — the fillable Phase 2 Definition of Done.
+
 ## Git
 
-Commit: `ed0419e698e2d582974f6866d2f26a0778c835ec` on `arena/019ffc4c-sultanpalace-game`.
+Phase 2 feel work + this audit pass live on `arena/019ffc4c-sultanpalace-game`.

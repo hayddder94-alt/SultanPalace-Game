@@ -18,6 +18,23 @@ UTBWInteractorComponent::UTBWInteractorComponent()
 void UTBWInteractorComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	TimeSinceFocusRefresh = FocusRefreshInterval; // resolve focus on the first tick
+}
+
+void UTBWInteractorComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// The HUD reads GetCurrentPrompt() / GetStatusLine() every frame, so focus has to be
+	// resolved continuously — not only at the moment E is pressed. Throttled: one sweep
+	// per FocusRefreshInterval instead of one per frame.
+	TimeSinceFocusRefresh += DeltaTime;
+	if (TimeSinceFocusRefresh < FocusRefreshInterval)
+	{
+		return;
+	}
+	TimeSinceFocusRefresh = 0.f;
+	RefreshFocus();
 }
 
 AActor* UTBWInteractorComponent::ResolveInteractable(AActor* HitActor)

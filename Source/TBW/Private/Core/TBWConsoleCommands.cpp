@@ -2,6 +2,7 @@
 // Copyright (c) 2026. All rights reserved.
 
 #include "Core/TBWWorldStateSubsystem.h"
+#include "Core/TBWWorldFlags.h"
 #include "Core/TBWVersion.h"
 #include "UI/TBWHUD.h"
 #include "Player/TBWPlayerCharacter.h"
@@ -45,7 +46,13 @@ static FAutoConsoleCommandWithWorldAndArgs CVarFlagsSet(
 		}
 		if (UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
 		{
-			State->SetFlag(FName(*Args[0]), FCString::Atoi(*Args[1]));
+			const FName FlagName(*Args[0]);
+			ETBWWorldFlag Typed = ETBWWorldFlag::None;
+			if (!FTBWWorldFlags::TryParse(Args[0], Typed))
+			{
+				UE_LOG(LogTBW, Warning, TEXT("'%s' is not a known flag. Setting it anyway (ad-hoc). tbw.Flags.List shows the typed set."), *Args[0]);
+			}
+			State->SetFlag(FlagName, FCString::Atoi(*Args[1]));
 		}
 	}));
 
@@ -77,6 +84,14 @@ static FAutoConsoleCommandWithWorld CVarFlagsList(
 			if (UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
 			{
 				State->LogAllFlags();
+
+				TArray<FName> Known;
+				FTBWWorldFlags::GetKnownNames(Known);
+				UE_LOG(LogTBW, Display, TEXT("Known typed flags (%d):"), Known.Num());
+				for (const FName& Name : Known)
+				{
+					UE_LOG(LogTBW, Display, TEXT("  %s = %d"), *Name.ToString(), State->GetFlag(Name));
+				}
 			}
 		}
 	}));

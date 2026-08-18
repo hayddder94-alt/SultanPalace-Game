@@ -66,7 +66,10 @@ AActor* ATBWDevSandbox::AddBox(const FVector& Location, const FVector& ScaleMete
 	}
 
 	UStaticMeshComponent* MeshComp = Box->GetStaticMeshComponent();
-	MeshComp->SetMobility(EComponentMobility::Static);
+	// AStaticMeshActor spawns with Static mobility; transforming a registered Static
+	// component at runtime logs "Mobility ... has to be 'Movable'". Move it first,
+	// then lock it back to Static so Lumen can treat the greybox as static geometry.
+	MeshComp->SetMobility(EComponentMobility::Movable);
 	MeshComp->SetStaticMesh(CubeMesh);
 	MeshComp->SetWorldScale3D(ScaleMeters);
 	if (UMaterial* Base = UMaterial::GetDefaultMaterial(MD_Surface))
@@ -79,6 +82,7 @@ AActor* ATBWDevSandbox::AddBox(const FVector& Location, const FVector& ScaleMete
 		}
 	}
 	MeshComp->SetCollisionProfileName(UCollisionProfile::BlockAll_ProfileName);
+	MeshComp->SetMobility(EComponentMobility::Static);
 	Spawned.Add(Box);
 	return Box;
 }
@@ -221,7 +225,12 @@ void ATBWDevSandbox::Rebuild()
 		NSLOCTEXT("TBW", "DevWillBody", "World-state test: WillWasRead is now set."),
 		TEXT("WillWasRead"));
 
-	AddLabel(FVector(0.f, 0.f, 280.f), TEXT("L_DEV_SANDBOX  /  PHASE 1 SYSTEMS TEST"));
+	AddLabel(FVector(0.f, 0.f, 280.f), TEXT("L_DEV_SANDBOX  /  PHASE 2 PLAYER-FEEL TEST"));
+
+	// Phase 2 test rigs. These were written but never called until the Phase 2 audit.
+	AddCrouchGate();
+	AddTestDoor();
+
 	AddLights();
 
 	PlayerSpawn = FTransform(FRotator(0.f, 0.f, 0.f), FVector(0.f, -400.f, 110.f));
