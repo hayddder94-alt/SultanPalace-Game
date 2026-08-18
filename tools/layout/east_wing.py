@@ -135,24 +135,36 @@ class Layout:
 def build():
     L = Layout()
 
+    # Paved site slab under the whole footprint. Top sits at exactly z = 0 so it
+    # is flush with every room floor - no phantom step anywhere. Without this the
+    # canal dock is an unreachable island: the walkability check proved it.
+    L.box("Site_GroundSlab", (20 * M, 27.5 * M, -0.15 * M), (40 * M, 55 * M, 0.3 * M), GROUND)
+
     # R2 audience hall - the hero volume
     hx, hy, hw, hd = 11 * M, 26 * M, 18 * M, 24 * M
     L.room("R2_AudienceHall", hx, hy, hw, hd, HALL_H,
-           doors=(("S", 0.5), ("W", 0.5), ("E", 0.35)), wall_kind=HERO)
+           doors=(("S", (19.75 * M - hx) / hw), ("W", 0.5), ("E", 0.35)), wall_kind=HERO)
     for i in range(6):
         cy = hy + 3.0 * M + i * 3.6 * M
         L.box("R2_ColW_{0}".format(i), (hx + 4.0 * M, cy, HALL_H * 0.5), (1.1 * M, 1.1 * M, HALL_H), HERO)
         L.box("R2_ColE_{0}".format(i), (hx + hw - 4.0 * M, cy, HALL_H * 0.5), (1.1 * M, 1.1 * M, HALL_H), HERO)
     L.box("R2_Dais", (hx + hw * 0.5, hy + hd - 4.0 * M, 0.3 * M), (7.0 * M, 4.0 * M, 0.6 * M), HERO)
+    # Three 20 cm treads. UE MaxStepHeight is 32 cm, so a bare 60 cm dais is a
+    # wall: the player could look at the will tablet but never stand at it.
+    for step_i in range(3):
+        L.box("R2_DaisStep_{0}".format(step_i),
+              (hx + hw * 0.5, hy + hd - 6.0 * M - step_i * 0.5 * M, (0.6 - 0.2 * step_i) * 0.5 * M),
+              (5.0 * M, 0.5 * M, (0.6 - 0.2 * step_i) * M), HERO)
     L.box("R2_ChairPlinth", (hx + hw * 0.5, hy + hd - 3.2 * M, 0.9 * M), (1.2 * M, 1.2 * M, 0.6 * M), HERO)
 
     # Clerestory band: six high windows down each long wall of the hall, above
     # the colonnade. Replaces the solid east/west walls built by room().
     L.boxes = [b for b in L.boxes if not (b["name"].startswith("R2_AudienceHall_W")
                                           or b["name"].startswith("R2_AudienceHall_E"))]
+    bay = (hd - 2.0 * M) / 4.0            # exactly fills the wall, no overshoot
     for i in range(4):
-        y_a = hy + 2.0 * M + i * 6.0 * M
-        y_b = y_a + 6.0 * M
+        y_a = hy + 2.0 * M + i * bay
+        y_b = y_a + bay
         L.window_wall("R2_ClerestoryW_{0}".format(i), (hx, y_a), (hx, y_b), HALL_H, WALL_T,
                       HERO, at=0.5, width=2.4 * M, sill=5.4 * M, header=7.6 * M)
         L.window_wall("R2_ClerestoryE_{0}".format(i), (hx + hw, y_a), (hx + hw, y_b), HALL_H, WALL_T,
@@ -161,20 +173,36 @@ def build():
     L.wall("R2_DoorW", (hx, hy), (hx, hy + 2.0 * M), HALL_H, WALL_T, HERO, door_at=0.5, door_h=3.2 * M)
     L.wall("R2_DoorE", (hx + hw, hy), (hx + hw, hy + 2.0 * M), HALL_H, WALL_T, HERO, door_at=0.5, door_h=3.2 * M)
 
-    # R4 family corridor
+    # R4 family corridor and everything that opens off it.
+    #
+    # Doors are placed from SHARED WORLD COORDINATES, never from per-room
+    # fractions. Two rooms sharing a wall with door_at 0.35 and 0.5 look aligned
+    # on paper and leave a 19 cm gap once the 38 cm capsule radius is applied -
+    # the walkability check caught exactly that and sealed the study off.
     cx, cy0, cw, cd = 18 * M, 12 * M, 3.5 * M, 14 * M
+    corridor_axis_x = cx + cw * 0.5          # 19.75 m, the spine
+    chamber_door_y = cy0 + 5.5 * M           # 17.5 m, shared by both chambers
+
+    def at(origin, length, world):
+        """door_at fraction that puts a door centre on an absolute coordinate"""
+        return max(0.08, min(0.92, (world - origin) / length))
+
     L.room("R4_FamilyCorridor", cx, cy0, cw, cd, WALL_H,
-           doors=(("N", 0.5), ("W", 0.35), ("E", 0.35), ("S", 0.5)), ceiling=True)
+           doors=(("N", 0.5),
+                  ("W", at(cy0, cd, chamber_door_y)),
+                  ("E", at(cy0, cd, chamber_door_y)),
+                  ("S", at(cx, cw, corridor_axis_x))),
+           ceiling=True)
 
-    # R5 / R6 chambers
+    # R5 / R6 chambers - doors on the same world line as the corridor openings
     L.room("R5_EvanChamber", cx - 8.0 * M, cy0 + 2.0 * M, 8.0 * M, 7.0 * M, WALL_H,
-           doors=(("E", 0.35),), ceiling=True)
+           doors=(("E", at(cy0 + 2.0 * M, 7.0 * M, chamber_door_y)),), ceiling=True)
     L.room("R6_RaynorChamber", cx + cw, cy0 + 2.0 * M, 8.0 * M, 7.0 * M, WALL_H,
-           doors=(("W", 0.35),), ceiling=True)
+           doors=(("W", at(cy0 + 2.0 * M, 7.0 * M, chamber_door_y)),), ceiling=True)
 
-    # R7 steward study
+    # R7 steward study - north door on the corridor spine
     L.room("R7_Study", cx - 3.0 * M, cy0 - 8.0 * M, 9.0 * M, 8.0 * M, WALL_H,
-           doors=(("N", 0.6),), ceiling=True)
+           doors=(("N", at(cx - 3.0 * M, 9.0 * M, corridor_axis_x)),), ceiling=True)
 
     # R3 terrace
     L.box("R3_Terrace_Floor", (6.0 * M, 34 * M, -0.1 * M), (10 * M, 16 * M, 0.2 * M), FLOOR)

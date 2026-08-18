@@ -55,3 +55,7 @@ Content/MetaHumans/
 Content/Fab/
 Content/Marketplace/
 Content/StarterContent/
+
+# Python bytecode from the offline validators
+__pycache__/
+*.pyc
