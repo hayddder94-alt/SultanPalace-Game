@@ -23,6 +23,10 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
 	ATBWDevSandbox* GetDevSandbox() const { return DevSandbox; }
 
+	/** Autosaves when a story flag turns on. Bound to the world state delegate. */
+	UFUNCTION()
+	void HandleStoryFlagChanged(FName Flag, int32 NewValue);
+
 	/** True when the current map ships its own geometry and PlayerStart. */
 	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
 	bool IsAuthoredLevel() const;
@@ -32,4 +36,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<ATBWDevSandbox> DevSandbox;
+
+	float LastAutosaveTime = -1000.f;
 };

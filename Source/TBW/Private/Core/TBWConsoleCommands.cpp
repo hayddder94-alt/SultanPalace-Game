@@ -6,8 +6,12 @@
 #include "Narrative/TBWDialogueSubsystem.h"
 #include "Narrative/TBWObjectiveSubsystem.h"
 #include "UI/TBWHUD.h"
+#include "Save/TBWSaveSubsystem.h"
+#include "Engine/GameInstance.h"
 #include "Core/TBWVersion.h"
 #include "UI/TBWHUD.h"
+#include "Save/TBWSaveSubsystem.h"
+#include "Engine/GameInstance.h"
 #include "Player/TBWPlayerCharacter.h"
 #include "Player/TBWPlayerIdentityComponent.h"
 #include "Player/TBWIdentityFactory.h"
@@ -213,6 +217,75 @@ static FAutoConsoleCommandWithWorldAndArgs CVarLanguage(
 			}
 		}
 		UE_LOG(LogTBW, Display, TEXT("Subtitle language: %s"), bArabic ? TEXT("Arabic") : TEXT("English"));
+	}));
+
+static UTBWSaveSubsystem* TBW_Saves(UWorld* World)
+{
+	World = TBW_CommandWorld(World);
+	UGameInstance* GI = World ? World->GetGameInstance() : nullptr;
+	return GI ? GI->GetSubsystem<UTBWSaveSubsystem>() : nullptr;
+}
+
+static FAutoConsoleCommandWithWorldAndArgs CVarSave(
+	TEXT("tbw.Save"),
+	TEXT("Save the game. Usage: tbw.Save [slot]  (default TBW_Quick)"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		if (UTBWSaveSubsystem* Saves = TBW_Saves(World))
+		{
+			Saves->SaveToSlot(Args.Num() > 0 ? Args[0] : UTBWSaveSubsystem::QuickSlot);
+		}
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarLoad(
+	TEXT("tbw.Load"),
+	TEXT("Load a save. Usage: tbw.Load [slot]  (default TBW_Quick)"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		if (UTBWSaveSubsystem* Saves = TBW_Saves(World))
+		{
+			Saves->LoadFromSlot(Args.Num() > 0 ? Args[0] : UTBWSaveSubsystem::QuickSlot);
+		}
+	}));
+
+static FAutoConsoleCommandWithWorld CVarSaveList(
+	TEXT("tbw.Save.List"),
+	TEXT("Show what is in the standard save slots."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		UTBWSaveSubsystem* Saves = TBW_Saves(World);
+		if (!Saves)
+		{
+			return;
+		}
+		for (const FString& Slot : { UTBWSaveSubsystem::QuickSlot, UTBWSaveSubsystem::AutoSlot })
+		{
+			FString Summary;
+			if (Saves->PeekSlot(Slot, Summary))
+			{
+				UE_LOG(LogTBWSave, Display, TEXT("%s  ->  %s"), *Slot, *Summary);
+			}
+			else
+			{
+				UE_LOG(LogTBWSave, Display, TEXT("%s  ->  (empty)"), *Slot);
+			}
+		}
+	}));
+
+static FAutoConsoleCommandWithWorldAndArgs CVarSaveDelete(
+	TEXT("tbw.Save.Delete"),
+	TEXT("Delete a save slot. Usage: tbw.Save.Delete <slot>"),
+	FConsoleCommandWithWorldAndArgsDelegate::CreateLambda([](const TArray<FString>& Args, UWorld* World)
+	{
+		if (Args.Num() < 1)
+		{
+			UE_LOG(LogTBWSave, Warning, TEXT("Usage: tbw.Save.Delete <slot>"));
+			return;
+		}
+		if (UTBWSaveSubsystem* Saves = TBW_Saves(World))
+		{
+			Saves->DeleteSlot(Args[0]);
+		}
 	}));
 
 static FAutoConsoleCommandWithWorldAndArgs CVarIdentitySet(

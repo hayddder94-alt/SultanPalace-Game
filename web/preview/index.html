@@ -38,6 +38,18 @@
   #help { bottom: 14px; right: 14px; font-size: 12px; color: var(--dim); line-height: 1.85; }
   #help b { color: var(--ink); }
 
+  /* On-screen controls: the preview must be usable when Pointer Lock is denied
+     inside an iframe, and on a phone that has no keyboard at all. */
+  #pad { position: fixed; bottom: 16px; left: 16px; display: grid; gap: 6px;
+    grid-template-columns: repeat(3, 52px); grid-template-rows: repeat(3, 46px);
+    z-index: 4; touch-action: none; }
+  #pad button { background: rgba(20,18,14,.86); color: var(--ink); border: 1px solid #3a332a;
+    border-radius: 8px; font-size: 15px; font-family: inherit; cursor: pointer;
+    user-select: none; -webkit-user-select: none; }
+  #pad button.on { background: var(--gold); color: #17150f; border-color: var(--gold); }
+  #pad button.wide { grid-column: span 3; height: 36px; font-size: 12px; }
+  #pad .sp { grid-column: span 3; height: 36px; }
+
   #gate { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
     background: rgba(6,6,5,.86); cursor: pointer; z-index: 5; text-align: center; }
   #gate div { max-width: 460px; padding: 26px 30px; }
@@ -73,8 +85,20 @@
   <div class="row"><span>التعريض</span><b id="hExp">1.05</b></div>
 </div>
 
+<div id="pad">
+  <button data-key="ShiftLeft" title="ركض">⇪</button>
+  <button data-key="KeyW">▲</button>
+  <button data-key="KeyC" title="انحناء">↧</button>
+  <button data-key="KeyA">◀</button>
+  <button data-key="KeyS">▼</button>
+  <button data-key="KeyD">▶</button>
+  <button class="wide" data-key="Space">قفز</button>
+  <button class="wide" data-toggle="top">منظر علوي</button>
+  <button class="wide" data-toggle="ceil">الأسقف</button>
+</div>
+
 <div id="help" class="panel">
-  <b>W A S D</b> حركة · <b>الفأرة</b> نظر · <b>Shift</b> ركض · <b>C</b> انحناء<br />
+  <b>W A S D</b> أو <b>الأسهم</b> حركة · <b>اسحب بالفأرة</b> للنظر · <b>Shift</b> ركض · <b>C</b> انحناء<br />
   <b>Space</b> قفز · <b>F</b> منظر علوي · <b>H</b> إظهار الأسقف · <b>L</b> كشّاف<br />
   <b>[</b> و <b>]</b> سطوع · <b>Esc</b> تحرير المؤشر
 </div>
@@ -84,6 +108,8 @@
     <h2>معاينة الجناح الشرقي</h2>
     <p>هذه <b>معاينة تخطيط معماري</b> بنفس أبعاد قصر اللعبة بالضبط، مولّدة من نفس ملف البيانات
        الذي يبنيه Unreal. تصلح لفحص الأحجام والمسافات وخطوط الرؤية من أي جهاز.</p>
+    <p>إن لم تعمل لوحة المفاتيح، <b>انقر داخل المشهد أولًا</b> ليأخذ الإطار التركيز،
+       أو استخدم <b>الأزرار في الأسفل يسارًا</b>. للنظر: <b>اسحب بزر الفأرة مضغوطًا</b>.</p>
     <p>الأسقف <b>مخفية افتراضيًا</b> ليدخل الضوء ويظهر التخطيط — اضغط <b>H</b> لإظهارها،
        و<b>[</b> <b>]</b> للسطوع.</p>
     <p class="warn">ليست اللعبة نفسها: لا Lumen ولا مواد ولا شخصيات. اللعبة الحقيقية تعمل في

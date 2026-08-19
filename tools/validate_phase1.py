@@ -63,17 +63,20 @@ def structural() -> None:
     for banned in ('"GameplayAbilities"', '"OnlineSubsystemSteam"', '"Steamworks"'):
         (ok if banned not in build_cs else fail)(f"no {banned}")
 
+    # Scope gate. Save and dialogue were on this list until 2026-08-18, when the
+    # director authorised building the full game; both now exist deliberately and
+    # have their own validators. What remains here is what is still NOT authorised:
+    # combat, GAS, enemy AI, a quest graph, and any Steam integration. Removing a
+    # name from this list must be a decision, never a side effect.
     joined = "\n".join(p.read_text(encoding="utf-8") for p in (ROOT / "Source").rglob("*.cpp"))
     for token in (
         "UGameplayAbility",
         "OnlineSubsystemSteam",
         "ATBWAIController",
         "UTBWQuestSubsystem",
-        "UTBWSaveGame",
-        "UTBWDialogueSubsystem",
         "UTBWCombatComponent",
     ):
-        (ok if token not in joined else fail)(f"no {token}")
+        (ok if token not in joined else fail)(f"still gated: no {token}")
 
     flags = (ROOT / "Source/TBW/Public/Core/TBWWorldFlags.h").read_text(encoding="utf-8")
     for name in ("WillWasRead", "RaynorDisappeared", "EvanInvestigating", "ClueFound_01", "GuardAlerted"):

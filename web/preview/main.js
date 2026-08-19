@@ -219,15 +219,98 @@ const player = {
 };
 
 const keys = new Set();
-addEventListener("keydown", (e) => {
-  keys.add(e.code);
-  if (e.code === "KeyF") toggleTop();
-  if (e.code === "KeyH") toggleCeilings();
-  if (e.code === "KeyL") toggleHeadlamp();
-  if (e.code === "BracketRight") setExposure(renderer.toneMappingExposure + 0.15);
-  if (e.code === "BracketLeft") setExposure(renderer.toneMappingExposure - 0.15);
-  if (e.code === "Space") e.preventDefault();
+
+/**
+ * Input is deliberately independent of Pointer Lock.
+ *
+ * The preview runs inside an iframe, and an iframe only gets Pointer Lock if the
+ * embedding page grants allow="pointer-lock". When it is denied the request fails
+ * silently, the pointerlockchange event never fires, and a control scheme built on
+ * it is simply dead - which is exactly what happened. So: keys work whenever the
+ * document has focus, looking works by dragging, and there are on-screen buttons
+ * for touch. Pointer Lock, if granted, is a bonus.
+ */
+const gate = document.getElementById("gate");
+let locked = false;
+let dragging = false;
+
+function beginPlaying() {
+  gate.style.display = "none";
+  canvas.focus();
+  // Optional: nicer if allowed, harmless if not.
+  if (canvas.requestPointerLock) {
+    const req = canvas.requestPointerLock();
+    if (req && typeof req.catch === "function") req.catch(() => {});
+  }
+}
+
+canvas.setAttribute("tabindex", "0");
+gate.addEventListener("click", beginPlaying);
+canvas.addEventListener("click", () => { if (gate.style.display === "none") canvas.focus(); });
+
+document.addEventListener("pointerlockchange", () => {
+  locked = document.pointerLockElement === canvas;
 });
+
+// Drag to look when we do not have pointer lock.
+canvas.addEventListener("mousedown", (e) => { dragging = true; e.preventDefault(); });
+addEventListener("mouseup", () => { dragging = false; });
+addEventListener("mouseleave", () => { dragging = false; });
+
+function applyLook(dx, dy) {
+  player.yaw -= dx * 0.0022;
+  player.pitch -= dy * 0.0019;
+  const up = THREE.MathUtils.degToRad(70);
+  const down = THREE.MathUtils.degToRad(55);
+  player.pitch = Math.max(-down, Math.min(up, player.pitch));
+}
+
+addEventListener("mousemove", (e) => {
+  if (locked || dragging) applyLook(e.movementX || 0, e.movementY || 0);
+});
+
+// Touch: left half drags the camera, the on-screen pad drives movement.
+let lastTouch = null;
+canvas.addEventListener("touchstart", (e) => {
+  lastTouch = e.touches[0];
+  if (gate.style.display !== "none") beginPlaying();
+}, { passive: true });
+canvas.addEventListener("touchmove", (e) => {
+  const t = e.touches[0];
+  if (lastTouch) applyLook((t.clientX - lastTouch.clientX) * 1.6, (t.clientY - lastTouch.clientY) * 1.6);
+  lastTouch = t;
+}, { passive: true });
+canvas.addEventListener("touchend", () => { lastTouch = null; }, { passive: true });
+
+// Keys are read from e.code, so an Arabic or French keyboard layout still drives
+// WASD by physical position. Arrow keys are accepted too.
+const KEY_ALIAS = {
+  ArrowUp: "KeyW", ArrowDown: "KeyS", ArrowLeft: "KeyA", ArrowRight: "KeyD",
+};
+
+function keyDown(code) {
+  keys.add(KEY_ALIAS[code] || code);
+  if (code === "KeyF") toggleTop();
+  if (code === "KeyH") toggleCeilings();
+  if (code === "KeyL") toggleHeadlamp();
+  if (code === "BracketRight") setExposure(renderer.toneMappingExposure + 0.15);
+  if (code === "BracketLeft") setExposure(renderer.toneMappingExposure - 0.15);
+}
+
+function keyUp(code) {
+  keys.delete(KEY_ALIAS[code] || code);
+}
+
+addEventListener("keydown", (e) => {
+  if (["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+    e.preventDefault();
+  }
+  if (gate.style.display !== "none") beginPlaying();
+  keyDown(e.code);
+});
+addEventListener("keyup", (e) => keyUp(e.code));
+// If the iframe loses focus mid-stride, stop moving instead of running forever.
+addEventListener("blur", () => keys.clear());
 
 let ceilingsVisible = false;
 function toggleCeilings() {
@@ -250,21 +333,30 @@ function setExposure(v) {
   const el = document.getElementById("hExp");
   if (el) el.textContent = renderer.toneMappingExposure.toFixed(2);
 }
-addEventListener("keyup", (e) => keys.delete(e.code));
 
-const gate = document.getElementById("gate");
-gate.addEventListener("click", () => canvas.requestPointerLock());
-document.addEventListener("pointerlockchange", () => {
-  gate.style.display = document.pointerLockElement === canvas ? "none" : "flex";
-});
-addEventListener("mousemove", (e) => {
-  if (document.pointerLockElement !== canvas) return;
-  player.yaw -= e.movementX * 0.0022;
-  player.pitch -= e.movementY * 0.0019;
-  const lim = THREE.MathUtils.degToRad(70);
-  const limDown = THREE.MathUtils.degToRad(55);
-  player.pitch = Math.max(-limDown, Math.min(lim, player.pitch));
-});
+// On-screen pad: works with mouse, finger, and pen. Held, not tapped.
+function bindPad() {
+  const pad = document.getElementById("pad");
+  if (!pad) return;
+  pad.querySelectorAll("[data-key]").forEach((btn) => {
+    const code = btn.getAttribute("data-key");
+    const press = (e) => { e.preventDefault(); keyDown(code); btn.classList.add("on"); };
+    const release = (e) => { e.preventDefault(); keyUp(code); btn.classList.remove("on"); };
+    btn.addEventListener("pointerdown", press);
+    btn.addEventListener("pointerup", release);
+    btn.addEventListener("pointerleave", release);
+    btn.addEventListener("pointercancel", release);
+  });
+  pad.querySelectorAll("[data-toggle]").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const which = btn.getAttribute("data-toggle");
+      if (which === "top") toggleTop();
+      if (which === "ceil") toggleCeilings();
+      if (which === "lamp") toggleHeadlamp();
+    });
+  });
+}
 
 // Axis-separated resolution against the box set. Crude on purpose: this is a
 // layout walkthrough, and crude is predictable.
@@ -427,7 +519,7 @@ fetch("./data/east_wing.json")
     for (const key of Object.keys(roomsOfInterest)) {
       const b = document.createElement("button");
       b.textContent = ROOM_LABELS[key] || key;
-      b.onclick = () => { teleport(key); canvas.requestPointerLock(); };
+      b.onclick = () => { teleport(key); beginPlaying(); };
       holder.appendChild(b);
     }
 
@@ -436,6 +528,7 @@ fetch("./data/east_wing.json")
     player.pos.set(v.x, EYE, v.z);
     player.yaw = THREE.MathUtils.degToRad(-layout.player_start.yaw);
 
+    bindPad();
     document.getElementById("hBoxes").textContent = boxCount;
     document.getElementById("hBeats").textContent = beatCount;
 
@@ -446,7 +539,7 @@ fetch("./data/east_wing.json")
       btn.onclick = () => {
         player.pos.set(b.pos.x, EYE, b.pos.z + 2.2);
         player.vel.set(0, 0, 0);
-        canvas.requestPointerLock();
+        beginPlaying();
       };
       document.getElementById("beatButtons").appendChild(btn);
     }
