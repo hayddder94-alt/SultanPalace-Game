@@ -1,0 +1,46 @@
+{
+  "scene_id": "VS09_TheCanalClasp",
+  "title": "The canal clasp",
+  "segment": "VS-09",
+  "completion_flag": "BoatmanSpoken",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. The clasp examine lines are Evan's; the interactable sets ClaspFound itself.",
+  "lines": [
+    {
+      "speaker": "Boatman",
+      "en": "Covered boat. Before the birds.",
+      "ar": "قارب مغطّى. قبل الطيور.",
+      "seconds": 2.6
+    },
+    {
+      "speaker": "Boatman",
+      "en": "Two men I did not know, and one I did. House cloak. He did not speak.",
+      "ar": "رجلان لا أعرفهما، وواحد أعرفه. عباءة البيت. لم ينطق.",
+      "seconds": 5.8
+    },
+    {
+      "speaker": "Evan",
+      "en": "Raynor always speaks to the dock.",
+      "ar": "رينور يكلّم الرصيف دائمًا.",
+      "seconds": 2.8
+    },
+    {
+      "speaker": "Boatman",
+      "en": "Then it was a very quiet Raynor, or it was a cloak.",
+      "ar": "إذن كان رينورًا صامتًا جدًا، أو كانت عباءة فحسب.",
+      "seconds": 4.2
+    },
+    {
+      "speaker": "Evan",
+      "en": "The lion-hook from his shoulder. Torn, not unpinned.",
+      "ar": "خُطّاف الأسد من كتفه. ممزَّق، لا مفكوك.",
+      "seconds": 4.3
+    },
+    {
+      "speaker": "Evan",
+      "en": "He does not drop this. He would hear it hit the stone.",
+      "ar": "لا يُسقط هذا. كان سيسمعه يرتطم بالحجر.",
+      "seconds": 4.5
+    }
+  ]
+}

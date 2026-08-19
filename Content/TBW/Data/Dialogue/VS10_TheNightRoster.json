@@ -1,0 +1,21 @@
+{
+  "scene_id": "VS10_TheNightRoster",
+  "title": "The night roster",
+  "segment": "VS-10",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Examine narration only. RosterAltered is set by the Roster interactable. Stealth, guard patrols and detection are NOT implemented and are not authorised.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "Canal posts struck through. Darius's mark over a name I know.",
+      "ar": "مراكز القناة مشطوبة. علامة داريوس فوق اسم أعرفه.",
+      "seconds": 5.1
+    },
+    {
+      "speaker": "Evan",
+      "en": "The night Raynor left, the water had no house eyes.",
+      "ar": "ليلة رحيل رينور، لم يكن للماء عيون من البيت.",
+      "seconds": 4.2
+    }
+  ]
+}

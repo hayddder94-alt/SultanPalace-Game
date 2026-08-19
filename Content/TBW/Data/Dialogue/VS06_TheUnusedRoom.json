@@ -1,0 +1,40 @@
+{
+  "scene_id": "VS06_TheUnusedRoom",
+  "title": "The unused room",
+  "segment": "VS-06",
+  "completion_flag": "EvanSuspicious",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Plays after both UnusedBed and ScarOil are examined. EvanSuspicious is the conclusion, not the examine.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "The sheet is tight. He did not lie down.",
+      "ar": "الملاءة مشدودة. لم يستلقِ.",
+      "seconds": 3.3
+    },
+    {
+      "speaker": "Evan",
+      "en": "Raynor sleeps like a soldier. He would have left a ruin if he had meant to sleep an hour.",
+      "ar": "رينور ينام كجندي. لو نوى النوم ساعة واحدة لترك خرابًا.",
+      "seconds": 7.4
+    },
+    {
+      "speaker": "Evan",
+      "en": "He oils the scar when the wind is dry. The stopper is loose. The oil is full.",
+      "ar": "يدهن الندبة حين تجفّ الريح. السدادة مرتخية. الزيت ممتلئ.",
+      "seconds": 6.4
+    },
+    {
+      "speaker": "Evan",
+      "en": "He did not pack this.",
+      "ar": "لم يحزم هذا معه.",
+      "seconds": 1.8
+    },
+    {
+      "speaker": "Evan",
+      "en": "He did not leave. He was taken, or he was lied about.",
+      "ar": "لم يرحل. إمّا أُخذ، وإمّا كُذب عنه.",
+      "seconds": 4.4
+    }
+  ]
+}

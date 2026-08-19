@@ -1,0 +1,88 @@
+{
+  "scene_id": "VS02_TheWillReading",
+  "title": "The will reading",
+  "segment": "VS-02",
+  "completion_flag": "WillWasRead",
+  "skippable_first_time": false,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Camera reads faces, not architecture. Nofan's warmth, Darius's stillness, Malik's ink, Soren's look at Evan, Leila unsmiling, Raynor taking the seal.",
+  "lines": [
+    {
+      "speaker": "Witness",
+      "en": "In the presence of the house and the temple:",
+      "ar": "بحضور البيت والمعبد:",
+      "seconds": 3.7
+    },
+    {
+      "speaker": "Witness",
+      "en": "The riverside palace, the eastern charter, and the southern water pass to Raynor.",
+      "ar": "القصر على النهر، والميثاق الشرقي، وماء الجنوب، تؤول كلها إلى رينور.",
+      "seconds": 6.8
+    },
+    {
+      "speaker": "Witness",
+      "en": "The other sons keep a room and a stipend, if they name him.",
+      "ar": "لبقية الأبناء غرفة ومخصَّص، إن أقرّوا به وريثًا.",
+      "seconds": 4.9
+    },
+    {
+      "speaker": "Witness",
+      "en": "The betrothal of Leila, daughter of Bel-Iddin, is confirmed.",
+      "ar": "وخِطبة ليلى، ابنة بيل إيدين، مُثبَتة.",
+      "seconds": 5.0
+    },
+    {
+      "speaker": "Witness",
+      "en": "Nofan, first-born, is named advisor to the heir.",
+      "ar": "ونوفان، البكر، يُسمّى مستشارًا للوريث.",
+      "seconds": 4.0
+    },
+    {
+      "en": "Silence. A servant begins to clap, and stops.",
+      "ar": "صمت. يبدأ خادم بالتصفيق، ثم يتوقف.",
+      "action": true,
+      "seconds": 3.8
+    },
+    {
+      "speaker": "Nofan",
+      "en": "Father always did prefer a clean sentence.",
+      "ar": "كان أبي يفضّل دائمًا جملة نظيفة.",
+      "seconds": 3.5
+    },
+    {
+      "en": "He aligns the cup in front of him. He does not drink.",
+      "ar": "يعدّل الكأس أمامه. لا يشرب.",
+      "action": true,
+      "seconds": 4.4
+    },
+    {
+      "speaker": "Darius",
+      "en": "Doors.",
+      "ar": "الأبواب.",
+      "seconds": 1.8
+    },
+    {
+      "speaker": "Malik",
+      "en": "Already writing.",
+      "ar": "أكتبها الآن.",
+      "seconds": 1.8
+    },
+    {
+      "speaker": "Soren",
+      "en": "He said your name last night. I heard it through the door.",
+      "ar": "قال اسمك البارحة. سمعته من خلف الباب.",
+      "seconds": 4.8
+    },
+    {
+      "en": "Leila does not smile.",
+      "ar": "ليلى لا تبتسم.",
+      "action": true,
+      "seconds": 1.8
+    },
+    {
+      "speaker": "Raynor",
+      "en": "I accept the seal.",
+      "ar": "أقبل الخاتم.",
+      "seconds": 1.8
+    }
+  ]
+}

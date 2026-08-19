@@ -1,0 +1,28 @@
+{
+  "scene_id": "VS13_TheBoardConnects",
+  "title": "The board connects",
+  "segment": "VS-13",
+  "completion_flag": "FamilyConnected",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Fires once ClaspFound, RosterAltered and LetterIsFalse are all set. Does NOT name Nofan as the architect - Three Names is Chapter 3.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "He did not ride north.",
+      "ar": "لم يركب شمالًا.",
+      "seconds": 1.8
+    },
+    {
+      "speaker": "Evan",
+      "en": "Someone in this house moved the watch, wrote his hand, and put him on a boat that did not want to be seen.",
+      "ar": "أحدٌ في هذا البيت حرّك الحراسة، وزوّر خطّه، ووضعه في قارب لا يريد أن يُرى.",
+      "seconds": 8.8
+    },
+    {
+      "speaker": "Evan",
+      "en": "This is not a rival. This is us.",
+      "ar": "هذا ليس خصمًا. هذا نحن.",
+      "seconds": 2.7
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "scene_id": "VS08b_MalikAtTheDoor",
+  "title": "Malik at the study door",
+  "segment": "VS-08b",
+  "completion_flag": "MalikSpoken",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Optional. First on the cut list if a rehearsal exceeds 45 minutes.",
+  "lines": [
+    {
+      "speaker": "Malik",
+      "en": "The heir is inspecting what he has been given. That is what responsible men do.",
+      "ar": "الوريث يتفقّد ما وُهب له. هذا ما يفعله الرجال المسؤولون.",
+      "seconds": 6.6
+    },
+    {
+      "speaker": "Malik",
+      "en": "You will make the staff theatrical.",
+      "ar": "أنت ستجعل الخدم مسرحيين.",
+      "seconds": 2.9
+    },
+    {
+      "en": "He does not stop writing.",
+      "ar": "لا يتوقف عن الكتابة.",
+      "action": true,
+      "seconds": 2.1
+    },
+    {
+      "speaker": "Malik",
+      "en": "Come back when you have decided to be glad.",
+      "ar": "عُد حين تقرّر أن تكون مسرورًا.",
+      "seconds": 3.6
+    }
+  ]
+}

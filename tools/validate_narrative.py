@@ -35,7 +35,9 @@ def known_flags() -> set[str]:
 def known_speakers() -> set[str]:
     """Names the story bible actually establishes, plus the six sons."""
     names = {"Orin", "Nofan", "Raynor", "Darius", "Evan", "Malik", "Soren",
-             "Leila", "Yasmin", "Nurse", "Guard", "Boatman", "Steward"}
+             "Leila", "Yasmin", "Nurse", "Guard", "Boatman", "Steward",
+             # Section 5 of the vertical slice script also puts these on screen.
+             "Witness", "Servant"}
     if BIBLE.is_file():
         text = BIBLE.read_text(encoding="utf-8")
         for m in re.findall(r"^#{2,3}\s+([A-Z][a-zA-Z]+)", text, re.M):

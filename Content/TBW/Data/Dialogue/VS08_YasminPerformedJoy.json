@@ -1,0 +1,46 @@
+{
+  "scene_id": "VS08_YasminPerformedJoy",
+  "title": "Yasmin and the performed joy",
+  "segment": "VS-08",
+  "completion_flag": "YasminSpoken",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Points at the canal and the annex without a quest arrow.",
+  "lines": [
+    {
+      "speaker": "Yasmin",
+      "en": "I turned his bed down. No one slept in it.",
+      "ar": "هيّأتُ فراشه. لم ينم فيه أحد.",
+      "seconds": 3.5
+    },
+    {
+      "speaker": "Yasmin",
+      "en": "Malik told me to strip it anyway. I did not.",
+      "ar": "أمرني مالك أن أنزع الغطاء رغم ذلك. لم أفعل.",
+      "seconds": 3.7
+    },
+    {
+      "speaker": "Evan",
+      "en": "Who took the night watch off the canal?",
+      "ar": "من رفع حراسة الليل عن القناة؟",
+      "seconds": 3.2
+    },
+    {
+      "speaker": "Yasmin",
+      "en": "Ask the roster. Darius keeps it in the annex like it is a blade.",
+      "ar": "اسأل السجل. داريوس يحفظه في الملحق كأنه نصل.",
+      "seconds": 5.3
+    },
+    {
+      "speaker": "Yasmin",
+      "en": "And if you go to the water, go before Nofan comes down.",
+      "ar": "وإن نزلتَ إلى الماء، فانزل قبل أن ينزل نوفان.",
+      "seconds": 4.6
+    },
+    {
+      "speaker": "Yasmin",
+      "en": "He has been kind all morning. I do not like him kind.",
+      "ar": "كان لطيفًا طوال الصباح. لا يعجبني وهو لطيف.",
+      "seconds": 4.4
+    }
+  ]
+}

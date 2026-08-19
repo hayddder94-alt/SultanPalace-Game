@@ -1,0 +1,38 @@
+{
+  "scene_id": "VS07_SorenWillNotLook",
+  "title": "Soren will not look at you",
+  "segment": "VS-07",
+  "completion_flag": "SorenSpoken",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Stops at the choice. The chooser UI does not exist yet - see docs/NARRATIVE_RUNTIME.md. Until it does, play VS07a or VS07b directly; both end on the same Malik line.",
+  "_choice_pending": [
+    "VS07a_KeepThis",
+    "VS07b_GoBack"
+  ],
+  "lines": [
+    {
+      "speaker": "Soren",
+      "en": "They said he asked for a boat. Raynor does not ask for boats.",
+      "ar": "قالوا إنه طلب قاربًا. رينور لا يطلب قوارب.",
+      "seconds": 5.1
+    },
+    {
+      "speaker": "Soren",
+      "en": "He takes the path along the wall.",
+      "ar": "هو يمشي على الدرب بمحاذاة السور.",
+      "seconds": 2.8
+    },
+    {
+      "speaker": "Evan",
+      "en": "You heard father say my name.",
+      "ar": "سمعتَ أبي يقول اسمي.",
+      "seconds": 2.4
+    },
+    {
+      "speaker": "Soren",
+      "en": "I hear a lot of things I am not invited to keep.",
+      "ar": "أسمع أشياء كثيرة لم يدعُني أحد لأحتفظ بها.",
+      "seconds": 4.0
+    }
+  ]
+}

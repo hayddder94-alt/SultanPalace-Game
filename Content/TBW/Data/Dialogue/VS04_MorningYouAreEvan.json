@@ -1,0 +1,15 @@
+{
+  "scene_id": "VS04_MorningYouAreEvan",
+  "title": "Morning. You are Evan.",
+  "segment": "VS-04",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Optional interior line on first movement. No completion flag: waking up is not an achievement.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "They clapped for him. Then they went to bed as if the house had not changed shape.",
+      "ar": "صفّقوا له. ثم ناموا كأن البيت لم يغيّر شكله.",
+      "seconds": 6.8
+    }
+  ]
+}

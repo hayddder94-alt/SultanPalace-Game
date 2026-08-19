@@ -1,0 +1,33 @@
+{
+  "scene_id": "VS12_WrongWax",
+  "title": "Wrong wax",
+  "segment": "VS-12",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. LetterIsFalse is set by the FalseLetter interactable. Malik's line plays only if he is present; he does not start combat under any circumstances.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "Raynor's words in Malik's patience. The seal is our house.",
+      "ar": "كلمات رينور بصبر مالك. الخاتم خاتم بيتنا.",
+      "seconds": 4.8
+    },
+    {
+      "speaker": "Evan",
+      "en": "The pressure is wrong. He presses deep, like a man who means it.",
+      "ar": "لكن الضغط خاطئ. يضغط عميقًا، كرجل يعني ما يقول.",
+      "seconds": 5.3
+    },
+    {
+      "speaker": "Evan",
+      "en": "This is a careful man pretending to be him.",
+      "ar": "هذا رجل حذر يتظاهر بأنه هو.",
+      "seconds": 3.6
+    },
+    {
+      "speaker": "Malik",
+      "en": "You are holding a courtesy. Put it back.",
+      "ar": "أنت تمسك مجاملة. أعدها إلى مكانها.",
+      "seconds": 3.3
+    }
+  ]
+}

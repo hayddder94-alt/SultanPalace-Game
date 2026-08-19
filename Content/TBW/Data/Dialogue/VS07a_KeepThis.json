@@ -1,0 +1,34 @@
+{
+  "scene_id": "VS07a_KeepThis",
+  "title": "Soren - then keep this",
+  "segment": "VS-07",
+  "completion_flag": "SorenRespected",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Branch 1 of the VS-07 choice. Sets SorenRespected, which the full game reads much later.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "Then keep this: I do not believe the letter.",
+      "ar": "إذن احتفظ بهذه: أنا لا أصدّق الرسالة.",
+      "seconds": 3.7
+    },
+    {
+      "speaker": "Soren",
+      "en": "Neither do I. Do not say that in the yard.",
+      "ar": "ولا أنا. لا تقل هذا في الفناء.",
+      "seconds": 3.5
+    },
+    {
+      "speaker": "Soren",
+      "en": "Malik has been in the study since before the sun.",
+      "ar": "مالك في الديوان منذ ما قبل الشمس.",
+      "seconds": 4.1
+    },
+    {
+      "speaker": "Soren",
+      "en": "He only works that early when he is inventing a day.",
+      "ar": "لا يعمل بهذا الباكر إلا حين يخترع يومًا.",
+      "seconds": 4.3
+    }
+  ]
+}

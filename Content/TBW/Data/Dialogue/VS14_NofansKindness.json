@@ -1,0 +1,64 @@
+{
+  "scene_id": "VS14_NofansKindness",
+  "title": "Nofan's kindness",
+  "segment": "VS-14",
+  "completion_flag": "SliceComplete",
+  "skippable_first_time": false,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Slice end. The threat is dressed as care.",
+  "lines": [
+    {
+      "speaker": "Nofan",
+      "en": "You have been making the servants nervous, Evan.",
+      "ar": "جعلتَ الخدم متوترين يا إيفان.",
+      "seconds": 4.0
+    },
+    {
+      "speaker": "Nofan",
+      "en": "That is not a crime. It is a weather.",
+      "ar": "هذا ليس جريمة. هذا طقس.",
+      "seconds": 3.1
+    },
+    {
+      "speaker": "Nofan",
+      "en": "Raynor will send for us when the north has been counted.",
+      "ar": "سيرسل رينور في طلبنا حين يُحصى الشمال.",
+      "seconds": 4.7
+    },
+    {
+      "speaker": "Nofan",
+      "en": "Until then, eat. Sit. Let the house be a house.",
+      "ar": "حتى ذلك الحين، كُل. اجلس. دع البيت يكون بيتًا.",
+      "seconds": 3.9
+    },
+    {
+      "speaker": "Evan",
+      "en": "The canal had no watch.",
+      "ar": "القناة لم يكن عليها حرس.",
+      "seconds": 2.0
+    },
+    {
+      "en": "Nofan aligns a bowl. He smiles with his eyes only.",
+      "ar": "يعدّل نوفان قصعة. يبتسم بعينيه وحدهما.",
+      "action": true,
+      "seconds": 4.2
+    },
+    {
+      "speaker": "Nofan",
+      "en": "Then I will speak to Darius about sloppiness. Thank you.",
+      "ar": "إذن سأكلّم داريوس في التهاون. شكرًا لك.",
+      "seconds": 4.7
+    },
+    {
+      "speaker": "Nofan",
+      "en": "Go inside. The sun on that water makes men invent stories.",
+      "ar": "ادخل. الشمس على ذلك الماء تجعل الرجال يخترعون الحكايات.",
+      "seconds": 4.8
+    },
+    {
+      "en": "He puts a hand on Evan's shoulder. It is almost kind.",
+      "ar": "يضع يده على كتف إيفان. تكاد تكون رحمة.",
+      "action": true,
+      "seconds": 4.4
+    }
+  ]
+}

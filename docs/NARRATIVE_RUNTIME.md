@@ -153,3 +153,61 @@ tbw.Load [slot]          تحميل
 tbw.Save.List            ما في الخانات القياسية
 tbw.Save.Delete <slot>   حذف خانة
 ```
+
+---
+
+## Vertical slice dialogue — written 2026-08-19
+
+The Arabic pipeline was proven on screen in PIE that day (see
+`docs/ARABIC_TEXT_PIPELINE.md`), which was the condition I had set for
+converting the rest of the locked script. VS-02 … VS-14 are now JSON.
+
+| Scene file | Segment | completion_flag | Lines | Attached to |
+|---|---|---|---|---|
+| `VS01_OrinLastWords.json` | VS-01 | `OrinLastWords` | 13 | `OrinBedside`, `Raynor_VS01` |
+| `VS02_TheWillReading.json` | VS-02 | `WillWasRead` | 13 | `WillTablet` |
+| `VS03_EyesInTheHall.json` | VS-03 | `RaynorDisappeared` | 2 | `Leila` |
+| `VS04_MorningYouAreEvan.json` | VS-04 | — | 1 | (first-move trigger, not wired) |
+| `VS05_LearnTheHouse.json` | VS-05 | — | 2 | `EmptyChair`, `ServantA` |
+| `VS06_TheUnusedRoom.json` | VS-06 | `EvanSuspicious` | 5 | `ScarOil` |
+| `VS07_SorenWillNotLook.json` | VS-07 | `SorenSpoken` | 4 | `Soren` |
+| `VS07a_KeepThis.json` | VS-07 | `SorenRespected` | 4 | choice branch 1 |
+| `VS07b_GoBack.json` | VS-07 | — | 4 | choice branch 2 |
+| `VS08_YasminPerformedJoy.json` | VS-08 | `YasminSpoken` | 6 | `Yasmin` |
+| `VS08b_MalikAtTheDoor.json` | VS-08b | `MalikSpoken` | 4 | `Malik` |
+| `VS09_TheCanalClasp.json` | VS-09 | `BoatmanSpoken` | 6 | `Boatman` |
+| `VS10_TheNightRoster.json` | VS-10 | — | 2 | `Roster` |
+| `VS11_TheManInTheCourt.json` | VS-11 | `AnnexChallenged` | 1 | `GuardCourt` |
+| `VS12_WrongWax.json` | VS-12 | — | 4 | `FalseLetter` |
+| `VS13_TheBoardConnects.json` | VS-13 | `FamilyConnected` | 3 | (auto-connect, not wired) |
+| `VS14_NofansKindness.json` | VS-14 | `SliceComplete` | 9 | `Nofan` |
+
+**17 scenes, 83 lines, 5.7 minutes of authored subtitle time.** Line durations
+are computed at 12 characters per second of the longer language, floor 1.8 s,
+so no hand-typed number can breach the 22 chars/s readability ceiling that
+`tools/validate_narrative.py` enforces.
+
+### What is deliberately NOT in these files
+
+* **The VS-07 choice has no chooser.** The runtime plays a linear list of
+  lines; it has no branch selection and no input for one. Rather than invent a
+  schema the runtime cannot read, `VS07` stops before the choice and the two
+  answers live in `VS07a` / `VS07b`, playable directly via
+  `tbw.Dialogue.Play VS07a_KeepThis`. `VS07`'s `_choice_pending` field names
+  them. When a chooser is built, the wiring is two lines.
+* **VS-11 has no fight.** The script calls for a short melee. Combat, health,
+  stamina, enemy AI and perception are outside the authorised scope. The scene
+  is the guard's one line; `AnnexChallenged` records that the line was heard.
+* **VS-10 has no stealth.** Same reason: guard patrols and detection are not
+  implemented. The scene is the roster examine narration.
+* **VS-04 and VS-13 have no trigger yet.** VS-04 wants a first-movement
+  trigger; VS-13 wants the investigation board's auto-connect. Neither exists,
+  so both scenes are authored and reachable by console only.
+
+### Console
+
+```
+tbw.Dialogue.Reload
+tbw.Dialogue.Play VS02_TheWillReading
+tbw.Objective
+```

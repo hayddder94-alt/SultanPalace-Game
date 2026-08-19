@@ -1,0 +1,22 @@
+{
+  "scene_id": "VS03_EyesInTheHall",
+  "title": "Eyes in the hall",
+  "segment": "VS-03",
+  "completion_flag": "RaynorDisappeared",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Ends on the dark canal, not on Raynor's face. Identity becomes Evan after this scene.",
+  "lines": [
+    {
+      "speaker": "Leila",
+      "en": "If they loved him, they would have been kinder in their eyes.",
+      "ar": "لو كانوا يحبّونه، لكانوا أرحم في نظراتهم.",
+      "seconds": 5.1
+    },
+    {
+      "en": "Raynor walks toward the canal gate at dusk. No one follows him.",
+      "ar": "يمضي رينور نحو بوابة القناة عند الغسق. لا أحد يتبعه.",
+      "action": true,
+      "seconds": 5.2
+    }
+  ]
+}

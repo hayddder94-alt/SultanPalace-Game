@@ -1,0 +1,33 @@
+{
+  "scene_id": "VS07b_GoBack",
+  "title": "Soren - go back to your books",
+  "segment": "VS-07",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. Branch 2 of the VS-07 choice. Deliberately sets no flag: the absence of SorenRespected is the record.",
+  "lines": [
+    {
+      "speaker": "Evan",
+      "en": "Go back to your books. This is not yours.",
+      "ar": "عُد إلى كتبك. هذا ليس شأنك.",
+      "seconds": 3.4
+    },
+    {
+      "speaker": "Soren",
+      "en": "You sound like Darius when you do that.",
+      "ar": "تبدو مثل داريوس حين تفعل ذلك.",
+      "seconds": 3.2
+    },
+    {
+      "speaker": "Soren",
+      "en": "Malik has been in the study since before the sun.",
+      "ar": "مالك في الديوان منذ ما قبل الشمس.",
+      "seconds": 4.1
+    },
+    {
+      "speaker": "Soren",
+      "en": "He only works that early when he is inventing a day.",
+      "ar": "لا يعمل بهذا الباكر إلا حين يخترع يومًا.",
+      "seconds": 4.3
+    }
+  ]
+}

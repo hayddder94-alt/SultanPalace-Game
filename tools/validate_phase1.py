@@ -53,8 +53,10 @@ def structural() -> None:
     for rel in required:
         (ok if (ROOT / rel).is_file() else fail)(rel)
 
+    # Same stale pin as validate_ue58 had: the literal phase-1 string. The
+    # invariant is the -ue58 suffix, not the phase number.
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    (ok if version == "0.1.0-phase1-ue58" else fail)(f"VERSION {version}")
+    (ok if version.endswith("-ue58") else fail)(f"VERSION {version}")
 
     uproject = (ROOT / "TheBetrayedWill.uproject").read_text(encoding="utf-8")
     (ok if '"EngineAssociation": "5.8"' in uproject else fail)("engine lock 5.8")

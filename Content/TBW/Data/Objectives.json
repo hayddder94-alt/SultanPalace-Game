@@ -1,5 +1,5 @@
 {
-  "_note": "Evaluated top to bottom; the first rule whose conditions hold is the current objective. Flags must exist in ETBWWorldFlag - tools/validate_dialogue.py enforces that.",
+  "_note": "Evaluated top to bottom; the first rule whose conditions hold is the current objective. Flags must exist in ETBWWorldFlag - tools/validate_narrative.py enforces that. Order follows docs/VERTICAL_SLICE_SCRIPT.md section 3, and the physical route through the wing: chamber, people, canal, annex, study, board, hall.",
   "objectives": [
     {
       "segment": "VS-01",
@@ -37,32 +37,60 @@
       "blocked_by": ["ScarOil"]
     },
     {
-      "segment": "VS-09",
-      "en": "Read the steward's papers. Someone rewrote the gate watch.",
-      "ar": "اقرأ أوراق الكاتب. أحدهم أعاد كتابة حراسة البوابة.",
+      "segment": "VS-07",
+      "en": "Ask the people who still talk. Soren is in the corridor niche.",
+      "ar": "اسأل من لا يزال يتكلم. سورين في كوّة الممر.",
       "requires": ["ScarOil"],
-      "blocked_by": ["RosterAltered"]
+      "blocked_by": ["SorenSpoken"]
+    },
+    {
+      "segment": "VS-08",
+      "en": "Yasmin turned down a bed nobody slept in. Find her at the kitchen yard.",
+      "ar": "ياسمين هيّأت فراشًا لم ينم فيه أحد. جدها عند فناء المطبخ.",
+      "requires": ["SorenSpoken"],
+      "blocked_by": ["YasminSpoken"]
     },
     {
       "segment": "VS-09",
-      "en": "The roster was altered. Compare it with the letter.",
-      "ar": "السجل مُعدَّل. قارنه بالرسالة.",
-      "requires": ["RosterAltered"],
-      "blocked_by": ["LetterIsFalse"]
-    },
-    {
-      "segment": "VS-09",
-      "en": "The letter is a forgery. Go down to the canal gate.",
-      "ar": "الرسالة مزوّرة. انزل إلى بوابة القناة.",
-      "requires": ["LetterIsFalse"],
+      "en": "Search the canal gate. Ask the boatman what left before the birds.",
+      "ar": "فتّش بوابة القناة. اسأل الملّاح عمّا غادر قبل الطيور.",
+      "requires": ["YasminSpoken"],
       "blocked_by": ["ClaspFound"]
     },
     {
       "segment": "VS-10",
-      "en": "A house guard's clasp, in the water. Raynor did not leave alone.",
-      "ar": "مشبك حارس من البيت، في الماء. لم يغادر رينور وحده.",
+      "en": "A house guard's clasp, torn off in the mud. Read the night roster.",
+      "ar": "مشبك حارس من البيت، مُمزّق في الطين. اقرأ سجل حراسة الليل.",
       "requires": ["ClaspFound"],
-      "blocked_by": ["EvanInvestigating"]
+      "blocked_by": ["RosterAltered"]
+    },
+    {
+      "segment": "VS-12",
+      "en": "The watch was moved. Read the letter on Malik's desk.",
+      "ar": "الحراسة نُقلت. اقرأ الرسالة على مكتب مالك.",
+      "requires": ["RosterAltered"],
+      "blocked_by": ["LetterIsFalse"]
+    },
+    {
+      "segment": "VS-13",
+      "en": "The hand is not his. Put the three together.",
+      "ar": "الخطّ ليس خطّه. اجمع الثلاثة معًا.",
+      "requires": ["LetterIsFalse"],
+      "blocked_by": ["FamilyConnected"]
+    },
+    {
+      "segment": "VS-14",
+      "en": "This is not a rival. Go back to the hall. Nofan is waiting.",
+      "ar": "هذا ليس خصمًا. عُد إلى القاعة. نوفان بانتظارك.",
+      "requires": ["FamilyConnected"],
+      "blocked_by": ["SliceComplete"]
+    },
+    {
+      "segment": "VS-14",
+      "en": "The house has started to lie.",
+      "ar": "بدأ البيت يكذب.",
+      "requires": ["SliceComplete"],
+      "blocked_by": []
     }
   ]
 }

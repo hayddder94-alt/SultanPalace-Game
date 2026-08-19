@@ -108,11 +108,16 @@ def check_build_cs() -> None:
 
 
 def check_version_files() -> None:
+    # Was pinned to the literal "0.1.0-phase1-ue58" and had been failing ever
+    # since VERSION was bumped to 0.2.0. A check that always fails is a check
+    # nobody reads. What actually matters is the shape and the -ue58 suffix,
+    # which is what says this tree targets the 5.8 engine and nothing else.
     version = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
-    if version != "0.1.0-phase1-ue58":
-        fail(ROOT / "VERSION", 1, f"VERSION={version!r}")
+    if not re.fullmatch(r"\d+\.\d+\.\d+-[A-Za-z0-9.-]*ue58", version):
+        fail(ROOT / "VERSION", 1,
+             f"VERSION={version!r} - expected N.N.N-<label>-ue58")
     else:
-        ok("VERSION 0.1.0-phase1-ue58")
+        ok(f"VERSION {version}")
     header = (ROOT / "Source/TBW/Public/Core/TBWVersion.h").read_text(encoding="utf-8")
     if 'TEXT("5.8")' not in header:
         fail(ROOT / "Source/TBW/Public/Core/TBWVersion.h", None, "TBW_ENGINE_LOCK is not 5.8")

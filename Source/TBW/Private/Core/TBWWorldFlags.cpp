@@ -21,6 +21,15 @@ FName FTBWWorldFlags::ToName(ETBWWorldFlag Flag)
 	case ETBWWorldFlag::WestArchTouched: return TEXT("WestArchTouched");
 	case ETBWWorldFlag::TestDoorOpen: return TEXT("TestDoorOpen");
 	case ETBWWorldFlag::OrinLastWords: return TEXT("OrinLastWords");
+	case ETBWWorldFlag::EvanSuspicious: return TEXT("EvanSuspicious");
+	case ETBWWorldFlag::SorenSpoken: return TEXT("SorenSpoken");
+	case ETBWWorldFlag::SorenRespected: return TEXT("SorenRespected");
+	case ETBWWorldFlag::YasminSpoken: return TEXT("YasminSpoken");
+	case ETBWWorldFlag::MalikSpoken: return TEXT("MalikSpoken");
+	case ETBWWorldFlag::BoatmanSpoken: return TEXT("BoatmanSpoken");
+	case ETBWWorldFlag::AnnexChallenged: return TEXT("AnnexChallenged");
+	case ETBWWorldFlag::FamilyConnected: return TEXT("FamilyConnected");
+	case ETBWWorldFlag::SliceComplete: return TEXT("SliceComplete");
 	default: return NAME_None;
 	}
 }

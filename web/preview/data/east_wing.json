@@ -2725,7 +2725,8 @@
    "prompt": "Read the will",
    "examine": "The tablet names Raynor. The clay is newer than the seal.",
    "flag": "WillWasRead",
-   "vs": "VS-02"
+   "vs": "VS-02",
+   "scene": "VS02_TheWillReading"
   },
   {
    "id": "EmptyChair",
@@ -2743,7 +2744,8 @@
    "prompt": "Examine the empty chair",
    "examine": "Cloth laid for an heir who has not sat down.",
    "flag": "EmptyChairExamined",
-   "vs": "VS-05"
+   "vs": "VS-05",
+   "scene": "VS05_LearnTheHouse"
   },
   {
    "id": "UnusedBed",
@@ -2779,7 +2781,8 @@
    "prompt": "Examine the oil jar",
    "examine": "Scar oil. Raynor stopped needing it years ago.",
    "flag": "ScarOil",
-   "vs": "VS-06"
+   "vs": "VS-06",
+   "scene": "VS06_TheUnusedRoom"
   },
   {
    "id": "Roster",
@@ -2797,7 +2800,8 @@
    "prompt": "Read the guard roster",
    "examine": "Two names on the canal gate were scraped and rewritten.",
    "flag": "RosterAltered",
-   "vs": "VS-09"
+   "vs": "VS-10",
+   "scene": "VS10_TheNightRoster"
   },
   {
    "id": "FalseLetter",
@@ -2815,7 +2819,8 @@
    "prompt": "Read the letter",
    "examine": "Orin's hand, but the pressure is wrong. Someone practised it.",
    "flag": "LetterIsFalse",
-   "vs": "VS-09"
+   "vs": "VS-12",
+   "scene": "VS12_WrongWax"
   },
   {
    "id": "CanalClasp",
@@ -2929,7 +2934,8 @@
    ],
    "yaw": 0.0,
    "vs": "VS-02",
-   "note": "Eldest. Closest to the dais on the left."
+   "scene": "VS14_NofansKindness",
+   "note": "Eldest. Closest to the dais on the left. Speaks VS-14 here at the end."
   },
   {
    "id": "Raynor",
@@ -2985,6 +2991,7 @@
    ],
    "yaw": 0.0,
    "vs": "VS-02",
+   "scene": "VS08b_MalikAtTheDoor",
    "note": "Ink on his hands."
   },
   {
@@ -2998,7 +3005,8 @@
     90.0
    ],
    "yaw": 340.0,
-   "vs": "VS-02",
+   "vs": "VS-07",
+   "scene": "VS07_SorenWillNotLook",
    "note": "Will not look at Evan."
   },
   {
@@ -3012,7 +3020,8 @@
     90.0
    ],
    "yaw": 200.0,
-   "vs": "VS-02",
+   "vs": "VS-03",
+   "scene": "VS03_EyesInTheHall",
    "note": "Not blood. Unsmiling. Stands apart, not behind."
   },
   {
@@ -3027,6 +3036,7 @@
    ],
    "yaw": 180.0,
    "vs": "VS-08",
+   "scene": "VS08_YasminPerformedJoy",
    "note": "Performed joy at the kitchen yard edge."
   },
   {
@@ -3041,6 +3051,7 @@
    ],
    "yaw": 90.0,
    "vs": "VS-05",
+   "scene": "VS05_LearnTheHouse",
    "note": "Setting bowls for a celebration nobody feels."
   },
   {
@@ -3086,6 +3097,21 @@
    "note": "Hall door."
   },
   {
+   "id": "GuardCourt",
+   "name": "House guard",
+   "pose": "standing",
+   "room": "R9_StorageCourt",
+   "location": [
+    3479.9999999999995,
+    2000.0,
+    90.0
+   ],
+   "yaw": 180.0,
+   "vs": "VS-11",
+   "scene": "VS11_TheManInTheCourt",
+   "note": "Storage court. Challenges Evan. Dialogue only."
+  },
+  {
    "id": "Boatman",
    "name": "Boatman",
    "pose": "standing",
@@ -3097,6 +3123,7 @@
    ],
    "yaw": 90.0,
    "vs": "VS-09",
+   "scene": "VS09_TheCanalClasp",
    "note": "At the dock. Saw the boat leave."
   }
  ]

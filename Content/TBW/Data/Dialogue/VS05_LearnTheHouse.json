@@ -1,0 +1,21 @@
+{
+  "scene_id": "VS05_LearnTheHouse",
+  "title": "Learn the house with your feet",
+  "segment": "VS-05",
+  "skippable_first_time": true,
+  "_note": "Locked dialogue from docs/VERTICAL_SLICE_SCRIPT.md. Arabic lives here, never in C++ source. The empty-chair line is the examine text; the interactable sets EmptyChairExamined itself.",
+  "lines": [
+    {
+      "speaker": "Servant",
+      "en": "The heir left before dawn. Northern estates. Malik has the letter.",
+      "ar": "غادر الوريث قبل الفجر. الأملاك الشمالية. الرسالة عند مالك.",
+      "seconds": 5.5
+    },
+    {
+      "speaker": "Evan",
+      "en": "Still warm cloth. No one has sat. They laid the celebration anyway.",
+      "ar": "قماش ما زال دافئًا. لم يجلس أحد. أقاموا الاحتفال على أي حال.",
+      "seconds": 5.6
+    }
+  ]
+}

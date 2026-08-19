@@ -29,6 +29,22 @@ enum class ETBWWorldFlag : uint8
 	WestArchTouched,
 	TestDoorOpen,
 	OrinLastWords,
+
+	// VS-03 .. VS-14. Added 2026-08-19 when the vertical slice dialogue was
+	// written out of docs/VERTICAL_SLICE_SCRIPT.md into JSON. Every one of
+	// these is the completion flag of exactly one scene file, or a branch
+	// result. Nothing here implies combat or AI - VS-11's flag records that
+	// the line was heard, not that a fight happened.
+	EvanSuspicious,
+	SorenSpoken,
+	SorenRespected,
+	YasminSpoken,
+	MalikSpoken,
+	BoatmanSpoken,
+	AnnexChallenged,
+	FamilyConnected,
+	SliceComplete,
+
 	COUNT UMETA(Hidden)
 };
 

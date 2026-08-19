@@ -323,12 +323,12 @@ def build():
         {"id": "WillTablet", "room": "R2_AudienceHall",
          "location": [hx + hw * 0.5, hy + hd - 3.2 * M, 1.45 * M], "size": [0.5 * M, 0.35 * M, 0.5 * M],
          "prompt": "Read the will", "examine": "The tablet names Raynor. The clay is newer than the seal.",
-         "flag": "WillWasRead", "vs": "VS-02"},
+         "flag": "WillWasRead", "vs": "VS-02", "scene": "VS02_TheWillReading"},
 
         {"id": "EmptyChair", "room": "R2_AudienceHall",
          "location": [hx + hw * 0.5 + 2.4 * M, hy + hd - 4.0 * M, 1.25 * M], "size": [0.8 * M, 0.8 * M, 1.2 * M],
          "prompt": "Examine the empty chair", "examine": "Cloth laid for an heir who has not sat down.",
-         "flag": "EmptyChairExamined", "vs": "VS-05"},
+         "flag": "EmptyChairExamined", "vs": "VS-05", "scene": "VS05_LearnTheHouse"},
 
         {"id": "UnusedBed", "room": "R6_RaynorChamber",
          "location": [cx + cw + 5.5 * M, cy0 + 5.5 * M, 0.35 * M], "size": [2.0 * M, 1.1 * M, 0.7 * M],
@@ -338,17 +338,17 @@ def build():
         {"id": "ScarOil", "room": "R6_RaynorChamber",
          "location": [cx + cw + 1.4 * M, cy0 + 7.6 * M, 0.95 * M], "size": [0.3 * M, 0.3 * M, 0.35 * M],
          "prompt": "Examine the oil jar", "examine": "Scar oil. Raynor stopped needing it years ago.",
-         "flag": "ScarOil", "vs": "VS-06"},
+         "flag": "ScarOil", "vs": "VS-06", "scene": "VS06_TheUnusedRoom"},
 
         {"id": "Roster", "room": "R7_Study",
          "location": [cx + 1.2 * M, cy0 - 5.5 * M, 1.05 * M], "size": [0.6 * M, 0.45 * M, 0.1 * M],
          "prompt": "Read the guard roster", "examine": "Two names on the canal gate were scraped and rewritten.",
-         "flag": "RosterAltered", "vs": "VS-09"},
+         "flag": "RosterAltered", "vs": "VS-10", "scene": "VS10_TheNightRoster"},
 
         {"id": "FalseLetter", "room": "R7_Study",
          "location": [cx + 3.0 * M, cy0 - 4.2 * M, 1.05 * M], "size": [0.4 * M, 0.3 * M, 0.06 * M],
          "prompt": "Read the letter", "examine": "Orin's hand, but the pressure is wrong. Someone practised it.",
-         "flag": "LetterIsFalse", "vs": "VS-09"},
+         "flag": "LetterIsFalse", "vs": "VS-12", "scene": "VS12_WrongWax"},
 
         {"id": "CanalClasp", "room": "R1_Dock",
          "location": [4.0 * M, 8.4 * M, 0.25 * M], "size": [0.22 * M, 0.22 * M, 0.12 * M],
@@ -392,7 +392,8 @@ def build():
         # arranged so the camera reads the line before it reads a face.
         {"id": "Nofan", "name": "Nofan", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx - 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
-         "vs": "VS-02", "note": "Eldest. Closest to the dais on the left."},
+         "vs": "VS-02", "scene": "VS14_NofansKindness",
+         "note": "Eldest. Closest to the dais on the left. Speaks VS-14 here at the end."},
         {"id": "Raynor", "name": "Raynor", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx + 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
          "vs": "VS-02", "note": "Named heir. Takes the seal here."},
@@ -404,21 +405,22 @@ def build():
          "vs": "VS-02", "note": "The player watches from here in VS-02."},
         {"id": "Malik", "name": "Malik", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx - 1.6 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
-         "vs": "VS-02", "note": "Ink on his hands."},
+         "vs": "VS-02", "scene": "VS08b_MalikAtTheDoor", "note": "Ink on his hands."},
         {"id": "Soren", "name": "Soren", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx + 6.2 * M, dais_y - 6.5 * M, 0.9 * M], "yaw": 340.0,
-         "vs": "VS-02", "note": "Will not look at Evan."},
+         "vs": "VS-07", "scene": "VS07_SorenWillNotLook", "note": "Will not look at Evan."},
         {"id": "Leila", "name": "Leila", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx + 2.8 * M, dais_y - 1.6 * M, 0.9 * M], "yaw": 200.0,
-         "vs": "VS-02", "note": "Not blood. Unsmiling. Stands apart, not behind."},
+         "vs": "VS-03", "scene": "VS03_EyesInTheHall",
+         "note": "Not blood. Unsmiling. Stands apart, not behind."},
 
         # The house at work - the wing has to feel inhabited between scenes
         {"id": "Yasmin", "name": "Yasmin", "pose": "standing", "room": "R8_Yard",
          "location": [30.0 * M, 11.0 * M, 0.9 * M], "yaw": 180.0,
-         "vs": "VS-08", "note": "Performed joy at the kitchen yard edge."},
+         "vs": "VS-08", "scene": "VS08_YasminPerformedJoy", "note": "Performed joy at the kitchen yard edge."},
         {"id": "ServantA", "name": "Servant", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx - 5.5 * M, hy + 6.0 * M, 0.9 * M], "yaw": 90.0,
-         "vs": "VS-05", "note": "Setting bowls for a celebration nobody feels."},
+         "vs": "VS-05", "scene": "VS05_LearnTheHouse", "note": "Setting bowls for a celebration nobody feels."},
         {"id": "ServantB", "name": "Servant", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hall_cx + 5.5 * M, hy + 7.5 * M, 0.9 * M], "yaw": 270.0,
          "vs": "VS-05", "note": "Cloth for the empty heir chair."},
@@ -428,9 +430,15 @@ def build():
         {"id": "GuardHall", "name": "House guard", "pose": "standing", "room": "R2_AudienceHall",
          "location": [hx + 1.6 * M, hy + 2.4 * M, 0.9 * M], "yaw": 45.0,
          "vs": "VS-02", "note": "Hall door."},
+        # VS-11. He exists so the line has a mouth. There is no patrol, no
+        # perception and no combat behind him - see the scene file's _note.
+        {"id": "GuardCourt", "name": "House guard", "pose": "standing", "room": "R9_StorageCourt",
+         "location": [34.8 * M, 20.0 * M, 0.9 * M], "yaw": 180.0,
+         "vs": "VS-11", "scene": "VS11_TheManInTheCourt",
+         "note": "Storage court. Challenges Evan. Dialogue only."},
         {"id": "Boatman", "name": "Boatman", "pose": "standing", "room": "R1_Dock",
          "location": [3.0 * M, 3.5 * M, 0.9 * M], "yaw": 90.0,
-         "vs": "VS-09", "note": "At the dock. Saw the boat leave."},
+         "vs": "VS-09", "scene": "VS09_TheCanalClasp", "note": "At the dock. Saw the boat leave."},
     ]
 
     return {

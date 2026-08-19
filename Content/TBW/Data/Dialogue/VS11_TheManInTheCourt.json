@@ -1,0 +1,16 @@
+{
+  "scene_id": "VS11_TheManInTheCourt",
+  "title": "A man who was not supposed to see you",
+  "segment": "VS-11",
+  "completion_flag": "AnnexChallenged",
+  "skippable_first_time": true,
+  "_note": "DIALOGUE ONLY. The VS-11 melee described in docs/VERTICAL_SLICE_SCRIPT.md is NOT implemented: combat, health, stamina and enemy AI remain outside the authorised scope. AnnexChallenged records that the line was heard, not that a fight happened.",
+  "lines": [
+    {
+      "speaker": "Guard",
+      "en": "The annex is not for younger sons.",
+      "ar": "الملحق ليس للأبناء الصغار.",
+      "seconds": 2.8
+    }
+  ]
+}

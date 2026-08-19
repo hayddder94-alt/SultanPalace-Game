@@ -59,7 +59,7 @@ editor_actor  = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 level_editor  = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 
 
-def safe_set(obj, prop, value):
+def safe_set(obj, prop, value, quiet=False):
     """set_editor_property that tolerates a missing property or a null object."""
     if obj is None:
         return False
@@ -67,8 +67,26 @@ def safe_set(obj, prop, value):
         obj.set_editor_property(prop, value)
         return True
     except Exception as exc:                                   # noqa: BLE001
-        unreal.log_warning("skip {0}.{1}: {2}".format(type(obj).__name__, prop, exc))
+        if not quiet:
+            unreal.log_warning("skip {0}.{1}: {2}".format(type(obj).__name__, prop, exc))
         return False
+
+
+def set_first(obj, names, value, what):
+    """Set the first spelling that exists, and only complain if none of them do.
+
+    Some engine properties are renamed between versions. Trying each spelling
+    with safe_set() worked, but it also printed a warning for every spelling
+    that missed - so a successful set still left 'Failed to find property
+    volumetric_fog' in the log, which reads like a defect and is not one.
+    """
+    for name in names:
+        if safe_set(obj, name, value, quiet=True):
+            return name
+    unreal.log_warning(
+        "{0}: none of {1} exist on {2} - {3} left at its default".format(
+            what, list(names), type(obj).__name__ if obj else "None", what))
+    return None
 
 
 def load(path):
@@ -410,11 +428,11 @@ def build_lighting():
     fog_c = fog.get_component_by_class(unreal.ExponentialHeightFogComponent)
     safe_set(fog_c, "fog_density", 0.035)
     safe_set(fog_c, "fog_height_falloff", 0.15)
-    # The bool is bEnableVolumetricFog in C++, but the Python name has moved
-    # between versions. Try each spelling rather than losing volumetric fog.
-    for fog_prop in ("volumetric_fog", "enable_volumetric_fog", "b_enable_volumetric_fog"):
-        if safe_set(fog_c, fog_prop, True):
-            break
+    # The bool is bEnableVolumetricFog in C++; the Python name has moved between
+    # versions. On 5.8.1 it is 'enable_volumetric_fog'. Ask for each spelling
+    # quietly so a successful set does not leave a scary warning in the log.
+    set_first(fog_c, ("volumetric_fog", "enable_volumetric_fog", "b_enable_volumetric_fog"),
+              True, "volumetric fog")
     safe_set(fog_c, "volumetric_fog_scattering_distribution", 0.6)
     safe_set(fog_c, "volumetric_fog_extinction_scale", 1.2)
     _spawned.append(fog)
