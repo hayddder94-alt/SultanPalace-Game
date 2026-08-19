@@ -383,11 +383,12 @@ def build_wing(pal, layout):
 # lighting and post
 # ---------------------------------------------------------------------------
 
-def build_lighting():
+def build_lighting(layout):
     """
     Late-afternoon Babylon: low warm sun, strong sky bounce, dusty volumetrics.
     Everything movable so Lumen does the work - no bake on a 6 GB laptop GPU.
     """
+    sun_cfg = layout.get("sun", {})
     sun = editor_actor.spawn_actor_from_class(
         unreal.DirectionalLight, unreal.Vector(0, 0, 12 * M), unreal.Rotator(-14.0, 125.0, 0.0))
     sun.set_actor_label("Sun_LateAfternoon")
@@ -399,7 +400,13 @@ def build_lighting():
         unreal.log_warning("[TBW] sun has no light component - skipping its settings")
     if sun_c:
         sun_c.set_mobility(unreal.ComponentMobility.MOVABLE)
-    safe_set(sun_c, "intensity", 6.0)
+    # 6.0 was the value here until 2026-08-19 and it is why Play was black.
+    # Config/DefaultEngine.ini sets
+    #   r.DefaultFeature.AutoExposure.ExtendDefaultLuminanceRange=True
+    # which makes the engine read directional-light Intensity as real LUX.
+    # 6 lux is the sky twenty minutes after sunset. Late afternoon is tens of
+    # thousands. The number now comes from the layout so both consumers agree.
+    safe_set(sun_c, "intensity", float(sun_cfg.get("intensity", 42000.0)))
     safe_set(sun_c, "light_color", unreal.Color(255, 214, 170, 255))
     safe_set(sun_c, "atmosphere_sun_light", True)
     safe_set(sun_c, "dynamic_shadow_distance_movable_light", 15000.0)
@@ -416,6 +423,49 @@ def build_lighting():
     safe_set(sky_c, "real_time_capture", True)
     safe_set(sky_c, "intensity", 1.0)
     _spawned.append(sky)
+
+    # Practicals. Without these every roofed room is a black box: the wing had
+    # a sun, a sky, an atmosphere and a fog, and nothing else. The player spawns
+    # in the family corridor, which is roofed, so Play showed nothing.
+    placed = 0
+    for spec in layout.get("lights", []):
+        loc = spec["location"]
+        lamp = editor_actor.spawn_actor_from_class(
+            unreal.PointLight, unreal.Vector(loc[0], loc[1], loc[2]), unreal.Rotator(0, 0, 0))
+        lamp.set_actor_label(spec["name"])
+        lc = lamp.get_component_by_class(unreal.PointLightComponent)
+        if lc:
+            lc.set_mobility(unreal.ComponentMobility.MOVABLE)
+        # Lumens, not the unitless default: a number a human can reason about.
+        # 2600 lm is a bright oil-lamp cluster; 5200 is the hall's hanging bowls.
+        #
+        # Resolve the enum defensively. Touching unreal.LightUnits.LUMENS
+        # directly would raise inside the try/except that wraps the whole
+        # lighting stage, and the level would come back with no lights at all
+        # because one enum was renamed. A missing unit is survivable; a missing
+        # lighting pass is the bug we are fixing.
+        lumens_enum = None
+        for enum_name in ("LightUnits", "ELightUnits"):
+            holder = getattr(unreal, enum_name, None)
+            if holder is not None and hasattr(holder, "LUMENS"):
+                lumens_enum = holder.LUMENS
+                break
+        if lumens_enum is not None:
+            safe_set(lc, "intensity_units", lumens_enum, quiet=True)
+        else:
+            unreal.log_warning("[TBW] no LUMENS enum on this engine - intensity is unitless")
+        safe_set(lc, "intensity", float(spec.get("lumens", 2600.0)))
+        safe_set(lc, "attenuation_radius", float(spec.get("attenuation_radius", 900.0)))
+        c = spec.get("color", [255, 200, 140])
+        safe_set(lc, "light_color", unreal.Color(int(c[0]), int(c[1]), int(c[2]), 255))
+        safe_set(lc, "cast_shadows", True)
+        # Shadow-casting point lights are the single most expensive thing in a
+        # Lumen scene on a 6 GB card. Small maps, short range.
+        safe_set(lc, "shadow_resolution_scale", 0.5)
+        safe_set(lc, "volumetric_scattering_intensity", 1.0)
+        _spawned.append(lamp)
+        placed += 1
+    LOG("[TBW] practical lights: {0}".format(placed))
 
     atmo = editor_actor.spawn_actor_from_class(
         unreal.SkyAtmosphere, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
@@ -443,11 +493,29 @@ def build_lighting():
     safe_set(ppv, "unbound", True)
     settings = ppv.get_editor_property("settings")
 
-    # fixed exposure: auto exposure hides lighting mistakes during art review
+    # Exposure. This block used to force AEM_MANUAL at EV100 = 11.
+    #
+    # EV100 11 is a target luminance of roughly 256 cd/m2. The wing was lit by a
+    # 6-lux sun, whose 18% grey reads about 0.6 cd/m2 - nine stops darker. The
+    # image was mathematically guaranteed to be black, indoors and out, and the
+    # comment defending the choice ("auto exposure hides lighting mistakes")
+    # made it sound deliberate.
+    #
+    # The principle was not wrong: unclamped auto exposure does hide mistakes.
+    # The answer is a CLAMPED auto exposure - it cannot lie about a room being
+    # four stops too dark, but it also cannot hand the player a black screen.
     safe_set(settings, "override_auto_exposure_method", True)
-    safe_set(settings, "auto_exposure_method", unreal.AutoExposureMethod.AEM_MANUAL)
+    safe_set(settings, "auto_exposure_method", unreal.AutoExposureMethod.AEM_HISTOGRAM)
+    safe_set(settings, "override_auto_exposure_min_brightness", True)
+    safe_set(settings, "auto_exposure_min_brightness", 0.4)
+    safe_set(settings, "override_auto_exposure_max_brightness", True)
+    safe_set(settings, "auto_exposure_max_brightness", 4.0)
     safe_set(settings, "override_auto_exposure_bias", True)
-    safe_set(settings, "auto_exposure_bias", 11.0)
+    safe_set(settings, "auto_exposure_bias", 1.0)
+    safe_set(settings, "override_auto_exposure_speed_up", True)
+    safe_set(settings, "auto_exposure_speed_up", 3.0)
+    safe_set(settings, "override_auto_exposure_speed_down", True)
+    safe_set(settings, "auto_exposure_speed_down", 1.0)
 
     # Lumen: quality that a P3000 can still turn, raised later on better hardware
     safe_set(settings, "override_lumen_scene_lighting_quality", True)
@@ -591,7 +659,7 @@ def main():
 
     # Lighting and gameplay bootstrap are isolated: 189 boxes and 25 actors are
     # too much work to discard because one property name changed.
-    for stage_name, stage in (("lighting", build_lighting),
+    for stage_name, stage in (("lighting", lambda: build_lighting(layout)),
                               ("gameplay", lambda: build_gameplay(layout))):
         try:
             stage()

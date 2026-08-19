@@ -17,7 +17,8 @@
  "sun": {
   "pitch": -14.0,
   "yaw": 125.0,
-  "intensity": 6.0,
+  "intensity": 42000.0,
+  "units": "lux",
   "color": [
    1.0,
    0.84,
@@ -2706,6 +2707,323 @@
     800.0
    ],
    "kind": "wall"
+  }
+ ],
+ "lights": [
+  {
+   "name": "R4_FamilyCorridor_Lamp_00",
+   "location": [
+    1975.0,
+    1320.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R4_FamilyCorridor_Lamp_01",
+   "location": [
+    1975.0,
+    2480.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R5_EvanChamber_Lamp_00",
+   "location": [
+    1400.0,
+    1750.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R6_RaynorChamber_Lamp_00",
+   "location": [
+    2550.0,
+    1750.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R7_Study_Lamp_00",
+   "location": [
+    1620.0,
+    800.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R7_Study_Lamp_10",
+   "location": [
+    2280.0,
+    800.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R10_BarracksAnnex_Lamp_00",
+   "location": [
+    3070.0,
+    4120.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R10_BarracksAnnex_Lamp_01",
+   "location": [
+    3070.0,
+    5080.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R10_BarracksAnnex_Lamp_10",
+   "location": [
+    3830.0,
+    4120.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R10_BarracksAnnex_Lamp_11",
+   "location": [
+    3830.0,
+    5080.0,
+    340.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R11_UpperChamber_Lamp_00",
+   "location": [
+    1420.0,
+    2720.0,
+    1250.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R11_UpperChamber_Lamp_01",
+   "location": [
+    1420.0,
+    3680.0,
+    1250.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R11_UpperChamber_Lamp_10",
+   "location": [
+    2130.0,
+    2720.0,
+    1250.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R11_UpperChamber_Lamp_11",
+   "location": [
+    2130.0,
+    3680.0,
+    1250.0
+   ],
+   "lumens": 2600.0,
+   "attenuation_radius": 900.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R2_Lamp_00",
+   "location": [
+    1640.0,
+    3272.0,
+    500.0
+   ],
+   "lumens": 5200.0,
+   "attenuation_radius": 1400.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R2_Lamp_01",
+   "location": [
+    1640.0,
+    4136.0,
+    500.0
+   ],
+   "lumens": 5200.0,
+   "attenuation_radius": 1400.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R2_Lamp_10",
+   "location": [
+    2360.0,
+    3272.0,
+    500.0
+   ],
+   "lumens": 5200.0,
+   "attenuation_radius": 1400.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R2_Lamp_11",
+   "location": [
+    2360.0,
+    4136.0,
+    500.0
+   ],
+   "lumens": 5200.0,
+   "attenuation_radius": 1400.0,
+   "color": [
+    255,
+    196,
+    132
+   ]
+  },
+  {
+   "name": "R2_DaisLamp_W",
+   "location": [
+    1700.0,
+    4600.0,
+    420.0
+   ],
+   "lumens": 3400.0,
+   "attenuation_radius": 1100.0,
+   "color": [
+    255,
+    186,
+    120
+   ]
+  },
+  {
+   "name": "R2_DaisLamp_E",
+   "location": [
+    2300.0,
+    4600.0,
+    420.0
+   ],
+   "lumens": 3400.0,
+   "attenuation_radius": 1100.0,
+   "color": [
+    255,
+    186,
+    120
+   ]
+  },
+  {
+   "name": "R1_QuayLamp",
+   "location": [
+    600.0,
+    1050.0,
+    300.0
+   ],
+   "lumens": 2200.0,
+   "attenuation_radius": 1000.0,
+   "color": [
+    255,
+    206,
+    150
+   ]
   }
  ],
  "interactables": [

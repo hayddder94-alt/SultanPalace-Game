@@ -28,6 +28,11 @@ WALL, FLOOR, HERO, GROUND, WATER = "wall", "floor", "hero", "ground", "water"
 class Layout:
     def __init__(self):
         self.boxes = []
+        # Every room built with a ceiling. A roofed box with no light source in
+        # it is black in any renderer - that is not a lighting style, it is a
+        # missing actor. Recording them here means lights are generated from
+        # the same authority as the geometry and cannot be forgotten.
+        self.ceilinged = []
 
     # -- primitives ---------------------------------------------------------
 
@@ -145,6 +150,8 @@ class Layout:
         if ceiling:
             self.box("{0}_Ceiling".format(name), (x + w * 0.5, y + d * 0.5, height + 0.1 * M),
                      (w, d, 0.2 * M), wall_kind)
+            self.ceilinged.append({"room": name, "x": x, "y": y, "w": w, "d": d,
+                                   "height": height, "z_base": 0.0})
 
 
 # ---------------------------------------------------------------------------
@@ -298,6 +305,9 @@ def build():
     for b in L.boxes:
         if b["name"].startswith("R11_UpperChamber"):
             b["center"][2] += up_z
+    for c in L.ceilinged:
+        if c["room"] == "R11_UpperChamber":
+            c["z_base"] = up_z
     L.boxes = [b for b in L.boxes if b["name"] != "R11_UpperChamber_Floor"]
 
     # Orin's bed, against the west wall of the chamber
@@ -441,13 +451,70 @@ def build():
          "vs": "VS-09", "scene": "VS09_TheCanalClasp", "note": "At the dock. Saw the boat leave."},
     ]
 
+    # -----------------------------------------------------------------
+    # Practical lighting.
+    #
+    # The wing shipped with exactly four light actors: a sun, a sky light, an
+    # atmosphere and a fog. Every roofed room therefore rendered black, and the
+    # player spawns in R4, which is roofed. The browser preview had already hit
+    # this and solved it by hiding ceilings and adding a headlamp; the real
+    # level had no such trick, so Play showed nothing at all.
+    #
+    # Lights are generated from L.ceilinged, the list the geometry builder fills
+    # in, so a future roofed room cannot be added without one.
+    # Spacing: one lamp per 6 m of run, never closer than 1.2 m to a wall.
+    # -----------------------------------------------------------------
+    lights = []
+
+    def lamp(name, x, y, z, lumens=2600.0, radius=9.0 * M, colour=(255, 196, 132)):
+        lights.append({
+            "name": name,
+            "location": [round(x, 2), round(y, 2), round(z, 2)],
+            "lumens": lumens,
+            "attenuation_radius": round(radius, 2),
+            "color": list(colour),
+        })
+
+    for c in L.ceilinged:
+        inset = 1.2 * M
+        usable_w = max(c["w"] - 2 * inset, 0.0)
+        usable_d = max(c["d"] - 2 * inset, 0.0)
+        nx = max(1, int(usable_w // (6.0 * M)) + 1)
+        ny = max(1, int(usable_d // (6.0 * M)) + 1)
+        # Hang them just under the ceiling, but never above head height + 1.6 m,
+        # so a 5.5 m corridor is not lit from a point nobody can perceive.
+        z = c["z_base"] + min(c["height"] - 0.5 * M, 3.4 * M)
+        for i in range(nx):
+            for j in range(ny):
+                fx = 0.5 if nx == 1 else i / float(nx - 1)
+                fy = 0.5 if ny == 1 else j / float(ny - 1)
+                lamp("{0}_Lamp_{1}{2}".format(c["room"], i, j),
+                     c["x"] + inset + usable_w * fx,
+                     c["y"] + inset + usable_d * fy,
+                     z)
+
+    # The audience hall is not in L.ceilinged - it has clerestory windows and no
+    # roof box - but 9 m of height eats daylight, and the dais is the one place
+    # the camera must read faces. Four hanging lamps and a warmer pair on the dais.
+    for i in range(2):
+        for j in range(2):
+            lamp("R2_Lamp_{0}{1}".format(i, j),
+                 hx + hw * (0.3 + 0.4 * i), hy + hd * (0.28 + 0.36 * j), 5.0 * M,
+                 lumens=5200.0, radius=14.0 * M)
+    lamp("R2_DaisLamp_W", hx + hw * 0.5 - 3.0 * M, dais_y, 4.2 * M, 3400.0, 11.0 * M, (255, 186, 120))
+    lamp("R2_DaisLamp_E", hx + hw * 0.5 + 3.0 * M, dais_y, 4.2 * M, 3400.0, 11.0 * M, (255, 186, 120))
+
+    # The canal gate at dusk: one lamp on the quay so the clasp is findable.
+    lamp("R1_QuayLamp", 6.0 * M, 10.5 * M, 3.0 * M, 2200.0, 10.0 * M, (255, 206, 150))
+
     return {
         "name": "L_VS_Palace_EastWing",
         "spec": "docs/PALACE_WING_SPEC.md",
         "units": "cm",
         "footprint_m": [40, 55],
         "player_start": {"location": [19.5 * M, 15.0 * M, 1.2 * M], "yaw": 90.0},
-        "sun": {"pitch": -14.0, "yaw": 125.0, "intensity": 6.0, "color": [1.0, 0.84, 0.67]},
+        "sun": {"pitch": -14.0, "yaw": 125.0, "intensity": 42000.0, "units": "lux",
+                "color": [1.0, 0.84, 0.67]},
         "fog": {"density": 0.035, "height_falloff": 0.15},
         "rooms_of_interest": {
             "R2_AudienceHall": [hx + hw * 0.5, hy + hd * 0.5, 1.7 * M],
@@ -458,6 +525,7 @@ def build():
             "R11_UpperChamber": [orin_bed[0] + 2.5 * M, orin_bed[1], up_z + 1.7 * M],
         },
         "boxes": L.boxes,
+        "lights": lights,
         "interactables": interactables,
         "characters": characters,
     }

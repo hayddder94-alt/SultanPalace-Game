@@ -129,11 +129,50 @@ def main() -> int:
     if not data.get("player_start"):
         errors.append("no player_start in the layout")
 
+    # 7 — a roofed room with no light in it renders black.
+    #
+    # This is the check that would have caught "the screen is black on Play".
+    # The wing had four light actors - sun, sky, atmosphere, fog - and the spawn
+    # is inside a ceilinged corridor, so the first thing the player ever saw was
+    # nothing. Geometry that cannot be seen is not built.
+    lights = data.get("lights", [])
+    if not lights:
+        errors.append("no lights in the layout - every roofed room will be black")
+
+    ceilings = [b for b in boxes if b["name"].endswith("_Ceiling")]
+    for ceil in ceilings:
+        cx, cy, cz = ceil["center"]
+        w, d, _ = ceil["size"]
+        x0, x1 = cx - w / 2, cx + w / 2
+        y0, y1 = cy - d / 2, cy + d / 2
+        inside = [l for l in lights
+                  if x0 <= l["location"][0] <= x1
+                  and y0 <= l["location"][1] <= y1
+                  and l["location"][2] <= cz]
+        if not inside:
+            room = ceil["name"][: -len("_Ceiling")]
+            errors.append(
+                f"{room} has a ceiling and no light under it - it will render black")
+
+    # 8 — and the very first thing the player sees must be lit.
+    start = data.get("player_start", {}).get("location")
+    if start and lights:
+        nearest = min(
+            ((sum((a - b) ** 2 for a, b in zip(start, l["location"]))) ** 0.5, l["name"])
+            for l in lights)
+        if nearest[0] > 1200.0:
+            errors.append(
+                f"the spawn is {nearest[0]/100:.1f} m from the nearest light "
+                f"({nearest[1]}) - the first frame will be dark")
+        else:
+            print(f"  spawn light    {nearest[1]} at {nearest[0]/100:.1f} m")
+
     print("=" * 66)
     print("LAYOUT / C++ CROSS-CHECK")
     print("=" * 66)
     print(f"  boxes          {len(boxes)}")
     print(f"  interactables  {len(items)}")
+    print(f"  lights         {len(data.get('lights', []))}")
     print(f"  flags in C++   {len(flags_enum)}")
     print(f"  story flags    {', '.join(sorted(i['flag'] for i in items))}")
     print()

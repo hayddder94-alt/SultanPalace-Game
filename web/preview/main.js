@@ -98,6 +98,25 @@ function buildLighting(layout) {
   scene.add(new THREE.HemisphereLight(0xbcd3f0, 0x6b5a42, 2.4));
   scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
+  // The practicals from the layout, so the preview shows the same lit rooms the
+  // engine does. Without these the preview relied on a hemisphere light and a
+  // headlamp - hacks that made it look fine while the real level rendered
+  // black, which is exactly the disagreement this preview exists to prevent.
+  // No shadows here: 21 shadow-casting point lights would crawl in WebGL and
+  // the preview is for layout and light PLACEMENT, not shadow quality.
+  for (const spec of layout.lights || []) {
+    const [x, y, z] = spec.location;
+    const c = spec.color || [255, 200, 140];
+    const lamp = new THREE.PointLight(
+      new THREE.Color(c[0] / 255, c[1] / 255, c[2] / 255),
+      (spec.lumens || 2600) / 90,
+      (spec.attenuation_radius || 900) / 100,
+      1.6);
+    // layout is cm with Y north / Z up; the preview is metres with Y up.
+    lamp.position.set(x / 100, z / 100, -y / 100);
+    scene.add(lamp);
+  }
+
   // warm fill over the hall so the hero volume reads first
   const fill = new THREE.PointLight(0xffd9a0, 60, 90, 1.6);
   fill.position.set(20, 6, -38);
