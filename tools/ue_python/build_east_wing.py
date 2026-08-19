@@ -465,6 +465,14 @@ def main():
     LOG("[TBW] Building L_VS_Palace_EastWing")
     LOG("=" * 70)
 
+    # Creating and saving a .umap needs the editor subsystems. Running this in a
+    # -game process would fail deep inside with a confusing error, so say it here.
+    if not level_editor or not editor_actor:
+        unreal.log_error(
+            "[TBW] editor subsystems unavailable. Run this inside the editor, or "
+            "headless with: UnrealEditor-Cmd.exe <project> -run=pythonscript -script=<this file>")
+        return
+
     if not level_editor.new_level(MAP_PACKAGE):
         unreal.log_error("[TBW] could not create {0}. Is it open and dirty?".format(MAP_PACKAGE))
         return
