@@ -460,6 +460,56 @@ def build_gameplay(layout):
 # main
 # ---------------------------------------------------------------------------
 
+def open_or_reset_level():
+    """
+    new_level() refuses to overwrite an existing asset - it fails with
+    "Failed to validate the destination. An asset already exists at this
+    location." So: create the level the first time, and on every later run open
+    the existing one and empty it instead.
+
+    Emptying rather than deleting is deliberate. The map asset keeps its identity,
+    so anything referencing it by path - a world setting, a shortcut, a future
+    sublevel - does not break every time the level is regenerated.
+    """
+    exists = False
+    try:
+        exists = unreal.EditorAssetLibrary.does_asset_exist(MAP_PACKAGE)
+    except Exception:
+        pass
+
+    if not exists:
+        if level_editor.new_level(MAP_PACKAGE):
+            LOG("[TBW] created a new level")
+            return True
+        unreal.log_error("[TBW] could not create {0}".format(MAP_PACKAGE))
+        return False
+
+    LOG("[TBW] level already exists - opening and clearing it")
+    if not level_editor.load_level(MAP_PACKAGE):
+        unreal.log_error(
+            "[TBW] could not open {0}. If the editor has it open with unsaved "
+            "changes, close the editor and run this again.".format(MAP_PACKAGE))
+        return False
+
+    removed = 0
+    kept = 0
+    for actor in editor_actor.get_all_level_actors():
+        # WorldSettings and the default brush cannot be destroyed and must not be.
+        if isinstance(actor, unreal.WorldSettings) or isinstance(actor, unreal.Brush):
+            kept += 1
+            continue
+        try:
+            if editor_actor.destroy_actor(actor):
+                removed += 1
+            else:
+                kept += 1
+        except Exception:
+            kept += 1
+
+    LOG("[TBW] cleared {0} actor(s), kept {1}".format(removed, kept))
+    return True
+
+
 def main():
     LOG("=" * 70)
     LOG("[TBW] Building L_VS_Palace_EastWing")
@@ -473,8 +523,7 @@ def main():
             "headless with: UnrealEditor-Cmd.exe <project> -run=pythonscript -script=<this file>")
         return
 
-    if not level_editor.new_level(MAP_PACKAGE):
-        unreal.log_error("[TBW] could not create {0}. Is it open and dirty?".format(MAP_PACKAGE))
+    if not open_or_reset_level():
         return
 
     layout = load_layout()
