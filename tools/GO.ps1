@@ -23,6 +23,58 @@ $Report = Join-Path $LogDir "REPORT.txt"
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 
 $lines = New-Object System.Collections.Generic.List[string]
+
+<#
+    Finish: write the full report, build a SHORT version, put that on the
+    clipboard, and say so. The user did not paste the last report, and the
+    reason was friction - open Notepad, select all, copy, switch, paste. The
+    short version is what actually needs reading, and it arrives pre-copied.
+#>
+function Finish([int]$code, [string]$verdict) {
+    $lines | Set-Content -Path $Report -Encoding UTF8
+
+    $short = New-Object System.Collections.Generic.List[string]
+    $short.Add("=== THE BETRAYED WILL - REPORT $(Get-Date -Format 'yyyy-MM-dd HH:mm') ===")
+    $short.Add("VERDICT: $verdict")
+    $short.Add("")
+
+    # the lines that carry information: results, errors, the test output
+    foreach ($l in $lines) {
+        if ($l -match "error [A-Z]+\d+|: error|LNK\d{4}|fatal error|BUILD SUCCEEDED|BUILD FAILED|Exit code|Errors found|Warnings found|Engine version|SELFTEST|PASS  |FAIL  |INFO  |VERDICT|now at:|git pull failed") {
+            $short.Add($l.Trim())
+        }
+    }
+    if ($short.Count -gt 90) {
+        $trimmed = $short[0..89]
+        $trimmed += "... (full report in $Report)"
+        $short = $trimmed
+    }
+
+    $text = ($short -join "`r`n")
+    try {
+        Set-Clipboard -Value $text
+        $copied = $true
+    } catch {
+        $copied = $false
+    }
+
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "   $verdict" -ForegroundColor $(if ($code -eq 0) { "Green" } else { "Red" })
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host ""
+    if ($copied) {
+        Write-Host "   The report is ALREADY COPIED to your clipboard." -ForegroundColor Green
+        Write-Host "   Switch to the chat and press Ctrl+V. Nothing else to do."
+    } else {
+        Write-Host "   Could not reach the clipboard. Opening the file instead."
+        Start-Process notepad $Report
+    }
+    Write-Host ""
+    Write-Host "   Full log: $Report"
+    Write-Host ""
+    exit $code
+}
 function Say($text, $colour = "Gray") {
     Write-Host $text -ForegroundColor $colour
     $lines.Add($text)
@@ -58,13 +110,8 @@ if (-not $SkipPull) {
     Pop-Location
 
     if ($pullCode -ne 0) {
-        Say "   git pull FAILED - check the internet connection." "Red"
         Record "RESULT: git pull failed"
-        $lines | Set-Content -Path $Report -Encoding UTF8
-        Write-Host ""
-        Write-Host "   Report: $Report"
-        Start-Process notepad $Report
-        exit 1
+        Finish 1 "GIT PULL FAILED - check the internet connection"
     }
     Write-Host "   code is up to date: $head" -ForegroundColor Green
 } else {
@@ -97,14 +144,8 @@ if (-not $SkipBuild) {
 }
 
 if ($buildCode -ne 0) {
-    Write-Host ""
-    Write-Host "   BUILD FAILED - nothing else matters until this is fixed." -ForegroundColor Red
     Record "RESULT: build failed with exit code $buildCode"
-    $lines | Set-Content -Path $Report -Encoding UTF8
-    Write-Host ""
-    Write-Host "   Report: $Report"
-    Start-Process notepad $Report
-    exit 1
+    Finish 1 "BUILD FAILED - paste this, nothing else needs doing"
 }
 Write-Host "   build: SUCCEEDED" -ForegroundColor Green
 
@@ -130,19 +171,10 @@ Record ""
 Record "RESULT: build ok, self test exit code $testCode"
 Record "---------- END OF REPORT ----------"
 
-$lines | Set-Content -Path $Report -Encoding UTF8
-
-Write-Host ""
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host "   DONE" -ForegroundColor Cyan
-Write-Host "============================================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "   Report written to:"
-Write-Host "     $Report"
-Write-Host ""
-Write-Host "   It is opening in Notepad. Select all with Ctrl+A, copy with"
-Write-Host "   Ctrl+C, and paste it into the chat."
-Write-Host ""
-
-Start-Process notepad $Report
-exit $testCode
+$verdict = switch ($testCode) {
+    0 { "ALL GREEN - build ok, every system check passed" }
+    1 { "BUILD OK, but some system checks FAILED" }
+    2 { "BUILD OK, but the self test never ran" }
+    default { "BUILD OK, self test returned $testCode" }
+}
+Finish $testCode $verdict
