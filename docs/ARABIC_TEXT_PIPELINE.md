@@ -59,3 +59,30 @@ reads, and which would silently drift away from the file that actually ships.
 
 `Config/DefaultEditor.ini` now sets `bMonitorContentDirectories=False`, so the
 editor stops offering. Requires an editor restart to take effect.
+
+---
+
+## ✅ PROVEN ON SCREEN — 2026-08-19
+
+Screenshot from a live PIE session on the Windows machine (`ar-IQ` Windows,
+UE 5.8.1, `DejaVuSans.ttf` loaded — the log line
+`Font face 'C:/Dev/SultanPalace-Game/Content/TBW/UI/Fonts/DejaVuSans.ttf'
+subface index 0 successfully added to font face map` appears immediately
+before the frame was taken):
+
+| Element | Rendered | Verdict |
+|---|---|---|
+| HUD title, top-left | `THE BETRAYED WILL  /  وصية الغدر` | letters **joined**, correct medial/final forms, word order right-to-left |
+| Objective, top-right | `شاهد. اعرف خوف الأب.` | joined, RTL, and **right-aligned** — `HAlign_Right` + `ETextFlowDirection::Auto` behaved |
+
+This closes the last open question in the Arabic pipeline. Previously only the
+*string* was proven (`tbw.SelfTest`: "Arabic survives JSON to subtitle"); now
+the *pixels* are proven too.
+
+Consequence: converting `docs/VERTICAL_SLICE_SCRIPT.md` VS-02 … VS-18 into JSON
+under `Content/TBW/Data/Dialogue/` is unblocked. It was deliberately held back
+until one segment rendered correctly on a real screen.
+
+Still unproven: Arabic inside the **subtitle** widget during an actual dialogue
+scene (`tbw.Dialogue.Play VS01_OrinLastWords`) — same widget class and same
+font as the objective, so expected to pass, but expected is not measured.

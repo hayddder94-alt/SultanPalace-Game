@@ -246,8 +246,20 @@ void ATBWHUD::DrawHUD()
 	// Arabic title is a Slate widget (see BeginPlay). Do not Canvas-draw it
 	// through DroidSansFallback — that produced glyph warnings / mojibake.
 
-	DrawText(FString::Printf(TEXT("%s   UE %s   L_Dev_Sandbox"), TBW_VERSION_STRING, TBW_ENGINE_LOCK),
+	// The map name used to be the literal "L_Dev_Sandbox". That is how a
+	// screenshot came back showing the sandbox banner while the editor tab said
+	// "NewMap" - the HUD was reporting a hard-coded string, not reality. A debug
+	// overlay that lies is worse than no overlay, so ask the world.
+	FString MapName = TEXT("<no world>");
+	if (const UWorld* World = GetWorld())
+	{
+		MapName = World->GetMapName();
+		MapName.RemoveFromStart(World->StreamingLevelsPrefix);   // strips "UEDPIE_0_"
+	}
+
+	DrawText(FString::Printf(TEXT("%s   UE %s   %s"), TBW_VERSION_STRING, TBW_ENGINE_LOCK, *MapName),
 		FLinearColor(0.55f, 0.55f, 0.55f), 24.f, 36.f, nullptr, 0.85f);
+
 
 	FString IdentityName = TEXT("Evan");
 	FVector Location = FVector::ZeroVector;
