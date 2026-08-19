@@ -534,21 +534,31 @@ def open_or_reset_level():
         return False
 
     removed = 0
-    kept = 0
+    # "kept" used to lump three different things into one number: actors kept on
+    # purpose, actors that refused to die, and actors that threw. The count went
+    # 0, then 2, then 3 across three rebuilds and there was no way to tell which
+    # kind had grown. Separate them and name the survivors.
+    system = 0
+    refused = []
     for actor in editor_actor.get_all_level_actors():
         # WorldSettings and the default brush cannot be destroyed and must not be.
         if isinstance(actor, unreal.WorldSettings) or isinstance(actor, unreal.Brush):
-            kept += 1
+            system += 1
             continue
         try:
             if editor_actor.destroy_actor(actor):
                 removed += 1
             else:
-                kept += 1
-        except Exception:
-            kept += 1
+                refused.append((actor.get_actor_label(), type(actor).__name__, "refused"))
+        except Exception as exc:                                   # noqa: BLE001
+            refused.append((actor.get_actor_label(), type(actor).__name__, str(exc)[:60]))
 
-    LOG("[TBW] cleared {0} actor(s), kept {1}".format(removed, kept))
+    LOG("[TBW] cleared {0} actor(s); {1} engine-owned, {2} survived".format(
+        removed, system, len(refused)))
+    for label, cls, why in refused:
+        # A survivor is a leak: it is still in the level when the fresh copy is
+        # placed on top of it, so every rebuild would add one more.
+        unreal.log_warning("[TBW] survived the clear: {0} ({1}) - {2}".format(label, cls, why))
     return True
 
 

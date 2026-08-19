@@ -223,3 +223,34 @@ INFO  map 'L_VS_Palace_EastWing', 9 interactable(s), 16 cast member(s)
 
 `INFO body: placeholder cube` كما هو: المحرك مُثبَّت بلا مكوّن
 Templates and Feature Packs.
+
+---
+
+## 2026-08-19 23:09 — القصر بطاقمه الكامل، مُتحقَّق داخل المحرك
+
+```
+[TBW] story characters staged: 17
+[TBW] actors placed : 221
+INFO  map 'L_VS_Palace_EastWing', 9 interactable(s), 17 cast member(s)
+PASS  authored level has its cast  (17 found)
+TBW SELFTEST RESULT: 33 passed, 0 failed
+```
+
+الحساب يطابق تمامًا: **189 صندوقًا + 9 عناصر + 17 شخصية + 6 (شمس، سماء، غلاف
+جوي، ضباب، معالجة لاحقة، PlayerStart) = 221**. لا زيادة ولا نقصان.
+
+### ملاحظة على عدّاد التنظيف
+
+سطر `cleared 219 actor(s), kept N` كان يخلط ثلاثة أشياء في رقم واحد: ما يُبقى
+عمدًا (`WorldSettings` و`Brush`)، وما يرفض الحذف، وما يرمي استثناءً. الرقم تحرّك
+0 ثم 2 ثم 3 عبر ثلاث عمليات بناء، ولم تكن هناك طريقة لمعرفة أي نوع نما.
+
+الآن يُفصل ويُسمّى:
+
+```
+[TBW] cleared N actor(s); M engine-owned, K survived
+[TBW] survived the clear: <label> (<class>) - <reason>
+```
+
+أي ناجٍ من التنظيف تسريب: يبقى في المستوى بينما تُوضع النسخة الجديدة فوقه، فكل
+إعادة بناء تضيف واحدًا. إن ظهر السطر الثاني في التشغيل القادم، عندنا اسم الفاعل.
