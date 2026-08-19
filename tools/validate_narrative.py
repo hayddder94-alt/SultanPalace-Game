@@ -160,6 +160,27 @@ def main() -> int:
                 warnings.append(
                     f"Objectives.json rule {i}: nothing in the level or the dialogue sets '{flag}' yet")
 
+    # The data only helps if it actually ships. Raw .json under Content/ is not
+    # a uasset, so the cooker ignores it; only UFS staging copies it into the
+    # pak. Without that line the packaged game launches with no dialogue and no
+    # objectives, and nothing before launch would have said so.
+    game_ini = ROOT / "Config" / "DefaultGame.ini"
+    if game_ini.is_file():
+        ini = game_ini.read_text(encoding="utf-8")
+        if 'DirectoriesToAlwaysStageAsUFS=(Path="TBW/Data")' not in ini:
+            errors.append(
+                "DefaultGame.ini: Content/TBW/Data is not staged as UFS - the "
+                "packaged game would ship with no dialogue and no objectives")
+
+    # The editor must not try to turn these files into DataTable assets.
+    editor_ini = ROOT / "Config" / "DefaultEditor.ini"
+    if editor_ini.is_file():
+        ed = editor_ini.read_text(encoding="utf-8")
+        if "bMonitorContentDirectories=False" not in ed:
+            warnings.append(
+                "DefaultEditor.ini: content monitoring is on - the editor will "
+                "offer to import Content/TBW/Data/*.json as DataTables")
+
     print("=" * 66)
     print("NARRATIVE DATA CHECK")
     print("=" * 66)

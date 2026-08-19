@@ -102,3 +102,18 @@ cd C:\Dev\SultanPalace-Game
    .\tools\selftest.cmd -Map /Game/TBW/Maps/L_VS_Palace_EastWing
    ```
    عندها ستتحول أسطر `INFO map ... 0 interactable(s)` إلى فحوص `PASS` حقيقية.
+
+---
+
+## 2026-08-19 — عطلان اكتُشفا من لقطة شاشة المحرر
+
+| العطل | السبب | الإصلاح | التحقق |
+|---|---|---|---|
+| المحرر يعرض حوار **DataTable import options** على `Content/TBW/Data/Objectives.json` | مراقبة مجلدات المحتوى مفعّلة افتراضيًا، فيرى المحرر ملفات `.json` كـ«محتوى مصدري» ويعرض استيرادها. الاستيراد كان سيُنشئ `UDataTable` لا يقرأه التشغيل أبدًا، ثم ينحرف عن الملف المشحون فعلًا | `Config/DefaultEditor.ini` → `bMonitorContentDirectories=False` + استثناء `TBW/Data/*` | يتطلب إعادة تشغيل المحرر. `validate_narrative.py` صار يحذّر إن رجع الإعداد |
+| **الأخطر:** `+DirectoriesToAlwaysCook=(Path="/Game/TBW/Data")` | هذا السطر يشمل الـ uassets فقط. ملفاتنا `.json` خام، فالطابخ (cooker) كان سيتجاهلها بالكامل: **النسخة المحزومة كانت ستُشحن بلا حوار وبلا أهداف**، ولا شيء قبل الإطلاق كان سيقول ذلك | استُبدل بـ `+DirectoriesToAlwaysStageAsUFS=(Path="TBW/Data")` — نفس آلية شحن خط DejaVu | فحص جديد داخل `tools/validate_narrative.py` يُفشل البناء إن اختفى السطر |
+| `+MapsToCook` يشير إلى `L_Dev_Sandbox` و`L_VS_Palace` | خريطتان غير موجودتين؛ الخريطة الحقيقية `L_VS_Palace_EastWing` | صُحّح | — |
+
+تحذير `Could not find Glyph Index 0 with codepoint U+61c` **ليس عطلًا**: هو محرف
+ARABIC LETTER MARK داخل ترجمة واجهة المحرر نفسها على ويندوز عربي، ولا يوجد في
+بياناتنا (`grep -rlP '\x{061C}' Content/TBW/Data/` → لا شيء). التفاصيل في
+`docs/ARABIC_TEXT_PIPELINE.md`.

@@ -22,3 +22,40 @@ No file on disk contained stored Mojibake (`ÙˆØµÙŠØ©`). The garbled PIE 
 ## Not run here
 
 Unreal Editor is not installed on this machine. Compile / PIE / visual confirmation of Arabic must be done on the Windows UE 5.8 PC.
+
+## Editor-log noise that is NOT a game bug
+
+On an Arabic Windows install (`ar-IQ`) the editor's own UI is localised, and the
+editor draws its own UI with `Roboto` + `DroidSansFallback`, not with our font.
+That produces, repeatedly, in the Output Log:
+
+```
+LogSlate: Warning: Could not find Glyph Index 0 with codepoint U+61c,
+          getting last resort font data ../../../Engine/Content/Slate/Fonts/DroidSansFallback.ttf
+```
+
+`U+061C` is ARABIC LETTER MARK — an invisible bidi control character that the
+Arabic editor localisation embeds in menu and tooltip strings. It has no glyph
+in any font by design.
+
+* It concerns **editor chrome**, not our HUD.
+* Our subtitles/objectives go through `STextBlock` + `DejaVuSans.ttf`.
+* Confirmed absent from our data: `grep -rlP '\x{061C}' Content/TBW/Data/` → none.
+
+Ignore it. It will not appear in a packaged build. If you want the log quiet,
+switch the editor language to English in
+*Edit → Editor Preferences → Region & Language*.
+
+## The DataTable import dialog
+
+Double-clicking `Content/TBW/Data/Objectives.json` in the Content Browser — or
+accepting the *"source content files changed, import them?"* toast — opens the
+**DataTable import options** dialog. **Always press إلغاء / Cancel.**
+
+Those `.json` files are runtime data read with `FFileHelper`
+(`TBWObjectiveSubsystem.cpp:25`, `TBWDialogueSubsystem.cpp:21`). They are not
+assets. Importing one would create a `UDataTable` uasset that the runtime never
+reads, and which would silently drift away from the file that actually ships.
+
+`Config/DefaultEditor.ini` now sets `bMonitorContentDirectories=False`, so the
+editor stops offering. Requires an editor restart to take effect.
