@@ -133,7 +133,9 @@ void ATBWPlayerCharacter::ResolveCharacterVisual()
 		TEXT("/Game/TBW/Characters/Evan/SKM_Evan.SKM_Evan"),
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny.SKM_Manny"),
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn"),
-		TEXT("/Game/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin")
+		TEXT("/Game/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin"),
+		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"),
+		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple")
 	};
 
 	USkeletalMesh* Chosen = nullptr;

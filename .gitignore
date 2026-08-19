@@ -49,6 +49,9 @@ Config/DefaultEditorPerProjectUserSettings.ini
 
 # Third-party art packs: acquired per machine from your Fab library, never committed.
 # A single Megascans pack can exceed the size of this entire repository.
+# Engine template content, copied per machine by tools/ADD_CHARACTERS.cmd
+Content/Characters/
+
 Content/Megascans/
 Content/MSPresets/
 Content/MetaHumans/
