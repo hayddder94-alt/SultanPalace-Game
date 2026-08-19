@@ -86,3 +86,32 @@ until one segment rendered correctly on a real screen.
 Still unproven: Arabic inside the **subtitle** widget during an actual dialogue
 scene (`tbw.Dialogue.Play VS01_OrinLastWords`) — same widget class and same
 font as the objective, so expected to pass, but expected is not measured.
+
+### 2026-08-19, second occurrence: the fix was in the wrong file
+
+The DataTable import dialog came back, this time on
+`Content/TBW/Data/Dialogue/VS02_TheWillReading.json`.
+
+`bMonitorContentDirectories=False` had been written into `Config/DefaultEditor.ini`.
+That setting belongs to `UEditorLoadingSavingSettings`, which is declared
+`UCLASS(config=EditorPerProjectUserSettings)` — so the engine never read it
+there. The line existed, looked right in a diff, and did nothing. The check in
+`tools/validate_narrative.py` then read the same wrong file and reported green
+over a live defect, which is worse than having no check.
+
+Correct locations:
+
+| File | In git? | Role |
+|---|---|---|
+| `Config/DefaultEditorPerProjectUserSettings.ini` | **yes** | project default for every clone |
+| `Saved/Config/WindowsEditor/EditorPerProjectUserSettings.ini` | no | the per-machine copy the editor writes; **overrides the above** |
+
+Because the editor has already written its own copy on this machine, the
+project default will not win on its own. Untick it once:
+
+**Edit → Editor Preferences → Loading & Saving → Auto Reimport →
+Monitor Content Directories** (`مراقبة أدلة المحتوى`).
+
+There is no correct row type to pick in that dialog. `FarmVisualDataRow`,
+`GameplayTagTableRow` and the rest are unrelated engine structs. The answer is
+Cancel, every time.

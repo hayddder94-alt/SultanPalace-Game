@@ -43,9 +43,13 @@ FileOpenOrder/
 Thumbs.db
 desktop.ini
 
-# Per-user editor
+# Per-user editor. The copy the editor writes under Saved/ is per-machine and
+# stays out. Config/DefaultEditorPerProjectUserSettings.ini is the opposite: it
+# is the project-wide default every clone needs - notably
+# bMonitorContentDirectories=False, without which the editor offers to import
+# our runtime JSON as DataTables.
 *EditorPerProjectUserSettings.ini
-Config/DefaultEditorPerProjectUserSettings.ini
+!Config/DefaultEditorPerProjectUserSettings.ini
 
 # Visual Studio's per-machine component list. Written by the editor the first
 # time it offers to install a missing workload. Says nothing about the game.

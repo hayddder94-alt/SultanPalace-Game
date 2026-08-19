@@ -175,13 +175,34 @@ def main() -> int:
                 "packaged game would ship with no dialogue and no objectives")
 
     # The editor must not try to turn these files into DataTable assets.
-    editor_ini = ROOT / "Config" / "DefaultEditor.ini"
-    if editor_ini.is_file():
+    #
+    # This used to look in DefaultEditor.ini and pass, while the setting there
+    # did nothing: UEditorLoadingSavingSettings is
+    # UCLASS(config=EditorPerProjectUserSettings). A check that reads the wrong
+    # file is worse than no check - it reports green over a live defect.
+    editor_ini = ROOT / "Config" / "DefaultEditorPerProjectUserSettings.ini"
+    if not editor_ini.is_file():
+        errors.append(
+            "Config/DefaultEditorPerProjectUserSettings.ini is missing - the "
+            "editor will offer to import Content/TBW/Data/*.json as DataTables")
+    else:
         ed = editor_ini.read_text(encoding="utf-8")
         if "bMonitorContentDirectories=False" not in ed:
-            warnings.append(
-                "DefaultEditor.ini: content monitoring is on - the editor will "
-                "offer to import Content/TBW/Data/*.json as DataTables")
+            errors.append(
+                "DefaultEditorPerProjectUserSettings.ini: content monitoring is "
+                "on - the editor will offer to import our runtime JSON as DataTables")
+    stale = ROOT / "Config" / "DefaultEditor.ini"
+    stale_body = ""
+    if stale.is_file():
+        # Comments are allowed to name the class - the whole point of the note
+        # left there is to stop someone re-adding the section.
+        stale_body = "\n".join(
+            l for l in stale.read_text(encoding="utf-8").splitlines()
+            if not l.lstrip().startswith(";"))
+    if "[/Script/UnrealEd.EditorLoadingSavingSettings]" in stale_body:
+        errors.append(
+            "DefaultEditor.ini declares EditorLoadingSavingSettings, which the "
+            "engine reads from EditorPerProjectUserSettings - the setting is inert there")
 
     print("=" * 66)
     print("NARRATIVE DATA CHECK")
