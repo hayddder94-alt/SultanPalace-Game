@@ -40,7 +40,7 @@ function Finish([int]$code, [string]$verdict) {
 
     # the lines that carry information: results, errors, the test output
     foreach ($l in $lines) {
-        if ($l -match "error [A-Z]+\d+|: error|LNK\d{4}|fatal error|BUILD SUCCEEDED|BUILD FAILED|Exit code|Errors found|Warnings found|Engine version|SELFTEST|PASS  |FAIL  |INFO  |VERDICT|now at:|git pull failed") {
+        if ($l -match "error [A-Z]+\d+|: error|LNK\d{4}|fatal error|BUILD SUCCEEDED|BUILD FAILED|Exit code|Errors found|Warnings found|Engine version|SELFTEST|PASS  |FAIL  |INFO  |VERDICT|now at:|git pull failed|^  git: |remote reachable|locally modified|branch  |remote url|cause  |suggested fix|WHY THE PULL FAILED|^      ") {
             $short.Add($l.Trim())
         }
     }
@@ -50,7 +50,18 @@ function Finish([int]$code, [string]$verdict) {
         $short = $trimmed
     }
 
-    $text = ($short -join "`r`n")
+    <#
+        Wrap the clipboard copy in a PowerShell block comment.
+
+        Twice now the report has been pasted into PowerShell instead of the
+        chat, and PowerShell answered with thirty red CommandNotFoundException
+        lines for "===", "VERDICT:", "now at:" and friends - noise on top of
+        whatever went wrong in the first place. Inside <# #> the whole thing is
+        a comment: paste it into PowerShell and absolutely nothing happens.
+        Paste it into the chat and it costs two extra lines.
+    #>
+    $text = "<# ---- The Betrayed Will report. Paste into the CHAT, not here. ----`r`n" +
+            ($short -join "`r`n") + "`r`n#>"
     try {
         Set-Clipboard -Value $text
         $copied = $true
@@ -104,15 +115,65 @@ if (-not $SkipPull) {
     Push-Location $ProjectRoot
     $pull = & git pull origin arena/019ffc4c-sultanpalace-game 2>&1
     $pullCode = $LASTEXITCODE
-    $pull | ForEach-Object { Record "  $_" }
+    $pull | ForEach-Object { Record "  git: $_" }
     $head = & git log -1 --pretty=format:"%h %s" 2>&1
     Record "  now at: $head"
-    Pop-Location
 
     if ($pullCode -ne 0) {
+        <#
+            Do not guess. The previous version of this script announced
+            "check the internet connection" for every possible failure, and
+            then the short report filtered git's actual message out, so the
+            report said a pull had failed and gave no reason at all.
+
+            Ask git what is actually wrong, classify it, and print the one
+            command that fixes that specific case.
+        #>
+        Record ""
+        Record "---------- WHY THE PULL FAILED ----------"
+
+        & git ls-remote --exit-code origin HEAD > $null 2>&1
+        $reachable = ($LASTEXITCODE -eq 0)
+        Record "  remote reachable      : $reachable"
+        Record "  branch                : $(& git rev-parse --abbrev-ref HEAD 2>&1)"
+        Record "  remote url            : $(& git remote get-url origin 2>&1)"
+
+        $dirty = @(& git status --porcelain 2>&1 | Where-Object { $_ -notmatch '^\?\?' })
+        Record "  locally modified files: $($dirty.Count)"
+        foreach ($d in $dirty) { Record "      $d" }
+
+        $blob = ($pull -join "`n")
+        if (-not $reachable) {
+            $why = "no network, or GitHub is unreachable from this machine"
+            $fix = "check the connection, then run .\tools\GO.cmd again"
+        } elseif ($blob -match "local changes|would be overwritten|Please commit your changes|Please, commit") {
+            $why = "local edits to tracked files block the merge"
+            $names = @($dirty | ForEach-Object { ($_ -replace '^..', '').Trim() } | Select-Object -First 6)
+            $fix = "git checkout -- " + ($names -join " ") + "   (or 'git stash' to keep them)"
+        } elseif ($blob -match "CONFLICT|Automatic merge failed") {
+            $why = "a real merge conflict"
+            $fix = "git merge --abort   then ask, do not resolve it blind"
+        } elseif ($blob -match "divergent branches|need to specify how to reconcile|not possible to fast-forward") {
+            $why = "local commits diverged from the branch"
+            $fix = "git pull --rebase origin arena/019ffc4c-sultanpalace-game"
+        } elseif ($blob -match "not a git repository") {
+            $why = "this folder is not a git checkout"
+            $fix = "clone the repository again into C:\Dev\SultanPalace-Game"
+        } else {
+            $why = "unclassified - read the git lines above"
+            $fix = "paste this report into the chat"
+        }
+        Record "  cause                 : $why"
+        Record "  suggested fix         : $fix"
         Record "RESULT: git pull failed"
-        Finish 1 "GIT PULL FAILED - check the internet connection"
+
+        Write-Host ""
+        Write-Host "   cause : $why" -ForegroundColor Yellow
+        Write-Host "   fix   : $fix" -ForegroundColor Yellow
+        Pop-Location
+        Finish 1 "GIT PULL FAILED - $why"
     }
+    Pop-Location
     Write-Host "   code is up to date: $head" -ForegroundColor Green
 } else {
     Record "---------- STEP 1: skipped ----------"

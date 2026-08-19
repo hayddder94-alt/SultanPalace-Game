@@ -197,3 +197,42 @@ E:\UE_5.8\Engine\Binaries\ThirdParty\DotNet\...\dotnet.exe
 إلى **خطأ قاتل يوقف السكربت** — وهذا ما أنهى التشغيل السابق قبل أن تبدأ الترجمة أصلًا.
 الأدوات الأصلية (UBT، MSVC) تكتب تقدّمها وتحذيراتها على stderr بشكل طبيعي، فكان البناء
 سيتوقف عند أول تحذير. صار تنفيذ الأدوات داخل دالة تُرخي هذا الإعداد أثناء الاستدعاء فقط.
+
+---
+
+## When `git pull` refuses
+
+`.\tools\GO.cmd` pulls before it builds. If that pull fails, the build never
+happens — and until 2026-08-19 the script announced *"check the internet
+connection"* no matter what the real cause was, then filtered git's own words
+out of the copied report. So the report said a pull had failed and gave no
+reason. That is fixed: GO now asks git what is wrong and prints the specific
+remedy.
+
+But GO pulls *itself*, so a broken pull cannot deliver its own fix. Use this
+instead — it diagnoses first and picks the safe action:
+
+```
+.\tools\PULL.cmd
+```
+
+| Flag | Effect |
+|---|---|
+| *(none)* | stash local edits, pull, put them back |
+| `-Discard` | throw local edits away, then pull |
+| `-DryRun` | report only, change nothing |
+
+### The usual cause
+
+Opening the project rewrites tracked files under `Config\`, and a level build
+touches the map. Git then refuses to merge over them. Nothing is broken and
+nothing is lost; the edits are almost always the editor's own churn.
+`PULL.cmd` stashes rather than discards by default, because a stash costs
+nothing and an overwrite cannot be undone.
+
+### Reading the clipboard report
+
+The report GO copies is now wrapped in `<# ... #>`. Pasted into the **chat** it
+reads normally; pasted into **PowerShell** by mistake it is a comment and does
+nothing. Before that wrapper, a misdirected paste produced a screen of
+`The term '===' is not recognized` on top of whatever had actually gone wrong.
