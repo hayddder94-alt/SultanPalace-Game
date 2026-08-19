@@ -204,6 +204,16 @@ def main() -> int:
             "DefaultEditor.ini declares EditorLoadingSavingSettings, which the "
             "engine reads from EditorPerProjectUserSettings - the setting is inert there")
 
+    # If anyone ever accepts the editor's import dialog, a .uasset lands next to
+    # the .json it was made from. The runtime keeps reading the .json, so the
+    # asset is dead weight that silently drifts out of sync with the shipped
+    # text - the worst kind of duplicate, because both look authoritative.
+    for asset in DIALOGUE_DIR.parent.rglob("*.uasset"):
+        errors.append(
+            f"{asset.relative_to(ROOT)}: an asset was imported into the data "
+            f"directory. The runtime reads the .json with FFileHelper and will "
+            f"never look at this. Delete it and press Cancel on that dialog.")
+
     print("=" * 66)
     print("NARRATIVE DATA CHECK")
     print("=" * 66)
