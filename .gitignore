@@ -47,6 +47,16 @@ desktop.ini
 *EditorPerProjectUserSettings.ini
 Config/DefaultEditorPerProjectUserSettings.ini
 
+# Visual Studio's per-machine component list. Written by the editor the first
+# time it offers to install a missing workload. Says nothing about the game.
+.vsconfig
+
+# Maps the editor creates at the Content root when you press File > New Level
+# and save without choosing a folder. The project has exactly one map and it
+# lives under Content/TBW/Maps. Anything here is a stray.
+/Content/*.umap
+/Content/*.uasset
+
 # Third-party art packs: acquired per machine from your Fab library, never committed.
 # A single Megascans pack can exceed the size of this entire repository.
 # Engine template content, copied per machine by tools/ADD_CHARACTERS.cmd
