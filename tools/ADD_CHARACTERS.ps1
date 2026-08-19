@@ -16,6 +16,7 @@
 
 param(
     [string]$EngineRoot = $env:UE58_ROOT,
+    [string]$Source = "",
     [switch]$Force,
     [switch]$SkipVerify
 )
@@ -45,6 +46,13 @@ Write-Host ""
 # ---------------------------------------------------------------- find source
 # Ordered by preference: the Blueprint third person template ships the full
 # Manny/Quinn set with animations and an AnimBP, which is what the pawn looks for.
+if ($Source) {
+    if (-not (Test-Path $Source)) {
+        Write-Host " -Source path does not exist: $Source" -ForegroundColor Red
+        exit 1
+    }
+    $candidates = @($Source)
+} else {
 $candidates = @(
     "Engine\Templates\TP_ThirdPersonBP\Content\Characters",
     "Engine\Templates\TP_ThirdPerson\Content\Characters",
@@ -53,18 +61,37 @@ $candidates = @(
 ) | ForEach-Object { Join-Path $EngineRoot $_ } | Where-Object { Test-Path $_ }
 
 if (-not $candidates -or $candidates.Count -eq 0) {
-    Write-Host " No template character content found under the engine." -ForegroundColor Yellow
-    Write-Host " Searching more widely (this can take a moment) ..."
-    $found = Get-ChildItem -Path (Join-Path $EngineRoot "Engine\Templates") -Directory -Recurse `
-                -Filter "Mannequins" -ErrorAction SilentlyContinue | Select-Object -First 1
-    if ($found) { $candidates = @($found.Parent.FullName) }
+    Write-Host " Not in the usual places. Searching the whole engine folder ..." -ForegroundColor Yellow
+    # Some installs put templates elsewhere, or omit them entirely. Look for the
+    # folder that actually holds a mannequin, wherever it is.
+    $found = Get-ChildItem -Path $EngineRoot -Directory -Recurse -Filter "Mannequins" `
+                -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($found) {
+        $candidates = @($found.Parent.FullName)
+    } else {
+        # Last resort: any folder containing a skeletal mesh asset.
+        $mesh = Get-ChildItem -Path $EngineRoot -Include "SKM_*.uasset" -Recurse -File `
+                    -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($mesh) { $candidates = @($mesh.Directory.Parent.FullName) }
+    }
+}
 }
 
 if (-not $candidates -or $candidates.Count -eq 0) {
     Write-Host ""
-    Write-Host " Could not find the mannequin content in this engine install." -ForegroundColor Red
-    Write-Host " Fall back to the editor: Content Browser > Add > Add Feature or"
-    Write-Host " Content Pack > Blueprint Feature > Third Person > Add."
+    Write-Host " No character content exists in this engine install." -ForegroundColor Red
+    Write-Host ""
+    Write-Host " Almost certainly the engine was installed without the optional" -ForegroundColor Yellow
+    Write-Host " 'Templates and Feature Packs' component. Fix it once:" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "   Epic Games Launcher > Library > down-arrow next to UE 5.8 >"
+    Write-Host "   Options > tick 'Templates and Feature Packs' > Apply"
+    Write-Host ""
+    Write-Host " Then run this again. To see exactly what is installed now, run:"
+    Write-Host "   .\tools\FIND_CHARACTERS.cmd"
+    Write-Host ""
+    Write-Host " Nothing is blocked by this: the palace, the cast and the dialogue"
+    Write-Host " all work without it. Only the body stays a placeholder."
     exit 1
 }
 
