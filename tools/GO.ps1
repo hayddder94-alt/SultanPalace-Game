@@ -56,9 +56,14 @@ function Finish([int]$code, [string]$verdict) {
         Twice now the report has been pasted into PowerShell instead of the
         chat, and PowerShell answered with thirty red CommandNotFoundException
         lines for "===", "VERDICT:", "now at:" and friends - noise on top of
-        whatever went wrong in the first place. Inside <# #> the whole thing is
-        a comment: paste it into PowerShell and absolutely nothing happens.
-        Paste it into the chat and it costs two extra lines.
+        whatever went wrong in the first place. Wrapped in a block comment the
+        whole thing is inert: paste it into PowerShell and nothing happens;
+        paste it into the chat and it costs two extra lines.
+
+        NOTE TO SELF: do not write the closing block-comment token inside a
+        block comment. The first version of this note did, PowerShell ended the
+        comment right there, and three lines of English prose were executed as
+        commands. That is what "the : The term 'the' is not recognized" was.
     #>
     $text = "<# ---- The Betrayed Will report. Paste into the CHAT, not here. ----`r`n" +
             ($short -join "`r`n") + "`r`n#>"
