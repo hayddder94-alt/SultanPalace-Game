@@ -8,11 +8,13 @@
 #include "UI/TBWHUD.h"
 #include "Save/TBWSaveSubsystem.h"
 #include "Core/TBWSelfTest.h"
+#include "World/TBWDevSandbox.h"
 #include "Engine/GameInstance.h"
 #include "Core/TBWVersion.h"
 #include "UI/TBWHUD.h"
 #include "Save/TBWSaveSubsystem.h"
 #include "Core/TBWSelfTest.h"
+#include "World/TBWDevSandbox.h"
 #include "Engine/GameInstance.h"
 #include "Player/TBWPlayerCharacter.h"
 #include "Player/TBWPlayerIdentityComponent.h"
@@ -239,6 +241,29 @@ static FAutoConsoleCommandWithWorld CVarSelfTest(
 		else
 		{
 			UE_LOG(LogTBW, Error, TEXT("TBW SELFTEST RESULT: subsystem missing"));
+		}
+	}));
+
+static FAutoConsoleCommandWithWorld CVarDevSandbox(
+	TEXT("tbw.Dev.Sandbox"),
+	TEXT("Spawn the greybox test sandbox in the current level."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			return;
+		}
+		// Authored maps suppress the greybox automatically - see
+		// ATBWGameMode::IsAuthoredLevel - so this is the way to summon it back
+		// for a movement or interaction test without loading a different map.
+		FActorSpawnParameters Params;
+		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		if (ATBWDevSandbox* Sandbox = World->SpawnActor<ATBWDevSandbox>(
+				FVector(0.f, 0.f, 0.f), FRotator::ZeroRotator, Params))
+		{
+			Sandbox->Rebuild();
+			UE_LOG(LogTBW, Display, TEXT("Dev sandbox spawned on demand."));
 		}
 	}));
 

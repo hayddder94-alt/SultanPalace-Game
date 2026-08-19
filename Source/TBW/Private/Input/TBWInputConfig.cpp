@@ -29,6 +29,13 @@ void UTBWInputConfig::Build()
 	InteractAction = CreateAction(TEXT("IA_TBW_Interact"), EInputActionValueType::Boolean);
 	PauseAction = CreateAction(TEXT("IA_TBW_Pause"), EInputActionValueType::Boolean);
 
+	// Reserved for Phase 3 combat. They are CREATED here even though nothing uses
+	// them yet: mapping a key to a null action makes Enhanced Input log
+	// "A Key Mapping with a blank action has been added!" and silently drop the
+	// binding, which the first headless self test surfaced four times.
+	PrimaryAction = CreateAction(TEXT("IA_TBW_Primary"), EInputActionValueType::Boolean);
+	SecondaryAction = CreateAction(TEXT("IA_TBW_Secondary"), EInputActionValueType::Boolean);
+
 	MappingContext = NewObject<UInputMappingContext>(this, TEXT("IMC_TBW_Default"));
 
 	auto AddSwizzleY = [this](FEnhancedActionKeyMapping& Mapping)
