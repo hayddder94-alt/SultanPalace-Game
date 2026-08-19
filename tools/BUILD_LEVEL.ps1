@@ -71,6 +71,9 @@ $argList = @(
     "-nullrhi",
     "-nosound",
     "-nosplash",
+    # The Git source control plugin tried to check the map out and popped a
+    # dialog mid-save. Headless runs must never wait on a human.
+    "-SCCProvider=None",
     "-stdout",
     "-FullStdOutLogOutput",
     "-AbsLog=`"$LogFile`""

@@ -62,3 +62,9 @@ Content/StarterContent/
 # Python bytecode from the offline validators
 __pycache__/
 *.pyc
+
+# Generated level. Rebuilt deterministically from web/preview/data/east_wing.json
+# by tools/BUILD_LEVEL.cmd, so the data is the source of truth, not the binary.
+# Delete this rule the day the level becomes hand-authored.
+Content/TBW/Maps/*.umap
+Content/TBW/Maps/*.uasset

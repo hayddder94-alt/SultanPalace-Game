@@ -410,7 +410,11 @@ def build_lighting():
     fog_c = fog.get_component_by_class(unreal.ExponentialHeightFogComponent)
     safe_set(fog_c, "fog_density", 0.035)
     safe_set(fog_c, "fog_height_falloff", 0.15)
-    safe_set(fog_c, "volumetric_fog", True)
+    # The bool is bEnableVolumetricFog in C++, but the Python name has moved
+    # between versions. Try each spelling rather than losing volumetric fog.
+    for fog_prop in ("volumetric_fog", "enable_volumetric_fog", "b_enable_volumetric_fog"):
+        if safe_set(fog_c, fog_prop, True):
+            break
     safe_set(fog_c, "volumetric_fog_scattering_distribution", 0.6)
     safe_set(fog_c, "volumetric_fog_extinction_scale", 1.2)
     _spawned.append(fog)

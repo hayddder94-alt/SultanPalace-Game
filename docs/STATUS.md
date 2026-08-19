@@ -1,6 +1,6 @@
 # STATUS — سجل التحقق الصادق
 
-**آخر تحديث:** 2026-08-19 · **المحرك:** UE 5.8.1 · **الإصدار:** `0.2.0-systems-verified-ue58`
+**آخر تحديث:** 2026-08-19 (مساءً) · **المحرك:** UE 5.8.1 · **الإصدار:** `0.2.0-systems-verified-ue58`
 
 > هذه الوثيقة تفصل ما رآه إنسان يعمل عمّا هو مكتوب فقط. بلا تجميل.
 
@@ -37,13 +37,35 @@ Level AUTHORED. Greybox suppressed (authored level).
 
 ---
 
+## ✅ القصر صار موجودًا — 2026-08-19
+
+بُني بلا فتح المحرر، عبر `tools/BUILD_LEVEL.cmd`:
+
+```
+[TBW] actors placed : 220
+[TBW] story beats   : 9
+[TBW] cast staged   : 16
+[TBW] level saved   : /Game/TBW/Maps/L_VS_Palace_EastWing
+```
+
+والاختبار الآلي على تلك الخريطة تحديدًا:
+
+```
+INFO  map 'L_VS_Palace_EastWing', 9 interactable(s), 16 cast member(s)
+PASS  authored level has its story beats  (9 found)
+PASS  authored level has its cast  (16 found)
+PASS  at least one character can speak
+TBW SELFTEST RESULT: 33 passed, 0 failed
+```
+
+الأسطر الثلاثة التي كانت `INFO ... 0` صارت **فحوصًا ناجحة**. القصر لم يعد ادعاءً.
+
 ## 🔨 مُترجَم لكن لم يُلعب بعد
 
 | العنصر | لماذا |
 |---|---|
-| القصر `L_VS_Palace_EastWing` | لم يُشغَّل سكربت البناء داخل المحرر بعد |
-| 9 مشاهد قصة و16 شخصية | نفس السبب — السجل يقول `map 'Template_Default', 0 interactable(s), 0 cast member(s)` |
-| الجسد الهيكلي للاعب | السجل يقول `body: placeholder cube` — حزمة Third Person المجانية غير مثبتة |
+| الجسد الهيكلي للاعب | `body: placeholder cube` — المحرك مثبَّت بلا مكوّن القوالب، انظر `FREE_ART_PLAN.md` |
+| **المشي داخل القصر بعين بشرية** | الاختبار يثبت وجود 220 ممثلًا، لا كيف يبدو المكان ولا كيف يشعر |
 | إحساس الحركة والكاميرا | يحتاج إنسانًا يلعب، لا اختبارًا آليًا |
 | الترجمة العربية **مرسومة على الشاشة** | الاختبار أثبت النص، لا البكسل. يحتاج PIE بعين بشرية |
 
