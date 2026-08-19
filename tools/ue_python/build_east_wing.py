@@ -60,7 +60,9 @@ level_editor  = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
 
 
 def safe_set(obj, prop, value):
-    """set_editor_property that tolerates a property missing in this engine build."""
+    """set_editor_property that tolerates a missing property or a null object."""
+    if obj is None:
+        return False
     try:
         obj.set_editor_property(prop, value)
         return True
@@ -307,7 +309,16 @@ def build_cast(layout):
         unreal.log_warning("[TBW] ATBWStoryCharacter not found - build the project first.")
         return 0
 
-    pose_enum = {"standing": 0, "seated": 1, "lying": 2}
+    def pose_value(name):
+        """
+        UE exposes ETBWCharacterPose to Python as unreal.TBWCharacterPose with
+        UPPER_CASE entries. Passing a plain int fails with
+        "Cannot nativize 'int' as 'Pose' (EnumProperty)".
+        """
+        enum = getattr(unreal, "TBWCharacterPose", None)
+        if not enum:
+            return None
+        return getattr(enum, str(name).upper(), getattr(enum, "STANDING", None))
     placed = 0
     for c in layout.get("characters", []):
         loc = c["location"]
@@ -319,7 +330,9 @@ def build_cast(layout):
             continue
         actor.set_actor_label("CAST_{0}".format(c["id"]))
         safe_set(actor, "character_name", unreal.Name(c["name"]))
-        safe_set(actor, "pose", pose_enum.get(c.get("pose", "standing"), 0))
+        pose = pose_value(c.get("pose", "standing"))
+        if pose is not None:
+            safe_set(actor, "pose", pose)
         safe_set(actor, "segment", unreal.Name(c.get("vs", "")))
         if c.get("scene"):
             safe_set(actor, "plays_dialogue_scene", unreal.Name(c["scene"]))
@@ -360,8 +373,14 @@ def build_lighting():
     sun = editor_actor.spawn_actor_from_class(
         unreal.DirectionalLight, unreal.Vector(0, 0, 12 * M), unreal.Rotator(-14.0, 125.0, 0.0))
     sun.set_actor_label("Sun_LateAfternoon")
-    sun_c = sun.directional_light_component
-    sun_c.set_mobility(unreal.ComponentMobility.MOVABLE)
+    # ADirectionalLight has no 'directional_light_component' in Python - the
+    # property on ALight is 'light_component'. Asking for the component by class
+    # works regardless of how any engine version names the property.
+    sun_c = sun.get_component_by_class(unreal.DirectionalLightComponent)
+    if not sun_c:
+        unreal.log_warning("[TBW] sun has no light component - skipping its settings")
+    if sun_c:
+        sun_c.set_mobility(unreal.ComponentMobility.MOVABLE)
     safe_set(sun_c, "intensity", 6.0)
     safe_set(sun_c, "light_color", unreal.Color(255, 214, 170, 255))
     safe_set(sun_c, "atmosphere_sun_light", True)
@@ -373,8 +392,9 @@ def build_lighting():
     sky = editor_actor.spawn_actor_from_class(
         unreal.SkyLight, unreal.Vector(20 * M, 27 * M, 10 * M), unreal.Rotator(0, 0, 0))
     sky.set_actor_label("SkyLight_Bounce")
-    sky_c = sky.sky_light_component
-    sky_c.set_mobility(unreal.ComponentMobility.MOVABLE)
+    sky_c = sky.get_component_by_class(unreal.SkyLightComponent)
+    if sky_c:
+        sky_c.set_mobility(unreal.ComponentMobility.MOVABLE)
     safe_set(sky_c, "real_time_capture", True)
     safe_set(sky_c, "intensity", 1.0)
     _spawned.append(sky)
@@ -387,7 +407,7 @@ def build_lighting():
     fog = editor_actor.spawn_actor_from_class(
         unreal.ExponentialHeightFog, unreal.Vector(0, 0, 0), unreal.Rotator(0, 0, 0))
     fog.set_actor_label("Fog_Dust")
-    fog_c = fog.component
+    fog_c = fog.get_component_by_class(unreal.ExponentialHeightFogComponent)
     safe_set(fog_c, "fog_density", 0.035)
     safe_set(fog_c, "fog_height_falloff", 0.15)
     safe_set(fog_c, "volumetric_fog", True)
@@ -536,8 +556,15 @@ def main():
     build_wing(pal, layout)
     build_interactables(layout)
     build_cast(layout)
-    build_lighting()
-    build_gameplay(layout)
+
+    # Lighting and gameplay bootstrap are isolated: 189 boxes and 25 actors are
+    # too much work to discard because one property name changed.
+    for stage_name, stage in (("lighting", build_lighting),
+                              ("gameplay", lambda: build_gameplay(layout))):
+        try:
+            stage()
+        except Exception as exc:                                   # noqa: BLE001
+            unreal.log_error("[TBW] {0} stage failed: {1}".format(stage_name, exc))
 
     level_editor.save_current_level()
 
