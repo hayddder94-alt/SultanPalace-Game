@@ -7,10 +7,12 @@
 #include "Narrative/TBWObjectiveSubsystem.h"
 #include "UI/TBWHUD.h"
 #include "Save/TBWSaveSubsystem.h"
+#include "Core/TBWSelfTest.h"
 #include "Engine/GameInstance.h"
 #include "Core/TBWVersion.h"
 #include "UI/TBWHUD.h"
 #include "Save/TBWSaveSubsystem.h"
+#include "Core/TBWSelfTest.h"
 #include "Engine/GameInstance.h"
 #include "Player/TBWPlayerCharacter.h"
 #include "Player/TBWPlayerIdentityComponent.h"
@@ -217,6 +219,27 @@ static FAutoConsoleCommandWithWorldAndArgs CVarLanguage(
 			}
 		}
 		UE_LOG(LogTBW, Display, TEXT("Subtitle language: %s"), bArabic ? TEXT("Arabic") : TEXT("English"));
+	}));
+
+static FAutoConsoleCommandWithWorld CVarSelfTest(
+	TEXT("tbw.SelfTest"),
+	TEXT("Run every automated system check and print a verdict."),
+	FConsoleCommandWithWorldDelegate::CreateLambda([](UWorld* World)
+	{
+		World = TBW_CommandWorld(World);
+		if (!World)
+		{
+			UE_LOG(LogTBW, Error, TEXT("TBW SELFTEST RESULT: no world"));
+			return;
+		}
+		if (UTBWSelfTest* Test = World->GetSubsystem<UTBWSelfTest>())
+		{
+			Test->RunAll();
+		}
+		else
+		{
+			UE_LOG(LogTBW, Error, TEXT("TBW SELFTEST RESULT: subsystem missing"));
+		}
 	}));
 
 static UTBWSaveSubsystem* TBW_Saves(UWorld* World)
