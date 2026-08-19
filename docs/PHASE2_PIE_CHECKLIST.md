@@ -7,6 +7,25 @@
 > This checklist is the **Phase 2 Definition of Done**. Phase 3 (combat) does not start
 > until every REQUIRED row is `PASS` or explicitly waived by you.
 
+## Where does a command go?
+
+Two different command lines are in play and they share no vocabulary. Pasting
+one into the other is the single most common wasted minute in this project.
+
+| | PowerShell | Unreal console |
+|---|---|---|
+| Where | `PS C:\Dev\SultanPalace-Game>` | inside PIE, press **`** (tilde) or **F10** |
+| Looks like | `.\tools\GO.cmd`, `git pull` | `stat unit`, `tbw.SelfTest`, `tbw.Lang ar` |
+| Rule of thumb | starts with `git`, `.\`, or `cd` | starts with `stat`, `show`, `r.`, or `tbw.` |
+
+`stat unit` in PowerShell gives `CommandNotFoundException`. `git pull` in the
+Unreal console gives `Command not recognized`. Neither is a bug.
+
+To reach the Unreal console: press **Play**, click once inside the viewport,
+then press **`** . On an Arabic keyboard layout that key may not register —
+`Config/DefaultInput.ini` therefore also binds **F10**. If the console steals
+your movement keys, press **Esc** to close it.
+
 ## How to run
 
 ```powershell
