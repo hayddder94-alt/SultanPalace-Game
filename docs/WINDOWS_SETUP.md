@@ -236,3 +236,39 @@ The report GO copies is now wrapped in `<# ... #>`. Pasted into the **chat** it
 reads normally; pasted into **PowerShell** by mistake it is a comment and does
 nothing. Before that wrapper, a misdirected paste produced a screen of
 `The term '===' is not recognized` on top of whatever had actually gone wrong.
+
+### What the editor actually writes into `Config/DefaultEngine.ini`
+
+Diagnosed 2026-08-19. It is not corruption and it is not your doing — the
+editor materialises the full default block for two settings pages the moment
+it saves project settings:
+
+| Section | Why it appears | Verdict |
+|---|---|---|
+| `[/Script/AndroidFileServerEditor.AndroidFileServerRuntimeSettings]` | An engine plugin enabled by default writes its whole default set, including a machine-generated `SecurityToken`. The plugin itself stays `bEnablePlugin=False`. | Harmless. Irrelevant to a Windows-only project. |
+| `[/Script/WindowsTargetPlatform.WindowsTargetSettings]` | Audio device defaults, shader formats, `DefaultGraphicsRHI`. Adds `PCD3D_SM6` alongside `PCD3D_SM5`. | Wanted. SM6 is the UE5 default and the Quadro P3000 supports it. |
+
+**The fix is to accept them into the repository once.** As long as the tracked
+file lacks blocks the editor insists on writing, every single pull will fail on
+the same file. Commit the editor's version and the churn stops.
+
+One thing to watch: `RayTracingMode=Full` in that block coexists with
+`r.RayTracing=False` in `[/Script/Engine.RendererSettings]`. The latter wins —
+ray tracing stays off, which is correct for a Pascal card. If the two ever
+disagree in a way that matters, `r.RayTracing` is the one we control
+deliberately.
+
+### Stop `git diff` opening a pager
+
+`git diff` pipes through `less`, which is why a long diff came back as the same
+screen repeated with `...skipping...`. Either:
+
+```
+git --no-pager diff Config/DefaultEngine.ini
+```
+
+or turn it off for this repository once:
+
+```
+git config core.pager cat
+```
