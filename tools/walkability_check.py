@@ -262,6 +262,30 @@ def main() -> int:
         print(f"    {'OK ' if ok else 'X  '} {it['id']:<14} "
               f"{'reachable from ' + format(best, '.0f') + ' cm' if ok else 'NO WALKABLE SURFACE WITHIN REACH'}")
 
+    # Every staged character must stand on reachable floor. A character inside a
+    # wall is invisible; a character on an unreachable ledge can never be spoken to.
+    chars = data.get("characters", [])
+    if chars:
+        print()
+        print("  staged characters")
+        for c in chars:
+            cx, cy, cz = c["location"]
+            gx = int((cx - ox) / CELL)
+            gy = int((cy - oy) / CELL)
+            near = None
+            for x, y, h in reach:
+                if abs(x - gx) > 8 or abs(y - gy) > 8:
+                    continue
+                d = ((ox + x * CELL - cx) ** 2 + (oy + y * CELL - cy) ** 2) ** 0.5
+                # feet within a step of the surface they are supposed to stand on
+                if abs((cz - 88.0) - h) <= 60.0 and (near is None or d < near):
+                    near = d
+            ok = near is not None and near <= 120.0
+            if not ok:
+                failures += 1
+            print(f"    {'OK ' if ok else 'X  '} {c['id']:<14} {c['pose']:<9} "
+                  f"{'floor ' + format(near, '.0f') + ' cm away' if near is not None else 'NO REACHABLE FLOOR'}")
+
     if args.times:
         rois = data.get("rooms_of_interest", {})
         ps = data["player_start"]["location"]

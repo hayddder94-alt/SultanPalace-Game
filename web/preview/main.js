@@ -19,6 +19,16 @@ const GRAVITY = 18.0;
 const JUMP = 5.2;
 const RADIUS = 0.38;                // capsule radius, matches the pawn
 
+// Third-person rig, same numbers as ATBWPlayerCharacter's spring arm:
+// TargetArmLength 280, SocketOffset (0, 55, 62), ProbeSize 20, collision on.
+const ARM_DEFAULT = 2.80;
+const ARM_SPRINT = 3.40;
+const ARM_CROUCH = 2.30;
+const SOCKET_RIGHT = 0.55;
+const SOCKET_UP = 0.62;
+const PROBE = 0.20;
+const CHAR_HEIGHT = 1.76;
+
 // Unreal (x east, y north, z up) -> Three (x east, y up, z south)
 function ueToThree(x, y, z) {
   return new THREE.Vector3(x * CM, z * CM, -y * CM);
@@ -208,6 +218,93 @@ function nearestBeat() {
   return best;
 }
 
+// ---------------------------------------------------------------- cast
+// The staged characters, drawn as proxies with the same silhouette rules the
+// Unreal ATBWStoryCharacter uses: body block plus head, poses staged not animated.
+
+const cast = [];
+
+function makeFigure(colour) {
+  const g = new THREE.Group();
+  const skin = new THREE.MeshStandardMaterial({ color: colour, roughness: 0.75 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.40, 1.45, 0.32), skin);
+  body.castShadow = true;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.115, 16, 12), skin);
+  head.castShadow = true;
+  g.add(body, head);
+  g.userData.body = body;
+  g.userData.head = head;
+  return g;
+}
+
+const CAST_COLOUR = {
+  Orin: 0xbfae86, Raynor: 0x9c6f4a, Evan: 0x7f93ae, Nofan: 0x8d6b8f,
+  Leila: 0xb08fa2, Darius: 0x6f7b6a, Malik: 0x9a9060, Soren: 0x86a3a8,
+};
+
+function buildCast(layout) {
+  const items = layout.characters || [];
+  for (const c of items) {
+    const p = ueToThree(c.location[0], c.location[1], c.location[2]);
+    const fig = makeFigure(CAST_COLOUR[c.name] || 0x8a8073);
+    const body = fig.userData.body;
+    const head = fig.userData.head;
+
+    if (c.pose === "seated") {
+      body.scale.set(1, 0.66, 1);
+      body.position.y = -0.16;
+      head.position.y = 0.36;
+    } else if (c.pose === "lying") {
+      body.rotation.z = Math.PI / 2;
+      body.position.y = -0.62;
+      head.position.set(0.62, -0.62, 0);
+    } else {
+      body.position.y = -0.16;
+      head.position.y = 0.68;
+    }
+
+    fig.position.copy(p);
+    fig.rotation.y = THREE.MathUtils.degToRad(-(c.yaw || 0));
+    scene.add(fig);
+
+    // name plate, always facing the camera
+    const label = makeLabel(c.name);
+    label.position.copy(p).add(new THREE.Vector3(0, c.pose === "lying" ? 0.5 : 1.05, 0));
+    scene.add(label);
+
+    cast.push({ ...c, pos: p, label });
+  }
+  return items.length;
+}
+
+function makeLabel(text) {
+  const cv = document.createElement("canvas");
+  cv.width = 256; cv.height = 64;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "rgba(12,11,9,0.72)";
+  ctx.fillRect(0, 0, 256, 64);
+  ctx.font = "28px system-ui, sans-serif";
+  ctx.fillStyle = "#e6cfa0";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(text, 128, 34);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: true }));
+  sprite.scale.set(1.5, 0.375, 1);
+  return sprite;
+}
+
+function nearestCast() {
+  let best = null;
+  let bestD = 5.0;
+  for (const c of cast) {
+    const d = Math.hypot(c.pos.x - player.pos.x, c.pos.z - player.pos.z);
+    if (d < bestD) { bestD = d; best = c; }
+  }
+  return best;
+}
+
 // ---------------------------------------------------------------- player
 const player = {
   pos: new THREE.Vector3(0, EYE, 0),
@@ -384,6 +481,80 @@ function groundHeightAt(x, z) {
   return best;
 }
 
+let avatar = null;
+
+function buildAvatar() {
+  avatar = makeFigure(0x6f8199);
+  avatar.userData.body.position.y = -0.16;
+  avatar.userData.head.position.y = 0.68;
+  scene.add(avatar);
+}
+
+/**
+ * Third-person boom. The game is third person, so a first-person preview was
+ * answering the wrong question: it could not show how much of a room the camera
+ * eats, or whether the player's own body blocks a doorway. Arm length, socket
+ * offset, probe size and the pitch clamp are all the pawn's own values.
+ */
+function updateCamera(dt) {
+  const crouch = keys.has("KeyC");
+  const sprint = (keys.has("ShiftLeft") || keys.has("ShiftRight")) && !crouch;
+  const targetArm = crouch ? ARM_CROUCH : (sprint ? ARM_SPRINT : ARM_DEFAULT);
+  updateCamera.arm = THREE.MathUtils.lerp(updateCamera.arm ?? targetArm, targetArm, 1 - Math.pow(0.001, dt));
+
+  const pivot = new THREE.Vector3(
+    player.pos.x,
+    player.pos.y - (crouch ? 0.25 : 0.0),
+    player.pos.z
+  );
+
+  const dir = new THREE.Vector3(
+    -Math.sin(player.yaw) * Math.cos(player.pitch),
+    Math.sin(player.pitch),
+    -Math.cos(player.yaw) * Math.cos(player.pitch)
+  );
+  const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
+
+  const socket = pivot.clone()
+    .add(right.clone().multiplyScalar(SOCKET_RIGHT))
+    .add(new THREE.Vector3(0, SOCKET_UP, 0));
+
+  // Collision-aware boom: march back until the probe sphere would enter geometry.
+  let arm = updateCamera.arm;
+  const steps = 14;
+  for (let i = 1; i <= steps; i++) {
+    const test = socket.clone().add(dir.clone().multiplyScalar(-arm * (i / steps)));
+    if (probeHits(test, PROBE)) {
+      arm = arm * ((i - 1) / steps);
+      break;
+    }
+  }
+  arm = Math.max(0.35, arm);
+
+  camera.position.copy(socket).add(dir.clone().multiplyScalar(-arm));
+  camera.lookAt(socket.clone().add(dir.clone().multiplyScalar(2.0)));
+
+  if (avatar) {
+    avatar.position.set(player.pos.x, player.pos.y - CHAR_HEIGHT + 0.88, player.pos.z);
+    avatar.userData.body.scale.y = crouch ? 0.72 : 1.0;
+    // The body turns toward movement, exactly like bOrientRotationToMovement.
+    if (player.moveDir && player.moveDir.lengthSq() > 0.01) {
+      const want = Math.atan2(-player.moveDir.x, -player.moveDir.z);
+      avatar.rotation.y = THREE.MathUtils.lerp(avatar.rotation.y, want, 1 - Math.pow(0.0001, dt));
+    }
+  }
+}
+
+function probeHits(point, r) {
+  for (const c of colliders) {
+    if (point.x + r < c.min.x || point.x - r > c.max.x) continue;
+    if (point.y + r < c.min.y || point.y - r > c.max.y) continue;
+    if (point.z + r < c.min.z || point.z - r > c.max.z) continue;
+    return true;
+  }
+  return false;
+}
+
 function updatePlayer(dt) {
   player.crouch = keys.has("KeyC");
   const height = player.crouch ? EYE_CROUCH : EYE;
@@ -398,6 +569,7 @@ function updatePlayer(dt) {
   if (keys.has("KeyS")) wish.sub(fwd);
   if (keys.has("KeyD")) wish.add(right);
   if (keys.has("KeyA")) wish.sub(right);
+  player.moveDir = wish.clone();
   if (wish.lengthSq() > 0) wish.normalize().multiplyScalar(speed);
 
   if (keys.has("Space") && player.grounded) {
@@ -422,8 +594,6 @@ function updatePlayer(dt) {
     player.grounded = true;
   }
 
-  camera.position.copy(player.pos);
-  camera.rotation.set(player.pitch, player.yaw, 0, "YXZ");
 }
 
 // ---------------------------------------------------------------- rooms
@@ -484,6 +654,7 @@ function frame(now) {
   last = now;
 
   updatePlayer(dt);
+  updateCamera(dt);
 
   if (usingTop) {
     topCamera.position.set(20, 90, -27);
@@ -501,7 +672,9 @@ function frame(now) {
     hPos.textContent = `${player.pos.x.toFixed(1)}, ${(-player.pos.z).toFixed(1)} م`;
     hRoom.textContent = currentRoom();
     const b = nearestBeat();
-    document.getElementById("hBeat").textContent = b ? `[E] ${b.prompt}` : "—";
+    const person = nearestCast();
+    document.getElementById("hBeat").textContent =
+      person ? `◆ ${person.name}` : (b ? `[E] ${b.prompt}` : "—");
   }
   requestAnimationFrame(frame);
 }
@@ -513,6 +686,8 @@ fetch("./data/east_wing.json")
     buildLighting(layout);
     buildGeometry(layout);
     const beatCount = buildInteractables(layout);
+    const castCount = buildCast(layout);
+    buildAvatar();
     roomsOfInterest = layout.rooms_of_interest || {};
 
     const holder = document.getElementById("roomButtons");
@@ -531,6 +706,7 @@ fetch("./data/east_wing.json")
     bindPad();
     document.getElementById("hBoxes").textContent = boxCount;
     document.getElementById("hBeats").textContent = beatCount;
+    document.getElementById("hCast").textContent = castCount;
 
     for (const b of beats) {
       const btn = document.createElement("button");

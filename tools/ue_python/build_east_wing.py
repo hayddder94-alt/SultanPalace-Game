@@ -300,6 +300,37 @@ def build_interactables(layout):
     return placed
 
 
+def build_cast(layout):
+    """Stage the story characters. No AI, no controllers - placement only."""
+    cls = unreal.load_class(None, "/Script/TBW.TBWStoryCharacter")
+    if not cls:
+        unreal.log_warning("[TBW] ATBWStoryCharacter not found - build the project first.")
+        return 0
+
+    pose_enum = {"standing": 0, "seated": 1, "lying": 2}
+    placed = 0
+    for c in layout.get("characters", []):
+        loc = c["location"]
+        actor = editor_actor.spawn_actor_from_class(
+            cls,
+            unreal.Vector(loc[0], loc[1], loc[2]),
+            unreal.Rotator(0.0, c.get("yaw", 0.0), 0.0))
+        if not actor:
+            continue
+        actor.set_actor_label("CAST_{0}".format(c["id"]))
+        safe_set(actor, "character_name", unreal.Name(c["name"]))
+        safe_set(actor, "pose", pose_enum.get(c.get("pose", "standing"), 0))
+        safe_set(actor, "segment", unreal.Name(c.get("vs", "")))
+        if c.get("scene"):
+            safe_set(actor, "plays_dialogue_scene", unreal.Name(c["scene"]))
+        actor.tags = ["Cast", c.get("vs", "VS")]
+        _spawned.append(actor)
+        placed += 1
+
+    LOG("[TBW] story characters staged: {0}".format(placed))
+    return placed
+
+
 def build_wing(pal, layout):
     kind_to_material = {
         "wall":   pal.wall,
@@ -447,6 +478,7 @@ def main():
 
     build_wing(pal, layout)
     build_interactables(layout)
+    build_cast(layout)
     build_lighting()
     build_gameplay(layout)
 
@@ -455,6 +487,7 @@ def main():
     LOG("-" * 70)
     LOG("[TBW] actors placed : {0}".format(len(_spawned)))
     LOG("[TBW] story beats   : {0}".format(len(layout.get("interactables", []))))
+    LOG("[TBW] cast staged    : {0}".format(len(layout.get("characters", []))))
     LOG("[TBW] level saved   : {0}".format(MAP_PACKAGE))
     LOG("[TBW] art materials : {0}".format("Megascans/Fab" if pal.using_real_art else "engine grey (install an art pack, re-run)"))
     LOG("-" * 70)

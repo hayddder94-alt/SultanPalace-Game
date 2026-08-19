@@ -366,6 +366,73 @@ def build():
          "flag": "WestArchTouched", "vs": "VS-05"},
     ]
 
+    # -----------------------------------------------------------------
+    # The cast, placed where the script puts them.
+    #
+    # These are staged story characters, not AI: no behaviour trees, no
+    # perception, no navigation. They stand, sit and lie where a scene needs
+    # them, face a direction, and can carry a line. Enemy AI stays gated.
+    # -----------------------------------------------------------------
+    hall_cx = hx + hw * 0.5
+    dais_y = hy + hd - 4.0 * M
+
+    characters = [
+        # VS-01, upper chamber: the death scene
+        {"id": "Orin", "name": "Orin", "pose": "lying", "room": "R11_UpperChamber",
+         "location": [orin_bed[0], orin_bed[1], up_z + 0.95 * M], "yaw": 0.0,
+         "vs": "VS-01", "note": "Dying. Head toward the west wall."},
+        {"id": "Raynor_VS01", "name": "Raynor", "pose": "seated", "room": "R11_UpperChamber",
+         "location": [orin_bed[0] + 1.8 * M, orin_bed[1], up_z + 0.6 * M], "yaw": 180.0,
+         "vs": "VS-01", "scene": "VS01_OrinLastWords", "note": "Seated at the bedside."},
+        {"id": "Nurse", "name": "Nurse", "pose": "standing", "room": "R11_UpperChamber",
+         "location": [orin_bed[0] - 0.4 * M, orin_bed[1] + 2.6 * M, up_z + 0.9 * M], "yaw": 270.0,
+         "vs": "VS-01", "note": "Silent. Never speaks."},
+
+        # VS-02, audience hall: the will reading. Six sons, in birth order,
+        # arranged so the camera reads the line before it reads a face.
+        {"id": "Nofan", "name": "Nofan", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx - 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
+         "vs": "VS-02", "note": "Eldest. Closest to the dais on the left."},
+        {"id": "Raynor", "name": "Raynor", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx + 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
+         "vs": "VS-02", "note": "Named heir. Takes the seal here."},
+        {"id": "Darius", "name": "Darius", "pose": "seated", "room": "R2_AudienceHall",
+         "location": [hall_cx - 6.4 * M, dais_y - 6.5 * M, 0.6 * M], "yaw": 15.0,
+         "vs": "VS-02", "note": "Seated. Stillness is the character."},
+        {"id": "Evan", "name": "Evan", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx + 1.4 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
+         "vs": "VS-02", "note": "The player watches from here in VS-02."},
+        {"id": "Malik", "name": "Malik", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx - 1.6 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
+         "vs": "VS-02", "note": "Ink on his hands."},
+        {"id": "Soren", "name": "Soren", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx + 6.2 * M, dais_y - 6.5 * M, 0.9 * M], "yaw": 340.0,
+         "vs": "VS-02", "note": "Will not look at Evan."},
+        {"id": "Leila", "name": "Leila", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx + 2.8 * M, dais_y - 1.6 * M, 0.9 * M], "yaw": 200.0,
+         "vs": "VS-02", "note": "Not blood. Unsmiling. Stands apart, not behind."},
+
+        # The house at work - the wing has to feel inhabited between scenes
+        {"id": "Yasmin", "name": "Yasmin", "pose": "standing", "room": "R8_Yard",
+         "location": [30.0 * M, 11.0 * M, 0.9 * M], "yaw": 180.0,
+         "vs": "VS-08", "note": "Performed joy at the kitchen yard edge."},
+        {"id": "ServantA", "name": "Servant", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx - 5.5 * M, hy + 6.0 * M, 0.9 * M], "yaw": 90.0,
+         "vs": "VS-05", "note": "Setting bowls for a celebration nobody feels."},
+        {"id": "ServantB", "name": "Servant", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hall_cx + 5.5 * M, hy + 7.5 * M, 0.9 * M], "yaw": 270.0,
+         "vs": "VS-05", "note": "Cloth for the empty heir chair."},
+        {"id": "GuardGate", "name": "House guard", "pose": "standing", "room": "R1_Dock",
+         "location": [6.0 * M, 12.5 * M, 0.9 * M], "yaw": 180.0,
+         "vs": "VS-09", "note": "Canal gate watch. The roster was altered here."},
+        {"id": "GuardHall", "name": "House guard", "pose": "standing", "room": "R2_AudienceHall",
+         "location": [hx + 1.6 * M, hy + 2.4 * M, 0.9 * M], "yaw": 45.0,
+         "vs": "VS-02", "note": "Hall door."},
+        {"id": "Boatman", "name": "Boatman", "pose": "standing", "room": "R1_Dock",
+         "location": [3.0 * M, 3.5 * M, 0.9 * M], "yaw": 90.0,
+         "vs": "VS-09", "note": "At the dock. Saw the boat leave."},
+    ]
+
     return {
         "name": "L_VS_Palace_EastWing",
         "spec": "docs/PALACE_WING_SPEC.md",
@@ -384,6 +451,7 @@ def build():
         },
         "boxes": L.boxes,
         "interactables": interactables,
+        "characters": characters,
     }
 
 

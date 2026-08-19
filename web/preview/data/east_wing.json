@@ -2872,5 +2872,232 @@
    "flag": "WestArchTouched",
    "vs": "VS-05"
   }
+ ],
+ "characters": [
+  {
+   "id": "Orin",
+   "name": "Orin",
+   "pose": "lying",
+   "room": "R11_UpperChamber",
+   "location": [
+    1600.0,
+    3200.0,
+    1035.0
+   ],
+   "yaw": 0.0,
+   "vs": "VS-01",
+   "note": "Dying. Head toward the west wall."
+  },
+  {
+   "id": "Raynor_VS01",
+   "name": "Raynor",
+   "pose": "seated",
+   "room": "R11_UpperChamber",
+   "location": [
+    1780.0,
+    3200.0,
+    1000.0
+   ],
+   "yaw": 180.0,
+   "vs": "VS-01",
+   "scene": "VS01_OrinLastWords",
+   "note": "Seated at the bedside."
+  },
+  {
+   "id": "Nurse",
+   "name": "Nurse",
+   "pose": "standing",
+   "room": "R11_UpperChamber",
+   "location": [
+    1560.0,
+    3460.0,
+    1030.0
+   ],
+   "yaw": 270.0,
+   "vs": "VS-01",
+   "note": "Silent. Never speaks."
+  },
+  {
+   "id": "Nofan",
+   "name": "Nofan",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    1580.0,
+    4300.0,
+    90.0
+   ],
+   "yaw": 0.0,
+   "vs": "VS-02",
+   "note": "Eldest. Closest to the dais on the left."
+  },
+  {
+   "id": "Raynor",
+   "name": "Raynor",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    2420.0,
+    4300.0,
+    90.0
+   ],
+   "yaw": 0.0,
+   "vs": "VS-02",
+   "note": "Named heir. Takes the seal here."
+  },
+  {
+   "id": "Darius",
+   "name": "Darius",
+   "pose": "seated",
+   "room": "R2_AudienceHall",
+   "location": [
+    1360.0,
+    3950.0,
+    60.0
+   ],
+   "yaw": 15.0,
+   "vs": "VS-02",
+   "note": "Seated. Stillness is the character."
+  },
+  {
+   "id": "Evan",
+   "name": "Evan",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    2140.0,
+    3850.0,
+    90.0
+   ],
+   "yaw": 0.0,
+   "vs": "VS-02",
+   "note": "The player watches from here in VS-02."
+  },
+  {
+   "id": "Malik",
+   "name": "Malik",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    1840.0,
+    3850.0,
+    90.0
+   ],
+   "yaw": 0.0,
+   "vs": "VS-02",
+   "note": "Ink on his hands."
+  },
+  {
+   "id": "Soren",
+   "name": "Soren",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    2620.0,
+    3950.0,
+    90.0
+   ],
+   "yaw": 340.0,
+   "vs": "VS-02",
+   "note": "Will not look at Evan."
+  },
+  {
+   "id": "Leila",
+   "name": "Leila",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    2280.0,
+    4440.0,
+    90.0
+   ],
+   "yaw": 200.0,
+   "vs": "VS-02",
+   "note": "Not blood. Unsmiling. Stands apart, not behind."
+  },
+  {
+   "id": "Yasmin",
+   "name": "Yasmin",
+   "pose": "standing",
+   "room": "R8_Yard",
+   "location": [
+    3000.0,
+    1100.0,
+    90.0
+   ],
+   "yaw": 180.0,
+   "vs": "VS-08",
+   "note": "Performed joy at the kitchen yard edge."
+  },
+  {
+   "id": "ServantA",
+   "name": "Servant",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    1450.0,
+    3200.0,
+    90.0
+   ],
+   "yaw": 90.0,
+   "vs": "VS-05",
+   "note": "Setting bowls for a celebration nobody feels."
+  },
+  {
+   "id": "ServantB",
+   "name": "Servant",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    2550.0,
+    3350.0,
+    90.0
+   ],
+   "yaw": 270.0,
+   "vs": "VS-05",
+   "note": "Cloth for the empty heir chair."
+  },
+  {
+   "id": "GuardGate",
+   "name": "House guard",
+   "pose": "standing",
+   "room": "R1_Dock",
+   "location": [
+    600.0,
+    1250.0,
+    90.0
+   ],
+   "yaw": 180.0,
+   "vs": "VS-09",
+   "note": "Canal gate watch. The roster was altered here."
+  },
+  {
+   "id": "GuardHall",
+   "name": "House guard",
+   "pose": "standing",
+   "room": "R2_AudienceHall",
+   "location": [
+    1260.0,
+    2840.0,
+    90.0
+   ],
+   "yaw": 45.0,
+   "vs": "VS-02",
+   "note": "Hall door."
+  },
+  {
+   "id": "Boatman",
+   "name": "Boatman",
+   "pose": "standing",
+   "room": "R1_Dock",
+   "location": [
+    300.0,
+    350.0,
+    90.0
+   ],
+   "yaw": 90.0,
+   "vs": "VS-09",
+   "note": "At the dock. Saw the boat leave."
+  }
  ]
 }
