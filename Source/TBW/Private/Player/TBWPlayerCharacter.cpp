@@ -135,7 +135,14 @@ void ATBWPlayerCharacter::ResolveCharacterVisual()
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn"),
 		TEXT("/Game/Characters/Mannequin_UE4/Meshes/SK_Mannequin.SK_Mannequin"),
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"),
-		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple")
+		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"),
+		// Engine PLUGIN content. These mount at /PluginName/... only when the
+		// plugin is enabled, so listing them is free when it is not - and the
+		// project gets a body the moment one is turned on. This install has no
+		// Engine\Templates at all, but ships mannequins inside these plugins.
+		TEXT("/MoverTests/Characters/Mannequins/Meshes/SKM_Manny.SKM_Manny"),
+		TEXT("/MoverExamples/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"),
+		TEXT("/AnimToTexture/Characters/Mannequin/Meshes/SKM_Mannequin.SKM_Mannequin")
 	};
 
 	USkeletalMesh* Chosen = nullptr;

@@ -103,7 +103,10 @@ void ATBWStoryCharacter::ResolveBody()
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn.SKM_Quinn"),
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny.SKM_Manny"),
 		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple"),
-		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple")
+		TEXT("/Game/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"),
+		TEXT("/MoverTests/Characters/Mannequins/Meshes/SKM_Manny.SKM_Manny"),
+		TEXT("/MoverExamples/Characters/Mannequins/Meshes/SKM_Manny_Simple.SKM_Manny_Simple"),
+		TEXT("/AnimToTexture/Characters/Mannequin/Meshes/SKM_Mannequin.SKM_Mannequin")
 	};
 
 	USkeletalMesh* Mesh = nullptr;

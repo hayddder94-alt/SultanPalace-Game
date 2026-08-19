@@ -155,3 +155,61 @@ INFO  body: skeletal mesh        ← بدل placeholder cube
 وما إن تصبح أي شخصية داخل `Content/`، **يلتقطها الكود تلقائيًا** — `ResolveCharacterVisual()`
 يبحث في قائمة مرتّبة تبدأ بـ `/Game/TBW/Characters/` (شخصياتنا الخاصة) ثم مانيكان المحرك.
 ضع MetaHuman باسم `SKM_Evan` في المسار الأول ولن يحتاج الأمر سطر كود واحدًا.
+
+
+---
+
+## حالة محرّكك بالتحديد (مقيسة 2026-08-19)
+
+`FIND_CHARACTERS.cmd` أعطى نتيجة قاطعة:
+
+```
+Engine\Templates      : MISSING
+Engine\FeaturePacks   : MISSING
+skeletal meshes found : 40   ← لكن داخل إضافات المحرك لا في القوالب
+```
+
+أي أن المحرك ثُبِّت **بدون مكوّن «Templates and Feature Packs» الاختياري**. لهذا لم يجد
+سكربت النسخ شيئًا، ولهذا أيضًا لن يجد زر «Add Feature or Content Pack» في المحرر شيئًا —
+فهو يقرأ من نفس المجلد المفقود.
+
+### لكن ماني موجود فعلًا، داخل إضافات
+
+```
+Engine\Plugins\Experimental\MoverTests\Content\Characters\Mannequins\Meshes\SKM_Manny.uasset
+Engine\Plugins\Experimental\MoverExamples\...\SKM_Manny_Simple.uasset
+Engine\Plugins\Experimental\AnimToTexture\Content\Characters\Mannequin\Meshes\SKM_Mannequin.uasset
+```
+
+**لماذا لا أنسخها ببساطة؟** لأن ملف `.uasset` يحمل مراجع مطلقة إلى هيكله العظمي وموادّه
+بمسار جذر الإضافة (`/MoverTests/...`). نسخه إلى `/Game/Characters/` يكسر تلك المراجع،
+فتُحمَّل الشبكة بلا هيكل — أي لا شيء على الشاشة، مع أخطاء غامضة. النسخ الأعمى للأصول
+الثنائية بين جذور محتوى مختلفة هو وصفة لفساد صامت.
+
+**الحل الصحيح إن أردت تجربتها فورًا:** محتوى الإضافة يُركَّب على المسار `/PluginName/...`
+عند تفعيل الإضافة. أضفت هذه المسارات إلى قائمة البحث في الكود:
+
+```
+/MoverTests/Characters/Mannequins/Meshes/SKM_Manny
+/MoverExamples/Characters/Mannequins/Meshes/SKM_Manny_Simple
+/AnimToTexture/Characters/Mannequin/Meshes/SKM_Mannequin
+```
+
+فعّل أيًّا منها من Edit ◂ Plugins، وسيلتقطها اللاعب والشخصيات تلقائيًا بلا نسخ وبلا كسر مراجع.
+
+### لكن التوصية تبقى: ثبّت المكوّن الناقص
+
+| | تفعيل إضافة تجريبية | تثبيت مكوّن القوالب |
+|---|---|---|
+| الشبكة الهيكلية | ✅ | ✅ |
+| **حركات المشي والركض** | ❌ غالبًا | ✅ |
+| **Animation Blueprint جاهز** | ❌ | ✅ (`ABP_Manny`) |
+| تبعية إضافة تجريبية في المشروع | ⚠️ نعم | ❌ لا |
+
+بلا Animation Blueprint ستحصل على **تمثال بوضعية T يتحرك بلا حركة** — أسوأ بصريًا من
+المكعّب الحالي. لذلك الطريق الصحيح خطوة واحدة لمرة واحدة:
+
+**Epic Games Launcher ◂ Library ◂ السهم لأسفل بجانب UE 5.8 ◂ Options ◂ ✔ Templates and
+Feature Packs ◂ Apply**
+
+ثم `.\tools\ADD_CHARACTERS.cmd`.
