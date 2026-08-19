@@ -32,7 +32,9 @@ bool ATBWGameMode::IsAuthoredLevel() const
 	{
 		return false;
 	}
-	for (TActorIterator<APlayerStart> It(*const_cast<UWorld*>(World)); It; ++It)
+	// TActorIterator takes a const UWorld POINTER. Passing a dereferenced world
+	// is what produced error C2665 - and the const_cast was never needed either.
+	for (TActorIterator<APlayerStart> It(World); It; ++It)
 	{
 		return true;
 	}

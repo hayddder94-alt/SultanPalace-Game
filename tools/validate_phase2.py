@@ -14,6 +14,7 @@ It catches the classes of mistake that would otherwise only surface after a
   E6  more than one .uproject, or EngineAssociation != 5.8
   E7  module used in an #include but missing from TBW.Build.cs
   E8  #include of a project header that no module include path can reach -> C1083
+  E9  a known UE API called with the wrong argument form -> C2665 and friends
 
   W1  private helper defined but never called                 -> dead feature
   W2  known deprecated API still in use                       -> tracked debt
@@ -321,6 +322,42 @@ def check_include_resolution() -> None:
                 )
 
 
+
+# --------------------------------------------------------------------------
+# E9 — UE API call shapes that the compiler rejects
+# --------------------------------------------------------------------------
+
+# Each entry: (name, regex, why). These are mistakes that read as correct C++ but
+# do not match the engine's signature, so only a compiler catches them - unless
+# they are written down here after the first time they cost a build.
+API_SHAPES = [
+    (
+        "TActorIterator takes a const UWorld* pointer, not a dereferenced world",
+        re.compile(r"TActorIterator\s*<[^>]+>\s*\w+\s*\(\s*\*"),
+        "error C2665: no overloaded function could convert all the argument types",
+    ),
+    (
+        "GetSubsystem is called on a pointer, not on a dereferenced object",
+        re.compile(r"\(\s*\*\s*\w+\s*\)\s*->\s*GetSubsystem"),
+        "dereferencing then arrow is a type error",
+    ),
+    (
+        "SpawnActor needs a class or template argument",
+        re.compile(r"SpawnActor\s*\(\s*\)"),
+        "SpawnActor with no arguments does not compile",
+    ),
+]
+
+
+def check_api_shapes() -> None:
+    for path in source_files((".cpp", ".h")):
+        code = strip_comments_and_strings(path.read_text(encoding="utf-8"))
+        for lineno, line in enumerate(code.splitlines(), 1):
+            for name, pattern, why in API_SHAPES:
+                if pattern.search(line):
+                    err("E9", f"{path.relative_to(ROOT)}:{lineno} {name} -> {why}")
+
+
 # --------------------------------------------------------------------------
 # E6 — project / engine lock
 # --------------------------------------------------------------------------
@@ -402,6 +439,7 @@ def main() -> int:
     check_definitions()
     check_build_deps()
     check_include_resolution()
+    check_api_shapes()
     check_deprecations()
 
     print("=" * 72)
