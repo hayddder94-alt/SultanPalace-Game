@@ -77,6 +77,13 @@ Content/StarterContent/
 __pycache__/
 *.pyc
 
+# Generated art. tools/BUILD_LEVEL.cmd creates the blockout master material and
+# its five instances under Content/TBW/Art/Blockout; the colour table in
+# tools/ue_python/build_east_wing.py is the source of truth, not the .uasset.
+# Content/TBW/Art/Imported is where a downloaded Megascans/Fab pack goes - never
+# committed, because a pack acquired under one account cannot ship from another.
+Content/TBW/Art/
+
 # Generated level. Rebuilt deterministically from web/preview/data/east_wing.json
 # by tools/BUILD_LEVEL.cmd, so the data is the source of truth, not the binary.
 # Delete this rule the day the level becomes hand-authored.

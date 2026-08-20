@@ -120,29 +120,131 @@ def find_first_asset(search_paths, class_names, name_hints):
 # material resolution: real art first, engine grey second
 # ---------------------------------------------------------------------------
 
-ART_PATHS = ["/Game/Megascans", "/Game/Fab", "/Game/TBW/Art", "/Game/MSPresets"]
+ART_PATHS = ["/Game/Megascans", "/Game/Fab", "/Game/MSPresets", "/Game/TBW/Art/Imported"]
 MAT_CLASSES = ["MaterialInstanceConstant", "Material"]
+
+# ---------------------------------------------------------------------------
+# Blockout materials, generated. No download, no account, no licence question.
+#
+# Everything was engine grey because I never gave the geometry a colour, not
+# because colour needs a Megascans pack. Grey on grey also hides real problems:
+# you cannot tell a wall from a floor from a doorway, so "is the hall imposing"
+# is unanswerable by eye.
+#
+# One master material with three parameters, five instances off it. One shader
+# for the whole wing - cheaper than five materials, and re-tinting the palace is
+# five numbers in this table. Megascans, when it arrives, still wins: the
+# Palette below prefers real art and only falls back to these.
+# ---------------------------------------------------------------------------
+
+BLOCKOUT_DIR = "/Game/TBW/Art/Blockout"
+MASTER_NAME = "M_TBW_Blockout"
+
+#          key       asset name                  linear colour            rough  metal
+BLOCKOUT = (
+    ("wall",   "MI_TBW_Mudbrick_Wall",   (0.230, 0.150, 0.093), 0.88, 0.0),
+    ("floor",  "MI_TBW_Sandstone_Floor", (0.330, 0.265, 0.170), 0.72, 0.0),
+    ("hero",   "MI_TBW_Glazed_Lapis",    (0.035, 0.070, 0.230), 0.22, 0.0),
+    ("ground", "MI_TBW_Sand_Ground",     (0.300, 0.230, 0.135), 0.95, 0.0),
+    ("water",  "MI_TBW_Canal_Water",     (0.008, 0.020, 0.028), 0.06, 0.0),
+)
+
+
+def _ensure_master():
+    path = "{0}/{1}".format(BLOCKOUT_DIR, MASTER_NAME)
+    if unreal.EditorAssetLibrary.does_asset_exist(path):
+        return unreal.EditorAssetLibrary.load_asset(path)
+
+    tools = unreal.AssetToolsHelpers.get_asset_tools()
+    mat = tools.create_asset(MASTER_NAME, BLOCKOUT_DIR, unreal.Material,
+                             unreal.MaterialFactoryNew())
+    if not mat:
+        return None
+
+    mel = unreal.MaterialEditingLibrary
+    colour = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -420, -100)
+    colour.set_editor_property("parameter_name", "BaseColor")
+    colour.set_editor_property("default_value", unreal.LinearColor(0.5, 0.5, 0.5, 1.0))
+    mel.connect_material_property(colour, "", unreal.MaterialProperty.MP_BASE_COLOR)
+
+    rough = mel.create_material_expression(mat, unreal.MaterialExpressionScalarParameter, -420, 60)
+    rough.set_editor_property("parameter_name", "Roughness")
+    rough.set_editor_property("default_value", 0.85)
+    mel.connect_material_property(rough, "", unreal.MaterialProperty.MP_ROUGHNESS)
+
+    metal = mel.create_material_expression(mat, unreal.MaterialExpressionScalarParameter, -420, 180)
+    metal.set_editor_property("parameter_name", "Metallic")
+    metal.set_editor_property("default_value", 0.0)
+    mel.connect_material_property(metal, "", unreal.MaterialProperty.MP_METALLIC)
+
+    mel.recompile_material(mat)
+    unreal.EditorAssetLibrary.save_asset(path)
+    return mat
+
+
+def ensure_blockout_materials():
+    """Create the five instances if they are not there yet. Never fatal."""
+    out = {}
+    try:
+        master = _ensure_master()
+        if not master:
+            unreal.log_warning("[TBW] could not create the blockout master material")
+            return out
+
+        mel = unreal.MaterialEditingLibrary
+        tools = unreal.AssetToolsHelpers.get_asset_tools()
+        for key, name, colour, roughness, metallic in BLOCKOUT:
+            path = "{0}/{1}".format(BLOCKOUT_DIR, name)
+            if unreal.EditorAssetLibrary.does_asset_exist(path):
+                out[key] = unreal.EditorAssetLibrary.load_asset(path)
+                continue
+            mi = tools.create_asset(name, BLOCKOUT_DIR, unreal.MaterialInstanceConstant,
+                                    unreal.MaterialInstanceConstantFactoryNew())
+            if not mi:
+                continue
+            mi.set_editor_property("parent", master)
+            mel.set_material_instance_vector_parameter_value(
+                mi, "BaseColor", unreal.LinearColor(colour[0], colour[1], colour[2], 1.0))
+            mel.set_material_instance_scalar_parameter_value(mi, "Roughness", roughness)
+            mel.set_material_instance_scalar_parameter_value(mi, "Metallic", metallic)
+            unreal.EditorAssetLibrary.save_asset(path)
+            out[key] = mi
+    except Exception as exc:                                       # noqa: BLE001
+        unreal.log_warning("[TBW] blockout materials unavailable: {0}".format(exc))
+    return out
 
 
 class Palette(object):
     def __init__(self):
+        # Real art first. It is the whole reason the search paths exist.
         self.wall   = find_first_asset(ART_PATHS, MAT_CLASSES, ["mudbrick", "brick", "plaster", "adobe", "clay", "stucco"])
         self.floor  = find_first_asset(ART_PATHS, MAT_CLASSES, ["floor", "tile", "stone", "sandstone", "granite"])
         self.hero   = find_first_asset(ART_PATHS, MAT_CLASSES, ["glazed", "ornament", "marble", "gold", "lapis"])
         self.ground = find_first_asset(ART_PATHS, MAT_CLASSES, ["sand", "dirt", "ground", "gravel"])
+        self.water  = find_first_asset(ART_PATHS, MAT_CLASSES, ["water", "canal", "river"])
         self.using_real_art = any([self.wall, self.floor, self.hero, self.ground])
+
+        # Blockout tints for whatever real art has not replaced yet. A wing that
+        # is half Megascans and half flat colour still reads; a wing that is all
+        # grey does not.
+        self.blockout = ensure_blockout_materials()
+        for key in ("wall", "floor", "hero", "ground", "water"):
+            if getattr(self, key) is None and key in self.blockout:
+                setattr(self, key, self.blockout[key])
 
     def report(self):
         if self.using_real_art:
             LOG("[TBW] real art materials found:")
-            for name in ("wall", "floor", "hero", "ground"):
-                mat = getattr(self, name)
-                LOG("      {0:6} -> {1}".format(name, mat.get_path_name() if mat else "(none)"))
-        else:
+        elif self.blockout:
+            LOG("[TBW] no art pack yet - using generated blockout tints:")
+        for name in ("wall", "floor", "hero", "ground", "water"):
+            mat = getattr(self, name)
+            LOG("      {0:6} -> {1}".format(name, mat.get_path_name() if mat else "(engine grey)"))
+        if not self.using_real_art:
             unreal.log_warning(
-                "[TBW] no Megascans/Fab materials in this project yet - the wing will be built "
-                "in engine grey. Install an art pack via Fab, then re-run this script and the "
-                "same geometry comes back dressed. See docs/AAA_QUALITY_PLAN.md."
+                "[TBW] flat colour, not photographed material. Install a Megascans/Fab pack "
+                "into Content/TBW/Art/Imported and re-run: the same geometry comes back "
+                "dressed. See docs/FREE_ART_PLAN.md."
             )
 
 
@@ -368,7 +470,7 @@ def build_wing(pal, layout):
         "floor":  pal.floor,
         "hero":   pal.hero or pal.wall,
         "ground": pal.ground or pal.floor,
-        "water":  pal.ground or pal.floor,
+        "water":  pal.water or pal.ground or pal.floor,
     }
     for entry in layout["boxes"]:
         spawn_box(
@@ -680,7 +782,9 @@ def main():
     LOG("[TBW] story beats   : {0}".format(len(layout.get("interactables", []))))
     LOG("[TBW] cast staged    : {0}".format(len(layout.get("characters", []))))
     LOG("[TBW] level saved   : {0}".format(MAP_PACKAGE))
-    LOG("[TBW] art materials : {0}".format("Megascans/Fab" if pal.using_real_art else "engine grey (install an art pack, re-run)"))
+    LOG("[TBW] art materials : {0}".format(
+        "Megascans/Fab" if pal.using_real_art
+        else ("generated blockout tints" if pal.blockout else "engine grey")))
     LOG("-" * 70)
 
 
