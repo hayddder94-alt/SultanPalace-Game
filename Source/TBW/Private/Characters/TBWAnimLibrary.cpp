@@ -119,9 +119,28 @@ namespace
 			const FString Name = Data.AssetName.ToString();
 			++Considered;
 
+			// Load it and check it can actually be played.
+			//
+			// A copied .uasset keeps ABSOLUTE references, so an animation lifted
+			// out of a plugin still points at /MoverExamples/.../SK_Mannequin_Skeleton
+			// and comes back with GetSkeleton() == nullptr:
+			//     "Unable to retrieve target Skeleton for Animation Asset"
+			// Name matching happily accepted those, the report said idle=MM_Idle,
+			// and the character stood in its bind pose while every line read PASS.
+			// A clip without a skeleton is not a clip.
 			auto Take = [&Data]() -> UAnimSequence*
 			{
-				return Cast<UAnimSequence>(Data.GetAsset());
+				UAnimSequence* Seq = Cast<UAnimSequence>(Data.GetAsset());
+				if (Seq && !Seq->GetSkeleton())
+				{
+					UE_LOG(LogTBW, Warning,
+						TEXT("Rejecting %s: no target skeleton. It was almost certainly "
+							 "copied out of a plugin, which breaks its references. Run "
+							 "tools\\ADD_CHARACTERS.cmd -Remove and let the plugin mount."),
+						*Data.GetObjectPathString());
+					return nullptr;
+				}
+				return Seq;
 			};
 
 			const bool bCrouch = Has(Name, TEXT("crouch"));
@@ -181,7 +200,20 @@ const FTBWLocomotionClips& FTBWAnimLibrary::For(const USkeleton* Skeleton)
 FString FTBWAnimLibrary::Describe(const USkeleton* Skeleton)
 {
 	const FTBWLocomotionClips& C = For(Skeleton);
-	auto N = [](UAnimSequence* S) { return S ? S->GetName() : FString(TEXT("-")); };
+	// Name plus where it came from. "idle=MM_Idle" was true and useless: the
+	// same name exists in a working plugin mount and in a broken copy, and the
+	// difference between them is the whole bug.
+	auto N = [](UAnimSequence* S)
+	{
+		if (!S) { return FString(TEXT("-")); }
+		FString Root = S->GetPathName();
+		int32 Slash = INDEX_NONE;
+		Root.FindChar(TEXT('/'), Slash);
+		Root = Root.Mid(1);
+		Root.FindChar(TEXT('/'), Slash);
+		Root = (Slash > 0) ? Root.Left(Slash) : Root;
+		return FString::Printf(TEXT("%s@%s"), *S->GetName(), *Root);
+	};
 	return FString::Printf(TEXT("idle=%s walk=%s run=%s crouch=%s"),
 		*N(C.Idle), *N(C.Walk), *N(C.Run), *N(C.CrouchWalk));
 }
