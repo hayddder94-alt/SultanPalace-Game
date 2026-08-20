@@ -67,7 +67,7 @@
    "center": [
     2000.0,
     2750.0,
-    -15.0
+    -17.0
    ],
    "size": [
     4000.0,
@@ -1563,13 +1563,13 @@
   {
    "name": "R8_YardFloor",
    "center": [
-    3000.0,
-    1200.0,
+    3450.0,
+    990.0,
     -10.0
    ],
    "size": [
-    1400.0,
-    1200.0,
+    1000.0,
+    1180.0,
     20.0
    ],
    "kind": "ground"
@@ -1577,13 +1577,13 @@
   {
    "name": "R8_YardWall_E_solid",
    "center": [
-    3700.0,
-    1200.0,
+    3950.0,
+    990.0,
     200.0
    ],
    "size": [
     35.0,
-    1200.0,
+    1180.0,
     400.0
    ],
    "kind": "wall"
@@ -3261,7 +3261,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    1580.0,
+    1255.0,
     4300.0,
     90.0
    ],
@@ -3281,7 +3281,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    2420.0,
+    2095.0,
     4300.0,
     90.0
    ],
@@ -3300,7 +3300,7 @@
    "pose": "seated",
    "room": "R2_AudienceHall",
    "location": [
-    1360.0,
+    1195.0,
     3950.0,
     60.0
    ],
@@ -3319,7 +3319,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    2140.0,
+    1815.0,
     3850.0,
     90.0
    ],
@@ -3338,7 +3338,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    1840.0,
+    1515.0,
     3850.0,
     90.0
    ],
@@ -3358,7 +3358,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    2620.0,
+    2175.0,
     3950.0,
     90.0
    ],
@@ -3378,7 +3378,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    2280.0,
+    1955.0,
     4440.0,
     90.0
    ],
@@ -3398,8 +3398,8 @@
    "pose": "standing",
    "room": "R8_Yard",
    "location": [
-    3000.0,
-    1100.0,
+    3400.0,
+    1000.0,
     90.0
    ],
    "yaw": 180.0,
@@ -3418,7 +3418,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    1450.0,
+    1275.0,
     3200.0,
     90.0
    ],
@@ -3438,7 +3438,7 @@
    "pose": "standing",
    "room": "R2_AudienceHall",
    "location": [
-    2550.0,
+    2025.0,
     3350.0,
     90.0
    ],

@@ -167,6 +167,50 @@ def main() -> int:
         else:
             print(f"  spawn light    {nearest[1]} at {nearest[0]/100:.1f} m")
 
+    # 9 — two surfaces at exactly the same height, overlapping in plan.
+    #
+    # The GPU cannot order coplanar geometry, so the two flicker against each
+    # other as the camera moves. That is what "some places change colour" was:
+    # Site_GroundSlab's top sat at exactly z = 0 and so did all ten room floors,
+    # eleven surfaces fighting over the same plane across the whole palace.
+    def bounds6(b):
+        """Flat min/max per axis. Named apart from the module-level aabb(),
+        which returns a pair of vectors and is used by rule 2 above - a nested
+        def with the same name shadowed it for the whole function."""
+        cx, cy, cz = b["center"]
+        w, d, h = b["size"]
+        return (cx - w / 2, cx + w / 2, cy - d / 2, cy + d / 2, cz - h / 2, cz + h / 2)
+
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            a, b2 = boxes[i], boxes[j]
+            ax0, ax1, ay0, ay1, _, atop = bounds6(a)
+            bx0, bx1, by0, by1, _, btop = bounds6(b2)
+            if abs(atop - btop) > 1.0:
+                continue
+            ox = min(ax1, bx1) - max(ax0, bx0)
+            oy = min(ay1, by1) - max(ay0, by0)
+            if ox > 50.0 and oy > 50.0:
+                errors.append(
+                    f"z-fighting: {a['name']} and {b2['name']} both have their top face "
+                    f"at z={atop/100:.2f} m and overlap {ox/100:.1f} x {oy/100:.1f} m")
+
+    # 10 — nobody may be standing inside a wall.
+    #
+    # A character whose capsule is embedded in geometry reads as a rendering
+    # bug: limbs poke through a surface from a body you cannot see.
+    standing_solids = [b for b in boxes if not b["name"].endswith(("_Floor", "_Ceiling"))
+                       and b["kind"] != "water"]
+    for ch in data.get("characters", []):
+        x, y, z = ch["location"]
+        for b in standing_solids:
+            bx0, bx1, by0, by1, bz0, bz1 = bounds6(b)
+            if bx0 < x < bx1 and by0 < y < by1 and bz0 - 10 < z < bz1 + 10:
+                errors.append(
+                    f"{ch['id']} is inside {b['name']} - it will appear half sunk "
+                    f"into that surface")
+                break
+
     print("=" * 66)
     print("LAYOUT / C++ CROSS-CHECK")
     print("=" * 66)

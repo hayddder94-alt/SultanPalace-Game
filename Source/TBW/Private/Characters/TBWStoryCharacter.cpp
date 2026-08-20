@@ -124,6 +124,16 @@ void ATBWStoryCharacter::ApplyIdleAnimation()
 	// every run.
 	const float Rate = 0.92f + FTBWCharacterLook::Jitter(CharacterName) * 0.16f;
 	FTBWAnimLibrary::PlayLooping(SkeletalBody, Clip, Rate);
+
+	if (Pose != ETBWCharacterPose::Standing && Clip == Clips.Idle)
+	{
+		// Say it. A seated character standing up is a staging error the eye
+		// forgives for a whole session because everything else looks fine.
+		UE_LOG(LogTBW, Warning,
+			TEXT("%s is staged as %s but only an idle clip was found - it will stand."),
+			*CharacterName.ToString(),
+			Pose == ETBWCharacterPose::Seated ? TEXT("seated") : TEXT("lying"));
+	}
 }
 
 void ATBWStoryCharacter::ResolveBody()
@@ -221,7 +231,17 @@ void ATBWStoryCharacter::ApplyPose()
 		{
 			NameLabel->SetRelativeLocation(FVector(0.f, 0.f, 44.f));
 		}
-		if (Body)
+		// Rotate the PROXY box only.
+		//
+		// Pitching a skeletal mesh 90 degrees put a character head-down, half
+		// inside a wall, with its legs out of the floor - which is what the
+		// screenshot showed. The mesh pivot is at the feet and sits 88 cm below
+		// the capsule, so rotating it swings the whole body underground.
+		//
+		// A lying human is an animation, not a transform. ApplyIdleAnimation
+		// plays the lie/death clip; if none is found the character stands,
+		// which is wrong but is obviously wrong rather than broken.
+		if (Body && !bUsingSkeletal)
 		{
 			Body->SetRelativeRotation(FRotator(90.f, -90.f, 0.f));
 		}

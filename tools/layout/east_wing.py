@@ -159,10 +159,18 @@ class Layout:
 def build():
     L = Layout()
 
-    # Paved site slab under the whole footprint. Top sits at exactly z = 0 so it
-    # is flush with every room floor - no phantom step anywhere. Without this the
-    # canal dock is an unreachable island: the walkability check proved it.
-    L.box("Site_GroundSlab", (20 * M, 27.5 * M, -0.15 * M), (40 * M, 55 * M, 0.3 * M), GROUND)
+    # Paved site slab under the whole footprint. Without this the canal dock is
+    # an unreachable island: the walkability check proved it.
+    #
+    # Its top used to sit at EXACTLY z = 0, flush with every room floor. Eleven
+    # overlapping surfaces then shared one plane and the GPU had no way to
+    # choose between them, so large patches of the palace changed colour as the
+    # camera moved - classic z-fighting, and exactly what "layer over layer" in
+    # the bug report describes.
+    #
+    # 2 cm lower. Far below MaxStepHeight so nothing about walking changes, and
+    # far above the depth buffer's ability to confuse the two.
+    L.box("Site_GroundSlab", (20 * M, 27.5 * M, -0.17 * M), (40 * M, 55 * M, 0.3 * M), GROUND)
 
     # R2 audience hall - the hero volume
     hx, hy, hw, hd = 11 * M, 26 * M, 18 * M, 24 * M
@@ -240,8 +248,13 @@ def build():
            door_at=0.5, door_w=2.4 * M, door_h=3.4 * M)
 
     # R8 yard / R9 storage court
-    L.box("R8_YardFloor", (30 * M, 12 * M, -0.1 * M), (14 * M, 12 * M, 0.2 * M), GROUND)
-    L.wall("R8_YardWall_E", (37 * M, 6 * M), (37 * M, 18 * M), 4.0 * M, WALL_T)
+    # The yard used to be 14 x 12 m at x 23..37, which drove it straight through
+    # Raynor's chamber (6.5 x 4.0 m), the steward study and the storage court.
+    # Rule 5 missed it for a spelling reason: it tested names ending "_Floor",
+    # and this one is "R8_YardFloor". Now it starts east of the chamber block
+    # and stops south of the court.
+    L.box("R8_YardFloor", (34.5 * M, 9.9 * M, -0.1 * M), (10 * M, 11.8 * M, 0.2 * M), GROUND)
+    L.wall("R8_YardWall_E", (39.5 * M, 4 * M), (39.5 * M, 15.8 * M), 4.0 * M, WALL_T)
     # Ends exactly where the hall begins: hall y0 = 26 m. It used to run to y = 29
     # and sat inside the hall's south-east corner.
     # East of Raynor's chamber (which ends at x = 29.5 m) and south of the hall.
@@ -386,6 +399,16 @@ def build():
     hall_cx = hx + hw * 0.5
     dais_y = hy + hd - 4.0 * M
 
+    # The switchback stair is a solid mass occupying the hall's east side from
+    # x = 22.6 m outward. Blocking the will-reading on the hall's geometric
+    # centre put Raynor inside the mid landing and Soren inside tread 18 - they
+    # rendered as limbs coming out of a staircase.
+    #
+    # The ceremony is centred on the CLEAR half instead. That is not a
+    # compromise: a crowd standing where a staircase is, is not blocking, and
+    # the camera reads a group better against an unbroken wall anyway.
+    group_cx = hx + 5.75 * M
+
     characters = [
         # VS-01, upper chamber: the death scene
         {"id": "Orin", "name": "Orin", "pose": "lying", "room": "R11_UpperChamber",
@@ -404,47 +427,47 @@ def build():
         # VS-02, audience hall: the will reading. Six sons, in birth order,
         # arranged so the camera reads the line before it reads a face.
         {"id": "Nofan", "name": "Nofan", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx - 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
+         "location": [group_cx - 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
          "vs": "VS-02", "scene": "VS14_NofansKindness",
          "tint": [0.420, 0.280, 0.070],
          "note": "Eldest. Closest to the dais on the left. Speaks VS-14 here at the end."},
         {"id": "Raynor", "name": "Raynor", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx + 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
+         "location": [group_cx + 4.2 * M, dais_y - 3.0 * M, 0.9 * M], "yaw": 0.0,
          "vs": "VS-02", "tint": [0.340, 0.070, 0.060],
          "note": "Named heir. Takes the seal here."},
         {"id": "Darius", "name": "Darius", "pose": "seated", "room": "R2_AudienceHall",
-         "location": [hall_cx - 6.4 * M, dais_y - 6.5 * M, 0.6 * M], "yaw": 15.0,
+         "location": [group_cx - 4.8 * M, dais_y - 6.5 * M, 0.6 * M], "yaw": 15.0,
          "vs": "VS-02", "tint": [0.050, 0.070, 0.110],
          "note": "Seated. Stillness is the character."},
         {"id": "Evan", "name": "Evan", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx + 1.4 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
+         "location": [group_cx + 1.4 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
          "vs": "VS-02", "tint": [0.130, 0.190, 0.110],
          "note": "The player watches from here in VS-02."},
         {"id": "Malik", "name": "Malik", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx - 1.6 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
+         "location": [group_cx - 1.6 * M, dais_y - 7.5 * M, 0.9 * M], "yaw": 0.0,
          "vs": "VS-02", "scene": "VS08b_MalikAtTheDoor", "tint": [0.060, 0.080, 0.160],
          "note": "Ink on his hands."},
         {"id": "Soren", "name": "Soren", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx + 6.2 * M, dais_y - 6.5 * M, 0.9 * M], "yaw": 340.0,
+         "location": [group_cx + 5.0 * M, dais_y - 6.5 * M, 0.9 * M], "yaw": 340.0,
          "vs": "VS-07", "scene": "VS07_SorenWillNotLook", "tint": [0.300, 0.420, 0.520],
          "note": "Will not look at Evan."},
         {"id": "Leila", "name": "Leila", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx + 2.8 * M, dais_y - 1.6 * M, 0.9 * M], "yaw": 200.0,
+         "location": [group_cx + 2.8 * M, dais_y - 1.6 * M, 0.9 * M], "yaw": 200.0,
          "vs": "VS-03", "scene": "VS03_EyesInTheHall",
          "tint": [0.720, 0.660, 0.440],
          "note": "Not blood. Unsmiling. Stands apart, not behind."},
 
         # The house at work - the wing has to feel inhabited between scenes
         {"id": "Yasmin", "name": "Yasmin", "pose": "standing", "room": "R8_Yard",
-         "location": [30.0 * M, 11.0 * M, 0.9 * M], "yaw": 180.0,
+         "location": [34.0 * M, 10.0 * M, 0.9 * M], "yaw": 180.0,
          "vs": "VS-08", "scene": "VS08_YasminPerformedJoy", "tint": [0.450, 0.190, 0.110],
          "note": "Performed joy at the kitchen yard edge."},
         {"id": "ServantA", "name": "Servant", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx - 5.5 * M, hy + 6.0 * M, 0.9 * M], "yaw": 90.0,
+         "location": [group_cx - 4.0 * M, hy + 6.0 * M, 0.9 * M], "yaw": 90.0,
          "vs": "VS-05", "scene": "VS05_LearnTheHouse", "tint": [0.240, 0.180, 0.120],
          "note": "Setting bowls for a celebration nobody feels."},
         {"id": "ServantB", "name": "Servant", "pose": "standing", "room": "R2_AudienceHall",
-         "location": [hall_cx + 5.5 * M, hy + 7.5 * M, 0.9 * M], "yaw": 270.0,
+         "location": [group_cx + 3.5 * M, hy + 7.5 * M, 0.9 * M], "yaw": 270.0,
          "vs": "VS-05", "tint": [0.240, 0.180, 0.120],
          "note": "Cloth for the empty heir chair."},
         {"id": "GuardGate", "name": "House guard", "pose": "standing", "room": "R1_Dock",
