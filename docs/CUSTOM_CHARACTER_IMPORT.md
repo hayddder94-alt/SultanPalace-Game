@@ -82,8 +82,52 @@ If there is none, the terms live on the generator's website, not on your disk.
 
 ---
 
+## The licence, specifically for Tripo (checked 2026-08-20)
+
+This is not a general warning. Tripo's tiers differ on exactly the clause that
+matters to us:
+
+| Plan | What you get | Can it ship on Steam? |
+|---|---|---|
+| **Basic / Free** (~300 credits/month) | models are **published publicly** under **CC BY 4.0** | **No.** Free-plan output is non-commercial |
+| **Professional** ($19.90/month) | private models, **full commercial rights** | Yes |
+| Advanced / Premium | same commercial rights, more credits | Yes |
+
+Sources agree on the free tier being non-commercial and public
+([1](https://www.tripo3d.ai/tutorials/tripo-ai-image-to-3d-model-tutorial),
+[3](https://www.tripo3d.ai/game-development/ip-security-cloud-ai-3d-workspaces-commercial-games),
+[4](https://tripo3ds.com/)).
+
+So the decision is simple and it is yours, not mine: **anything generated on
+the free plan cannot go into a game you intend to sell.** It can go into a
+prototype nobody sells. Mixing the two is how a free-tier asset ends up in a
+shipped build because someone forgot which folder it came from — so if you do
+use free-tier output for blockout, it goes in
+`Content/TBW/Art/Prototype_NonCommercial/` and never anywhere else.
+
+Tripo also has its own auto-rigging feature on paid tiers, which would make a
+generated humanoid Route A directly instead of via Mixamo.
+
+## 2026-08-20: the folder inspected was the add-on, not a model
+
+`C:\Users\dell\Downloads\Tripo3d_Blender_Bridge` holds 66 `.py` files, one
+`.c`, one `logo.png` and **no geometry at all**. That is the Blender **add-on** —
+the tool that talks to the generator. The fishing rod, not the fish.
+
+The first version of `INSPECT_MODEL` answered *"no skeleton, so it is a
+statue"*, which is a wrong answer to an unasked question and points at the
+wrong next step. No mesh is now its own verdict, the add-on case is named, and
+there is a finder:
+
+```
+.\tools\INSPECT_MODEL.cmd -Find
+```
+
+It scans Downloads, Desktop, Documents and their OneDrive equivalents for
+`.fbx .glb .gltf .obj .usd .blend .zip`, newest first.
+
 ## What I need from you
 
-Run the inspection and paste its report. It ends with one of two verdicts, and
-which one it is decides whether the next hour is spent on a character or on a
-prop.
+The inspection report, and which Tripo plan the model was generated on. The
+verdict decides whether the next hour goes into a character or a prop; the plan
+decides whether it can be in the game at all.

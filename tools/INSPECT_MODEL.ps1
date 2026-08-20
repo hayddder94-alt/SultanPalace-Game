@@ -21,10 +21,53 @@
 
 param(
     [Parameter(Position = 0)]
-    [string]$Path = ""
+    [string]$Path = "",
+    [switch]$Find
 )
 
 $ErrorActionPreference = "Continue"
+
+if ($Find) {
+    # Where an export actually lands: the browser's download folder, the
+    # desktop, Documents, and whatever OneDrive has redirected those to.
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Cyan
+    Write-Host "   LOOKING FOR 3D FILES" -ForegroundColor Cyan
+    Write-Host "============================================================" -ForegroundColor Cyan
+    $roots = @(
+        [Environment]::GetFolderPath("UserProfile") + "\Downloads",
+        [Environment]::GetFolderPath("Desktop"),
+        [Environment]::GetFolderPath("MyDocuments"),
+        [Environment]::GetFolderPath("UserProfile") + "\OneDrive\Desktop",
+        [Environment]::GetFolderPath("UserProfile") + "\OneDrive\Documents"
+    ) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
+    $wanted = @("*.fbx", "*.glb", "*.gltf", "*.obj", "*.usd", "*.usdz", "*.blend", "*.zip")
+    $hits = @()
+    foreach ($r in $roots) {
+        Write-Host "   scanning $r ..."
+        foreach ($w in $wanted) {
+            $hits += @(Get-ChildItem -Path $r -Filter $w -Recurse -File -ErrorAction SilentlyContinue)
+        }
+    }
+    Write-Host ""
+    if ($hits.Count -eq 0) {
+        Write-Host " Nothing found. The model has not been exported yet." -ForegroundColor Yellow
+        Write-Host " In Blender: File > Export > FBX (or glTF 2.0), tick Apply Transform."
+    } else {
+        Write-Host " NEWEST FIRST" -ForegroundColor Green
+        $hits | Sort-Object LastWriteTime -Descending | Select-Object -First 20 |
+            ForEach-Object {
+                Write-Host ("   {0:yyyy-MM-dd HH:mm}  {1,8:N1} MB  {2}" -f
+                            $_.LastWriteTime, ($_.Length / 1MB), $_.FullName)
+            }
+        Write-Host ""
+        Write-Host " Then inspect the folder one of these is in:"
+        Write-Host '   .\tools\INSPECT_MODEL.cmd "<that folder>"'
+    }
+    Write-Host ""
+    exit 0
+}
 
 if (-not $Path) {
     Write-Host ""
@@ -188,11 +231,30 @@ if ($lic.Count -eq 0) {
 Say ""
 
 Say "============================================================"
-if ($anyRigged) {
+if ($meshes.Count -eq 0) {
+    # The first version answered "no skeleton, so it is a statue" for a folder
+    # containing no geometry at all. That is a wrong answer to an unasked
+    # question, and it points at the wrong next step. No mesh is its own case.
+    $py = @($all | Where-Object { $_.Extension -eq ".py" }).Count
+    $isAddon = ($py -ge 5) -and (
+        ($all | Where-Object { $_.Name -eq "__init__.py" -or $_.Name -eq "blender_manifest.toml" }).Count -gt 0
+        -or $py -ge 20)
+
+    Say " VERDICT: there is no 3D model here." "Yellow"
+    if ($isAddon) {
+        Say ""
+        Say " $py Python files and no geometry: this is the Blender ADD-ON," "Yellow"
+        Say " the tool that talks to the generator. It is the fishing rod, not"
+        Say " the fish. The model it produces is exported somewhere else."
+    }
+    Say ""
+    Say " Find the actual export with:"
+    Say '   .\tools\INSPECT_MODEL.cmd -Find'
+} elseif ($anyRigged) {
     Say " VERDICT: at least one file carries a skeleton." "Green"
     Say " It can become a character. Next step is retargeting our clips onto it."
 } else {
-    Say " VERDICT: no skeleton anywhere in this folder." "Yellow"
+    Say " VERDICT: no skeleton in any of the $($meshes.Count) mesh file(s)." "Yellow"
     Say " As-is it is a STATUE: it can be a prop, a body on a bed, a"
     Say " decoration - but it cannot walk until something rigs it."
 }
