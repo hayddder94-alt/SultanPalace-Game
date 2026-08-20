@@ -34,6 +34,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "TBW|Dialogue")
 	bool PlayScene(FName SceneId);
 
+	/**
+	 * Play a scene the first time only.
+	 *
+	 * "First time" means two things and both matter: not already played in this
+	 * session, and its completion flag not already set - otherwise loading a
+	 * save replays the father's death the moment you move.
+	 */
+	UFUNCTION(BlueprintCallable, Category = "TBW|Dialogue")
+	bool PlaySceneOnce(FName SceneId);
+
 	UFUNCTION(BlueprintCallable, Category = "TBW|Dialogue")
 	void Advance();
 
@@ -78,6 +88,8 @@ public:
 	FTBWDialogueSceneEvent OnSceneFinished;
 
 private:
+	/** Scenes already played this session, for PlaySceneOnce. */
+	TSet<FName> PlayedScenes;
 	bool LoadSceneFile(const FString& FilePath);
 	void StartLine(int32 Index);
 	void OnLineTimer();

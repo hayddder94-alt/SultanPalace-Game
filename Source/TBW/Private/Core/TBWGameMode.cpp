@@ -2,6 +2,7 @@
 // Copyright (c) 2026. All rights reserved.
 
 #include "Core/TBWGameMode.h"
+#include "Narrative/TBWDialogueSubsystem.h"
 #include "Core/TBWVersion.h"
 #include "Player/TBWPlayerCharacter.h"
 #include "Player/TBWPlayerController.h"
@@ -85,6 +86,11 @@ void ATBWGameMode::HandleStoryFlagChanged(FName Flag, int32 NewValue)
 		return;
 	}
 
+	// Before the autosave throttle, not after it. The throttle exists so one
+	// scene setting three flags does not write three saves; a story trigger
+	// must not be silently swallowed by that same rule.
+	CheckStoryTriggers();
+
 	UGameInstance* GI = World->GetGameInstance();
 	UTBWSaveSubsystem* Saves = GI ? GI->GetSubsystem<UTBWSaveSubsystem>() : nullptr;
 	if (!Saves || Saves->IsApplying())
@@ -131,4 +137,38 @@ void ATBWGameMode::RestartPlayer(AController* NewPlayer)
 		return;
 	}
 	Super::RestartPlayer(NewPlayer);
+}
+
+void ATBWGameMode::CheckStoryTriggers()
+{
+	UWorld* World = GetWorld();
+	if (!World || !IsAuthoredLevel())
+	{
+		return;
+	}
+
+	UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>();
+	UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>();
+	if (!State || !Dialogue || Dialogue->IsPlaying())
+	{
+		return;
+	}
+
+	// VS-13. The three physical clues are the ones the script calls the first
+	// major evidence: the moved watch, the forged hand, the boat. Evan says it
+	// out loud the moment he holds all three, and the line does not name Nofan -
+	// Three Names is Chapter 3.
+	const bool bHasAll =
+		State->GetFlag(TEXT("ClaspFound")) != 0 &&
+		State->GetFlag(TEXT("RosterAltered")) != 0 &&
+		State->GetFlag(TEXT("LetterIsFalse")) != 0;
+
+	if (bHasAll && State->GetFlag(TEXT("FamilyConnected")) == 0)
+	{
+		if (Dialogue->PlaySceneOnce(TEXT("VS13_TheBoardConnects")))
+		{
+			UE_LOG(LogTBW, Display,
+				TEXT("VS-13: clasp + roster + letter are all in hand. The board connects."));
+		}
+	}
 }

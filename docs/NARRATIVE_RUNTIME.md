@@ -211,3 +211,53 @@ tbw.Dialogue.Reload
 tbw.Dialogue.Play VS02_TheWillReading
 tbw.Objective
 ```
+
+---
+
+## 2026-08-20 — two scenes that nothing could ever play
+
+`VS04_MorningYouAreEvan` and `VS13_TheBoardConnects` were authored, validated
+and completely unreachable. Every check passed and no path through the game
+could reach either of them. **A scene only the console can play is a document,
+not a game.**
+
+| Scene | Trigger now | Where |
+|---|---|---|
+| VS-04 | the player's first movement input | `TBWPlayerCharacter.cpp` `PlayWakeLineOnce()` |
+| VS-13 | `ClaspFound` + `RosterAltered` + `LetterIsFalse` all set | `TBWGameMode.cpp` `CheckStoryTriggers()` |
+
+VS-04 fires on the first movement rather than on `BeginPlay` because the script
+says what the moment is: *"Move. Look. Understand you are not the man from the
+night."* The line lands on the player's own first decision, not on a loading
+screen.
+
+VS-13 is checked **before** the autosave throttle, not after. The throttle
+stops one scene setting three flags from writing three saves; a story trigger
+must not be swallowed by that same rule.
+
+### `PlaySceneOnce`
+
+"First time" means two things and both matter:
+
+* not already played in this session, and
+* its completion flag not already set.
+
+Without the second, loading a save and taking one step replays Orin's death.
+
+### This is not a quest graph
+
+`CheckStoryTriggers()` is a short, explicit list of *when these are all true,
+this happens once*. It has no nodes, no state machine and no data asset.
+Anything needing more than that belongs in a system nobody has authorised.
+
+### The check that stops it recurring
+
+`tools/validate_narrative.py` now cross-references every scene id against the
+`scene` field of every interactable and character in the layout, plus a table
+of code-triggered scenes that names the function playing each one. A scene
+reachable by nothing is reported. The code-trigger table is verified against
+the actual sources, so deleting a trigger fails the check instead of silently
+orphaning the scene.
+
+Known exception: `VS07a_KeepThis` and `VS07b_GoBack` are branches of a choice
+that has no UI yet. Documented, not forgotten.

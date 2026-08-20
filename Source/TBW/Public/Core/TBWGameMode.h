@@ -27,6 +27,13 @@ public:
 	UFUNCTION()
 	void HandleStoryFlagChanged(FName Flag, int32 NewValue);
 
+	/**
+	 * Story reactions to a flag going up. NOT a quest graph: a short, explicit
+	 * list of "when these are all true, this happens once". Anything that needs
+	 * more than that belongs in a system nobody has authorised yet.
+	 */
+	void CheckStoryTriggers();
+
 	/** True when the current map ships its own geometry and PlayerStart. */
 	UFUNCTION(BlueprintPure, Category = "TBW|Sandbox")
 	bool IsAuthoredLevel() const;

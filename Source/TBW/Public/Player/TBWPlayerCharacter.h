@@ -142,4 +142,8 @@ private:
 	 *  when no anim blueprint bound. Deleted the day a real AnimGraph exists. */
 	void TickBlockoutLocomotion();
 	bool bBlockoutLocomotion = false;
+
+	/** VS-04 is a line Evan thinks the first time he moves as himself. */
+	void PlayWakeLineOnce();
+	bool bWakeLinePlayed = false;
 };

@@ -3,6 +3,9 @@
 
 #include "Player/TBWPlayerCharacter.h"
 #include "Characters/TBWAnimLibrary.h"
+#include "Narrative/TBWDialogueSubsystem.h"
+#include "Core/TBWGameMode.h"
+#include "Engine/World.h"
 #include "Player/TBWPlayerIdentityComponent.h"
 #include "Player/TBWIdentityFactory.h"
 #include "Player/TBWIdentityData.h"
@@ -451,10 +454,47 @@ void ATBWPlayerCharacter::Move(const FInputActionValue& Value)
 		return;
 	}
 
+	PlayWakeLineOnce();
+
 	const FRotator Yaw(0.f, Controller->GetControlRotation().Yaw, 0.f);
 	const FRotationMatrix Matrix(Yaw);
 	AddMovementInput(Matrix.GetUnitAxis(EAxis::X), Axis.Y);
 	AddMovementInput(Matrix.GetUnitAxis(EAxis::Y), Axis.X);
+}
+
+void ATBWPlayerCharacter::PlayWakeLineOnce()
+{
+	// VS-04 was authored, validated and completely unreachable: nothing in the
+	// game ever asked for it. A scene that only a console command can reach is
+	// a document, not a game.
+	//
+	// The trigger is the first movement input, because that is exactly what the
+	// script says the moment is - "Move. Look. Understand you are not the man
+	// from the night." Not BeginPlay: the line lands on the player's own first
+	// decision, not on a loading screen.
+	if (bWakeLinePlayed)
+	{
+		return;
+	}
+	bWakeLinePlayed = true;
+
+	UWorld* World = GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	const ATBWGameMode* Mode = World->GetAuthGameMode<ATBWGameMode>();
+	if (!Mode || !Mode->IsAuthoredLevel())
+	{
+		return;   // the dev sandbox is not the palace at dawn
+	}
+	if (UTBWDialogueSubsystem* Dialogue = World->GetSubsystem<UTBWDialogueSubsystem>())
+	{
+		if (!Dialogue->IsPlaying())
+		{
+			Dialogue->PlaySceneOnce(TEXT("VS04_MorningYouAreEvan"));
+		}
+	}
 }
 
 void ATBWPlayerCharacter::Look(const FInputActionValue& Value)

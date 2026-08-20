@@ -158,6 +158,38 @@ void UTBWDialogueSubsystem::GetSceneIds(TArray<FName>& OutIds) const
 	OutIds.Sort(FNameLexicalLess());
 }
 
+bool UTBWDialogueSubsystem::PlaySceneOnce(FName SceneId)
+{
+	if (PlayedScenes.Contains(SceneId))
+	{
+		return false;
+	}
+
+	// A scene whose completion flag is already up has been seen, even if this
+	// process has not seen it. Without this, loading a save and taking one step
+	// replays Orin's death.
+	if (const FTBWDialogueScene* Scene = Scenes.Find(SceneId))
+	{
+		if (Scene->CompletionFlag != NAME_None)
+		{
+			if (const UWorld* World = GetWorld())
+			{
+				if (const UTBWWorldStateSubsystem* State = World->GetSubsystem<UTBWWorldStateSubsystem>())
+				{
+					if (State->GetFlag(Scene->CompletionFlag) != 0)
+					{
+						PlayedScenes.Add(SceneId);
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	PlayedScenes.Add(SceneId);
+	return PlayScene(SceneId);
+}
+
 bool UTBWDialogueSubsystem::PlayScene(FName SceneId)
 {
 	const FTBWDialogueScene* Found = Scenes.Find(SceneId);

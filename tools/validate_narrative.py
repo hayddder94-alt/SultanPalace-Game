@@ -214,6 +214,47 @@ def main() -> int:
             f"directory. The runtime reads the .json with FFileHelper and will "
             f"never look at this. Delete it and press Cancel on that dialog.")
 
+    # A scene nothing can reach is a document, not a game.
+    #
+    # VS-04 and VS-13 sat authored, validated and completely unreachable for
+    # days: every check passed and no path through the game could ever play
+    # them. Cross-reference every scene id against what actually asks for one.
+    wired: set[str] = set()
+    layout_file = ROOT / "web" / "preview" / "data" / "east_wing.json"
+    if layout_file.is_file():
+        layout_data = json.loads(layout_file.read_text(encoding="utf-8"))
+        for group in ("interactables", "characters"):
+            for entry in layout_data.get(group, []):
+                if entry.get("scene"):
+                    wired.add(entry["scene"])
+
+    # Scenes triggered from C++ rather than from a placed actor. Each entry must
+    # name the file that plays it, so this list cannot rot into a wish list.
+    code_triggered = {
+        "VS04_MorningYouAreEvan": "TBWPlayerCharacter.cpp PlayWakeLineOnce",
+        "VS13_TheBoardConnects": "TBWGameMode.cpp CheckStoryTriggers",
+    }
+    for scene_id, where in code_triggered.items():
+        src = ROOT / "Source" / "TBW"
+        found = any(scene_id in f.read_text(encoding="utf-8")
+                    for f in src.rglob("*.cpp"))
+        if not found:
+            errors.append(
+                f"{scene_id} is listed as code-triggered ({where}) but no .cpp "
+                f"mentions it - the trigger was removed and the scene is orphaned")
+        else:
+            wired.add(scene_id)
+
+    # Branches of a choice nobody can make yet. Documented, not forgotten.
+    pending_ui = {"VS07a_KeepThis", "VS07b_GoBack"}
+
+    for sid in sorted(scene_ids):
+        if sid in wired or sid in pending_ui:
+            continue
+        warnings.append(
+            f"scene '{sid}' is not attached to any interactable, character or "
+            f"code trigger - only the console can reach it")
+
     print("=" * 66)
     print("NARRATIVE DATA CHECK")
     print("=" * 66)
