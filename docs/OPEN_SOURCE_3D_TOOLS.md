@@ -105,6 +105,17 @@ generator whose output is CC BY 4.0 non-commercial (see
 
 ---
 
+## The executable version
+
+The ordered, step-by-step plan with download links, export settings and a
+checkpoint after every stage is in **`docs/PLAN_CHARACTERS.md`**.
+
+Note on tooling: standalone MakeHuman still works, but the same community now
+ships **MPFB2** as a Blender add-on installable in one click from
+<https://extensions.blender.org/add-ons/mpfb/>. It generates the humanoid,
+does the parametric modelling and **rigs it automatically** without leaving
+Blender, which removes an entire export/import round trip.
+
 ## What this changes about the plan
 
 Nothing about the code. `TBWPlayerCharacter.cpp` already tries
