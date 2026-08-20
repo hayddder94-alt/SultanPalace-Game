@@ -318,3 +318,38 @@ spawn light    R4_FamilyCorridor_Lamp_00 at 2.9 m
 
 والمعاينة في المتصفح صارت ترسم المصابيح نفسها من البيانات نفسها، فلا تعود تبدو
 سليمة بينما المحرك أسود.
+
+---
+
+## 2026-08-20 00:27 — المصابيح موجودة في المستوى، مُتحقَّق منها
+
+```
+[TBW] cleared 220 actor(s); 4 engine-owned, 0 survived
+[TBW] practical lights: 21
+[TBW] actors placed : 242
+TBW SELFTEST RESULT: 33 passed, 0 failed
+```
+
+**221 + 21 = 242.** الحساب مضبوط.
+
+وسطر التنظيف الجديد حسم اللغز السابق: **`0 survived`**. الرقم الزاحف
+(0 → 2 → 3) لم يكن تسريبًا، بل ممثلين يملكهم المحرك كانوا يُحسبون مع الرافضين
+في عدّاد واحد. الآن مفصولان، ولا شيء يتسرّب.
+
+### والتقرير سُمِّم الطرفية للمرة الثالثة
+
+`BUILD_LEVEL.ps1` كان ينسخ تقريره بنداء `Set-Clipboard` مباشر، بلا التغليف الذي
+أضفتُه إلى `GO.ps1` وحده. فعاد المستخدم يلصق سطور السجل في PowerShell.
+
+هذا خطأ منهجي مني: أصلحتُ **نسخة واحدة** من عطل موجود في **أربعة ملفات**.
+
+| الملف | كان | صار |
+|---|---|---|
+| `GO.ps1` | تغليف مكتوب يدويًا | `Copy-TBWReport` |
+| `BUILD_LEVEL.ps1` | `Set-Clipboard` خام | `Copy-TBWReport` |
+| `ADD_CHARACTERS.ps1` | `Set-Clipboard` خام | `Copy-TBWReport` |
+| `FIND_CHARACTERS.ps1` | `Set-Clipboard` خام | `Copy-TBWReport` |
+
+الدالة المشتركة في `tools/ue58_common.ps1`. وأُضيفت قاعدة **S4** إلى
+`validate_scripts.py`: أي `Set-Clipboard` خام خارج الملف المالك = فشل. اختُبرت
+بزرع نداء في `PULL.ps1` فأمسكته.

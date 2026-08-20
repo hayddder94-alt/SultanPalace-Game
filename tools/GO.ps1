@@ -17,6 +17,7 @@ param(
 )
 
 $ErrorActionPreference = "Continue"
+. (Join-Path $PSScriptRoot "ue58_common.ps1")
 $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $LogDir = Join-Path $ProjectRoot "Saved\Logs"
 $Report = Join-Path $LogDir "REPORT.txt"
@@ -65,25 +66,15 @@ function Finish([int]$code, [string]$verdict) {
         comment right there, and three lines of English prose were executed as
         commands. That is what "the : The term 'the' is not recognized" was.
     #>
-    $text = "<# ---- The Betrayed Will report. Paste into the CHAT, not here. ----`r`n" +
-            ($short -join "`r`n") + "`r`n#>"
-    try {
-        Set-Clipboard -Value $text
-        $copied = $true
-    } catch {
-        $copied = $false
-    }
+    $copied = Copy-TBWReport -Title "Build + self test" -Text ($short -join "`r`n")
 
     Write-Host ""
     Write-Host "============================================================" -ForegroundColor Cyan
     Write-Host "   $verdict" -ForegroundColor $(if ($code -eq 0) { "Green" } else { "Red" })
     Write-Host "============================================================" -ForegroundColor Cyan
     Write-Host ""
-    if ($copied) {
-        Write-Host "   The report is ALREADY COPIED to your clipboard." -ForegroundColor Green
-        Write-Host "   Switch to the chat and press Ctrl+V. Nothing else to do."
-    } else {
-        Write-Host "   Could not reach the clipboard. Opening the file instead."
+    if (-not $copied) {
+        Write-Host "   Opening the file instead."
         Start-Process notepad $Report
     }
     Write-Host ""

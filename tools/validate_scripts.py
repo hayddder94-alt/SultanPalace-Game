@@ -17,6 +17,13 @@ actually broken, each of which cost a round trip with the user to discover.
   S3  PowerShell 7 only cmdlets in scripts the user runs under Windows
       PowerShell 5.1, which is what `powershell` resolves to on this machine.
 
+  S4  a raw Set-Clipboard outside the shared Copy-TBWReport helper
+
+      Every script ends by copying a report and asking for it to be pasted into
+      the chat. Three separate times it went into PowerShell instead and buried
+      the real message under a screen of CommandNotFoundException. The helper
+      wraps the text in a block comment so a misdirected paste does nothing.
+
 Exit 0 = clean, 1 = at least one error.
 """
 
@@ -32,6 +39,9 @@ TOOLS = ROOT / "tools"
 # Cmdlets that only exist in PowerShell 7+. The .cmd wrappers all invoke
 # `powershell`, which is Windows PowerShell 5.1, never `pwsh`.
 PS7_ONLY = ["Join-String", "ConvertFrom-Markdown", "Test-Json", "Get-Uptime"]
+
+# The one file allowed to call Set-Clipboard: it is the helper itself.
+CLIPBOARD_OWNER = "ue58_common.ps1"
 
 errors: list[str] = []
 
@@ -74,6 +84,12 @@ def check(path: Path) -> None:
         depth -= line.count("#>")
         if depth < 0:
             depth = 0
+
+        if (depth == 0 and "Set-Clipboard" in line
+                and path.name != CLIPBOARD_OWNER):
+            errors.append(
+                f"[S4] {rel}:{lineno} raw Set-Clipboard - use Copy-TBWReport from "
+                f"ue58_common.ps1 so a paste into a terminal cannot execute")
 
         for cmdlet in PS7_ONLY:
             if depth == 0 and re.search(rf"\b{re.escape(cmdlet)}\b", line):

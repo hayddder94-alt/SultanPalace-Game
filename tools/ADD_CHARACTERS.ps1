@@ -153,9 +153,7 @@ if ($body -match "skeletal") {
     Write-Host " Still reporting a placeholder cube. Send the output above." -ForegroundColor Yellow
 }
 
-try {
-    Set-Clipboard -Value (($out | Where-Object { $_ -match "body:|PASS |FAIL |INFO |SELFTEST RESULT|VERDICT" }) -join "`r`n")
-    Write-Host " Result copied to your clipboard - press Ctrl+V in the chat."
-} catch { }
+Copy-TBWReport -Title "Character import" `
+    -Text (($out | Where-Object { $_ -match "body:|PASS |FAIL |INFO |SELFTEST RESULT|VERDICT" }) -join "`r`n") | Out-Null
 Write-Host ""
 exit 0

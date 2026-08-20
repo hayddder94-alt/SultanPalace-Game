@@ -272,3 +272,40 @@ function Get-BundledDotnet {
     if ($hits) { return $hits[0].FullName }
     return $null
 }
+
+<#
+    Copy a report to the clipboard in a form that cannot hurt anything.
+
+    Every one of these scripts ends by copying a summary and asking the user to
+    paste it into the chat. Three times now it has gone into PowerShell instead,
+    and PowerShell answered with a screen of red for lines beginning "===",
+    "VERDICT:" and "[2026.08.20-...]" - noise stacked on top of whatever the
+    report was trying to say.
+
+    Wrapping the text in a PowerShell block comment makes a misdirected paste a
+    no-op. In the chat it costs two lines. There is no case where the old
+    behaviour was better.
+
+    Note deliberately spelled out rather than shown: never write the closing
+    comment token inside a comment body. Doing exactly that in GO.ps1 got three
+    lines of English executed as commands.
+#>
+function Copy-TBWReport {
+    param(
+        [Parameter(Mandatory = $true)][string]$Text,
+        [string]$Title = "The Betrayed Will report"
+    )
+    $open  = '<' + '#'
+    $close = '#' + '>'
+    $wrapped = "$open ---- $Title. Paste into the CHAT, not here. ----`r`n$Text`r`n$close"
+    try {
+        Set-Clipboard -Value $wrapped
+        Write-Host ""
+        Write-Host "   Copied to your clipboard - press Ctrl+V in the chat." -ForegroundColor Green
+        Write-Host "   (Safe to paste anywhere: in a terminal it does nothing.)"
+        return $true
+    } catch {
+        Write-Host "   Could not reach the clipboard." -ForegroundColor Yellow
+        return $false
+    }
+}

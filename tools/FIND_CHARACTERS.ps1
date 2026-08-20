@@ -100,9 +100,6 @@ if (Test-Path $templates) {
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
 
-try {
-    Set-Clipboard -Value ($report -join "`r`n")
-    Write-Host " Report copied to your clipboard - press Ctrl+V in the chat." -ForegroundColor Green
-} catch { }
+Copy-TBWReport -Title "Character search" -Text ($report -join "`r`n") | Out-Null
 Write-Host ""
 exit 0

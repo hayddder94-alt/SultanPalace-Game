@@ -135,11 +135,8 @@ $out | Where-Object { $_ -match "PASS |FAIL |INFO |VERDICT|SELFTEST RESULT" } |
     ForEach-Object { Write-Host "   $_" }
 
 $summary = ($out | Where-Object { $_ -match "PASS |FAIL |INFO |VERDICT|SELFTEST RESULT|interactable" }) -join "`r`n"
-try {
-    Set-Clipboard -Value "=== PALACE BUILD + VERIFY ===`r`n$($tbw -join "`r`n")`r`n`r`n$summary"
-    Write-Host ""
-    Write-Host "   Report copied to your clipboard - press Ctrl+V in the chat." -ForegroundColor Green
-} catch { }
+Copy-TBWReport -Title "Palace build + verify" `
+    -Text "$($tbw -join "`r`n")`r`n`r`n$summary" | Out-Null
 
 Write-Host ""
 exit $code
