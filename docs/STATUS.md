@@ -353,3 +353,44 @@ TBW SELFTEST RESULT: 33 passed, 0 failed
 الدالة المشتركة في `tools/ue58_common.ps1`. وأُضيفت قاعدة **S4** إلى
 `validate_scripts.py`: أي `Set-Clipboard` خام خارج الملف المالك = فشل. اختُبرت
 بزرع نداء في `PULL.ps1` فأمسكته.
+
+---
+
+## 2026-08-20 00:59 — المكعّب انتهى
+
+```
+Source  : E:\UE_5.8\Engine\Plugins\Experimental\MoverExamples\Content\Characters
+Files copied     : 96  (179.4 MB)
+Skeletal meshes  : 1   SKM_Manny_Simple
+Anim blueprints  : 2   ABP_Manny, ABP_MannyExtended
+LogTBW: Player ready. Phase 2 feel. Body: skeletal. No combat.
+INFO  body: skeletal mesh
+TBW SELFTEST RESULT: 33 passed, 0 failed
+```
+
+`INFO body: placeholder cube` — السطر الذي لازمنا منذ أول يوم — **اختفى**.
+
+### لكن السطر كان يخفي سؤالًا لم يُجب عنه
+
+`body: skeletal mesh` لا يقول شيئًا عن **الحركة**. هيكل عظمي بلا
+`anim blueprint` هو تمثال في وضعية T ينزلق على الأرض — وكان الفحص الذاتي يمرّره
+كنجاح. اختبار يعطي PASS على شخصية معطوبة أسوأ من غياب الاختبار.
+
+الحقيقتان صارتا منفصلتين:
+
+| الحالة | ما يقوله الفحص الآن |
+|---|---|
+| مكعّب | `body: placeholder cube` |
+| هيكل بلا حركة | `body: skeletal mesh, NO anim - it will T-pose and slide` |
+| هيكل بحركة | `body: skeletal mesh + anim (/Game/…/ABP_Manny)` |
+
+وإن لم يُعثر على `anim blueprint` يُطبع **تحذير صريح** وقت التشغيل، لأن وضعية T
+الصامتة تبدو كعطل فيزياء لساعة كاملة قبل أن يخطر لأحد أن يسأل عن AnimInstance.
+
+قائمة المرشحين وُسّعت إلى تسعة مسارات تغطي ثلاثة تخطيطات: استيراداتنا،
+و`/Game/Characters` التي ينسخها `ADD_CHARACTERS.cmd`، ومسارات الإضافات
+`/MoverExamples` و`/MoverTests`.
+
+و`ADD_CHARACTERS.ps1` صار يطبع **مسار الحزمة الكامل** لا اسم الملف فقط: الاسم
+وحده لا يمكن مقارنته بقائمة مكتوبة بمسارات، وهذا ما جعل تشغيل اليوم يقول
+«ABP_Manny موجود» دون أن يخبر أحدًا هل يستطيع المحمّل الوصول إليه.

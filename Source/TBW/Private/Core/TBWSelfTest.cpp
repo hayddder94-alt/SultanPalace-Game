@@ -248,7 +248,11 @@ void UTBWSelfTest::TestPlayer()
 		Check(TEXT("pawn has an identity component"), Pawn->GetIdentityComponent() != nullptr);
 		Check(TEXT("pawn has an interactor"), Pawn->GetInteractor() != nullptr);
 		Report.Add(FString::Printf(TEXT("  INFO  body: %s"),
-			Pawn->IsUsingRealCharacterMesh() ? TEXT("skeletal mesh") : TEXT("placeholder cube")));
+			Pawn->IsUsingRealCharacterMesh()
+				? (Pawn->IsUsingRealCharacterAnim()
+					? *FString::Printf(TEXT("skeletal mesh + anim (%s)"), *Pawn->GetCharacterAnimPath())
+					: TEXT("skeletal mesh, NO anim - it will T-pose and slide"))
+				: TEXT("placeholder cube")));
 	}
 
 	Check(TEXT("HUD is the TBW HUD"), Cast<ATBWHUD>(PC->GetHUD()) != nullptr);

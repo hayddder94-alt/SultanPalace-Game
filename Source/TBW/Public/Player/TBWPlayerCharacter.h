@@ -68,6 +68,13 @@ public:
 	UFUNCTION(BlueprintPure, Category = "TBW|Presentation")
 	bool IsUsingRealCharacterMesh() const { return bUsingRealMesh; }
 
+	/** A mesh with no anim blueprint is a T-posing statue that slides. The two
+	 *  are separate facts and the self test must be able to tell them apart. */
+	bool IsUsingRealCharacterAnim() const { return bUsingRealAnim; }
+
+	/** Package path of whatever anim blueprint was bound, for the log. */
+	const FString& GetCharacterAnimPath() const { return ResolvedAnimPath; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -128,4 +135,6 @@ private:
 	float CrouchSpeed = 160.f;
 	ETBWMoveState MoveState = ETBWMoveState::Idle;
 	bool bUsingRealMesh = false;
+	bool bUsingRealAnim = false;
+	FString ResolvedAnimPath;
 };

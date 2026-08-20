@@ -95,8 +95,9 @@ void ATBWPlayerCharacter::BeginPlay()
 	ApplyMovementFromIdentity();
 	ApplyPresentationFromIdentity();
 
-	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 2 feel. Body: %s. No combat."),
-		bUsingRealMesh ? TEXT("skeletal") : TEXT("placeholder cube"));
+	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 2 feel. Body: %s. Anim: %s. No combat."),
+		bUsingRealMesh ? TEXT("skeletal") : TEXT("placeholder cube"),
+		bUsingRealAnim ? *ResolvedAnimPath : TEXT("NONE - reference pose"));
 }
 
 void ATBWPlayerCharacter::PossessedBy(AController* NewController)
@@ -173,11 +174,27 @@ void ATBWPlayerCharacter::ResolveCharacterVisual()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	MeshComp->SetCollisionProfileName(TEXT("CharacterMesh"));
 
+	// The anim blueprint is a SEPARATE fact from the mesh. A skeletal mesh with
+	// no anim instance is a T-posing statue that slides across the floor, and
+	// the self test used to report that state as "body: skeletal mesh" - a pass
+	// that hid a broken character. The two are tracked apart now.
+	//
+	// The list covers three layouts, because the mannequin arrives by three
+	// different routes on this project:
+	//   /Game/TBW/...        our own imports
+	//   /Game/Characters/... copied per machine by tools/ADD_CHARACTERS.cmd
+	//   /MoverExamples/...   mounted only while that engine plugin is enabled
 	static const TCHAR* AnimCandidates[] =
 	{
 		TEXT("/Game/TBW/Characters/Evan/ABP_Evan.ABP_Evan_C"),
 		TEXT("/Game/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C"),
-		TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C")
+		TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"),
+		TEXT("/Game/Characters/Mannequins/Animations/ABP_MannyExtended.ABP_MannyExtended_C"),
+		TEXT("/Game/Characters/Mannequin/Animations/ABP_Manny.ABP_Manny_C"),
+		TEXT("/Game/Characters/Animations/ABP_Manny.ABP_Manny_C"),
+		TEXT("/MoverExamples/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C"),
+		TEXT("/MoverExamples/Characters/Mannequins/Animations/ABP_MannyExtended.ABP_MannyExtended_C"),
+		TEXT("/MoverTests/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C")
 	};
 
 	for (const TCHAR* Path : AnimCandidates)
@@ -186,9 +203,21 @@ void ATBWPlayerCharacter::ResolveCharacterVisual()
 		{
 			MeshComp->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 			MeshComp->SetAnimInstanceClass(AnimClass);
+			bUsingRealAnim = true;
+			ResolvedAnimPath = Path;
 			UE_LOG(LogTBW, Display, TEXT("Character anim blueprint: %s"), Path);
 			break;
 		}
+	}
+
+	if (!bUsingRealAnim)
+	{
+		// Say it loudly. A silent T-pose looks like a physics bug for an hour
+		// before anyone thinks to check whether an anim instance was ever set.
+		UE_LOG(LogTBW, Warning,
+			TEXT("Skeletal mesh bound but NO anim blueprint was found. The character "
+				 "will stand in its reference pose and slide. Send the output of "
+				 "tools\\FIND_CHARACTERS.cmd and the loader gets the right path."));
 	}
 
 	bUsingRealMesh = true;

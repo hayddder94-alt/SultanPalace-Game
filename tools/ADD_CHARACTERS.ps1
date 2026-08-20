@@ -119,10 +119,28 @@ $sizeMb = [math]::Round((($total | Measure-Object Length -Sum).Sum / 1MB), 1)
 
 Write-Host ""
 Write-Host " Files copied     : $($total.Count)  ($sizeMb MB)"
-Write-Host " Skeletal meshes  : $($meshes.Count)"
-foreach ($m in $meshes) { Write-Host "     $($m.BaseName)" }
-Write-Host " Anim blueprints  : $($anims.Count)"
-foreach ($a in $anims) { Write-Host "     $($a.BaseName)" }
+<#
+    Print the /Game/... PACKAGE PATH, not just the file name.
+
+    The first run of this reported "Anim blueprints : 2  ABP_Manny,
+    ABP_MannyExtended" and that told nobody whether the loader in
+    TBWPlayerCharacter.cpp could actually reach them - the C++ candidate list is
+    written in package paths, and a name on its own cannot be compared against
+    one. A skeletal mesh with no anim instance T-poses and slides, so the
+    difference matters more than it looks.
+#>
+function Show-Assets {
+    param([string]$Label, $Items, [string]$ContentRoot)
+    Write-Host " $Label : $($Items.Count)"
+    foreach ($i in $Items) {
+        $rel = $i.FullName.Substring($ContentRoot.Length).TrimStart('\')
+        $pkg = "/Game/" + ($rel -replace '\\', '/') -replace '\.uasset$', ''
+        Write-Host "     ${pkg}.$($i.BaseName)"
+    }
+}
+
+Show-Assets -Label "Skeletal meshes " -Items $meshes -ContentRoot $ProjectContent
+Show-Assets -Label "Anim blueprints " -Items $anims  -ContentRoot $ProjectContent
 Write-Host ""
 
 if ($meshes.Count -eq 0) {
