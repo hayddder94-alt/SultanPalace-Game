@@ -2,6 +2,8 @@
 // Copyright (c) 2026. All rights reserved.
 
 #include "Characters/TBWStoryCharacter.h"
+#include "Characters/TBWAnimLibrary.h"
+#include "Characters/TBWCharacterLook.h"
 #include "Narrative/TBWDialogueSubsystem.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -81,6 +83,7 @@ void ATBWStoryCharacter::BeginPlay()
 	Super::BeginPlay();
 	ResolveBody();
 	ApplyPose();
+	ApplyIdleAnimation();
 
 #if UE_BUILD_SHIPPING
 	if (NameLabel)
@@ -91,6 +94,36 @@ void ATBWStoryCharacter::BeginPlay()
 
 	UE_LOG(LogTBW, Verbose, TEXT("Story character %s staged (%s body)."),
 		*CharacterName.ToString(), bUsingSkeletal ? TEXT("skeletal") : TEXT("proxy"));
+}
+
+void ATBWStoryCharacter::ApplyIdleAnimation()
+{
+	// A staged character is not AI and gets none here: no controller, no
+	// perception, no navigation. It gets a breathing loop, which is
+	// presentation, not behaviour. A room of people holding a reference pose
+	// reads as a bug; the same room breathing reads as a room.
+	if (!bUsingSkeletal || !SkeletalBody || !SkeletalBody->GetSkeletalMeshAsset())
+	{
+		return;
+	}
+
+	const FTBWLocomotionClips& Clips =
+		FTBWAnimLibrary::For(SkeletalBody->GetSkeletalMeshAsset()->GetSkeleton());
+
+	UAnimSequence* Clip = Clips.Idle;
+	switch (Pose)
+	{
+	case ETBWCharacterPose::Seated: Clip = Clips.Sit; break;
+	case ETBWCharacterPose::Lying:  Clip = Clips.Lie; break;
+	default: break;
+	}
+
+	// Seventeen idles started on the same frame at the same rate look like one
+	// puppet copied seventeen times. A few percent of drift per character is
+	// enough to break that, and it is deterministic - same cast, same look,
+	// every run.
+	const float Rate = 0.92f + FTBWCharacterLook::Jitter(CharacterName) * 0.16f;
+	FTBWAnimLibrary::PlayLooping(SkeletalBody, Clip, Rate);
 }
 
 void ATBWStoryCharacter::ResolveBody()
@@ -128,6 +161,7 @@ void ATBWStoryCharacter::ResolveBody()
 	SkeletalBody->SetSkeletalMesh(Mesh);
 	SkeletalBody->SetVisibility(true);
 	bUsingSkeletal = true;
+	FTBWCharacterLook::Apply(SkeletalBody, BodyTint);
 
 	if (ProxyBody)
 	{

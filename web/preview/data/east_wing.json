@@ -3209,6 +3209,11 @@
    ],
    "yaw": 0.0,
    "vs": "VS-01",
+   "tint": [
+    0.62,
+    0.6,
+    0.55
+   ],
    "note": "Dying. Head toward the west wall."
   },
   {
@@ -3224,6 +3229,11 @@
    "yaw": 180.0,
    "vs": "VS-01",
    "scene": "VS01_OrinLastWords",
+   "tint": [
+    0.34,
+    0.07,
+    0.06
+   ],
    "note": "Seated at the bedside."
   },
   {
@@ -3238,6 +3248,11 @@
    ],
    "yaw": 270.0,
    "vs": "VS-01",
+   "tint": [
+    0.55,
+    0.52,
+    0.44
+   ],
    "note": "Silent. Never speaks."
   },
   {
@@ -3253,6 +3268,11 @@
    "yaw": 0.0,
    "vs": "VS-02",
    "scene": "VS14_NofansKindness",
+   "tint": [
+    0.42,
+    0.28,
+    0.07
+   ],
    "note": "Eldest. Closest to the dais on the left. Speaks VS-14 here at the end."
   },
   {
@@ -3267,6 +3287,11 @@
    ],
    "yaw": 0.0,
    "vs": "VS-02",
+   "tint": [
+    0.34,
+    0.07,
+    0.06
+   ],
    "note": "Named heir. Takes the seal here."
   },
   {
@@ -3281,6 +3306,11 @@
    ],
    "yaw": 15.0,
    "vs": "VS-02",
+   "tint": [
+    0.05,
+    0.07,
+    0.11
+   ],
    "note": "Seated. Stillness is the character."
   },
   {
@@ -3295,6 +3325,11 @@
    ],
    "yaw": 0.0,
    "vs": "VS-02",
+   "tint": [
+    0.13,
+    0.19,
+    0.11
+   ],
    "note": "The player watches from here in VS-02."
   },
   {
@@ -3310,6 +3345,11 @@
    "yaw": 0.0,
    "vs": "VS-02",
    "scene": "VS08b_MalikAtTheDoor",
+   "tint": [
+    0.06,
+    0.08,
+    0.16
+   ],
    "note": "Ink on his hands."
   },
   {
@@ -3325,6 +3365,11 @@
    "yaw": 340.0,
    "vs": "VS-07",
    "scene": "VS07_SorenWillNotLook",
+   "tint": [
+    0.3,
+    0.42,
+    0.52
+   ],
    "note": "Will not look at Evan."
   },
   {
@@ -3340,6 +3385,11 @@
    "yaw": 200.0,
    "vs": "VS-03",
    "scene": "VS03_EyesInTheHall",
+   "tint": [
+    0.72,
+    0.66,
+    0.44
+   ],
    "note": "Not blood. Unsmiling. Stands apart, not behind."
   },
   {
@@ -3355,6 +3405,11 @@
    "yaw": 180.0,
    "vs": "VS-08",
    "scene": "VS08_YasminPerformedJoy",
+   "tint": [
+    0.45,
+    0.19,
+    0.11
+   ],
    "note": "Performed joy at the kitchen yard edge."
   },
   {
@@ -3370,6 +3425,11 @@
    "yaw": 90.0,
    "vs": "VS-05",
    "scene": "VS05_LearnTheHouse",
+   "tint": [
+    0.24,
+    0.18,
+    0.12
+   ],
    "note": "Setting bowls for a celebration nobody feels."
   },
   {
@@ -3384,6 +3444,11 @@
    ],
    "yaw": 270.0,
    "vs": "VS-05",
+   "tint": [
+    0.24,
+    0.18,
+    0.12
+   ],
    "note": "Cloth for the empty heir chair."
   },
   {
@@ -3398,6 +3463,11 @@
    ],
    "yaw": 180.0,
    "vs": "VS-09",
+   "tint": [
+    0.16,
+    0.12,
+    0.09
+   ],
    "note": "Canal gate watch. The roster was altered here."
   },
   {
@@ -3412,6 +3482,11 @@
    ],
    "yaw": 45.0,
    "vs": "VS-02",
+   "tint": [
+    0.16,
+    0.12,
+    0.09
+   ],
    "note": "Hall door."
   },
   {
@@ -3427,6 +3502,11 @@
    "yaw": 180.0,
    "vs": "VS-11",
    "scene": "VS11_TheManInTheCourt",
+   "tint": [
+    0.16,
+    0.12,
+    0.09
+   ],
    "note": "Storage court. Challenges Evan. Dialogue only."
   },
   {
@@ -3442,6 +3522,11 @@
    "yaw": 90.0,
    "vs": "VS-09",
    "scene": "VS09_TheCanalClasp",
+   "tint": [
+    0.17,
+    0.2,
+    0.14
+   ],
    "note": "At the dock. Saw the boat leave."
   }
  ]

@@ -137,4 +137,9 @@ private:
 	bool bUsingRealMesh = false;
 	bool bUsingRealAnim = false;
 	FString ResolvedAnimPath;
+
+	/** Blockout locomotion: single-node clips driven from the movement component
+	 *  when no anim blueprint bound. Deleted the day a real AnimGraph exists. */
+	void TickBlockoutLocomotion();
+	bool bBlockoutLocomotion = false;
 };

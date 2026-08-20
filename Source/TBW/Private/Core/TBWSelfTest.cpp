@@ -10,6 +10,9 @@
 #include "Characters/TBWStoryCharacter.h"
 #include "Interaction/TBWInteractableActor.h"
 #include "Player/TBWPlayerCharacter.h"
+#include "Characters/TBWAnimLibrary.h"
+#include "Engine/SkeletalMesh.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "UI/TBWHUD.h"
 #include "Engine/World.h"
 #include "Engine/GameInstance.h"
@@ -251,8 +254,23 @@ void UTBWSelfTest::TestPlayer()
 			Pawn->IsUsingRealCharacterMesh()
 				? (Pawn->IsUsingRealCharacterAnim()
 					? *FString::Printf(TEXT("skeletal mesh + anim (%s)"), *Pawn->GetCharacterAnimPath())
-					: TEXT("skeletal mesh, NO anim - it will T-pose and slide"))
+					: TEXT("skeletal mesh, single-node blockout locomotion"))
 				: TEXT("placeholder cube")));
+
+		// Naming the clips is the difference between "it has a mesh" and "its
+		// feet move". The first version of this line said skeletal mesh and
+		// passed while the character slid across the floor in its bind pose.
+		if (const USkeletalMeshComponent* MeshComp = Pawn->GetMesh())
+		{
+			if (const USkeletalMesh* Asset = MeshComp->GetSkeletalMeshAsset())
+			{
+				const FString Clips = FTBWAnimLibrary::Describe(Asset->GetSkeleton());
+				Report.Add(FString::Printf(TEXT("  INFO  clips: %s"), *Clips));
+				Check(TEXT("the character has something to play"),
+					!Clips.Contains(TEXT("idle=- walk=- run=-")),
+					TEXT("no animation sequence resolved - it will stand in the bind pose"));
+			}
+		}
 	}
 
 	Check(TEXT("HUD is the TBW HUD"), Cast<ATBWHUD>(PC->GetHUD()) != nullptr);

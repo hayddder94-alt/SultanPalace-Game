@@ -28,6 +28,10 @@ public class TBW : ModuleRules
 			"Json",
 			"JsonUtilities",
 			"NavigationSystem",
+			// Locomotion clips are found by name at runtime rather than hard
+			// coded, because the mannequin arrives from three different places
+			// on this machine and none of them is guaranteed.
+			"AssetRegistry",
 			"LevelSequence",
 			"MovieScene",
 			"CinematicCamera"

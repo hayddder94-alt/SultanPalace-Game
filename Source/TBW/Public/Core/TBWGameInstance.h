@@ -20,6 +20,10 @@ class TBW_API UTBWGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
+	/** Drops cached animation lookups so a re-import inside the editor is seen
+	 *  on the next Play instead of on the next restart. */
+	virtual void Shutdown() override;
+
 	UPROPERTY(BlueprintReadOnly, Category = "TBW|Session")
 	int32 LastUsedSaveSlot = INDEX_NONE;
 

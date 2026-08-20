@@ -456,6 +456,13 @@ def build_cast(layout):
         safe_set(actor, "segment", unreal.Name(c.get("vs", "")))
         if c.get("scene"):
             safe_set(actor, "plays_dialogue_scene", unreal.Name(c["scene"]))
+        # Costume colour. Seventeen identical grey mannequins is a warehouse,
+        # not a cast; the palette is in tools/layout/east_wing.py and is chosen
+        # per role, not per pixel. Faces come with MetaHuman, much later.
+        tint = c.get("tint")
+        if tint:
+            safe_set(actor, "body_tint",
+                     unreal.LinearColor(tint[0], tint[1], tint[2], 1.0))
         actor.tags = ["Cast", c.get("vs", "VS")]
         _spawned.append(actor)
         placed += 1

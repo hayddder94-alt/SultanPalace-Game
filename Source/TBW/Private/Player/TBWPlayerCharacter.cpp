@@ -2,6 +2,7 @@
 // Copyright (c) 2026. All rights reserved.
 
 #include "Player/TBWPlayerCharacter.h"
+#include "Characters/TBWAnimLibrary.h"
 #include "Player/TBWPlayerIdentityComponent.h"
 #include "Player/TBWIdentityFactory.h"
 #include "Player/TBWIdentityData.h"
@@ -97,7 +98,9 @@ void ATBWPlayerCharacter::BeginPlay()
 
 	UE_LOG(LogTBW, Log, TEXT("Player ready. Phase 2 feel. Body: %s. Anim: %s. No combat."),
 		bUsingRealMesh ? TEXT("skeletal") : TEXT("placeholder cube"),
-		bUsingRealAnim ? *ResolvedAnimPath : TEXT("NONE - reference pose"));
+		bUsingRealAnim ? *ResolvedAnimPath
+			: (bBlockoutLocomotion ? TEXT("blockout single-node clips")
+								   : TEXT("NONE - reference pose")));
 }
 
 void ATBWPlayerCharacter::PossessedBy(AController* NewController)
@@ -212,6 +215,18 @@ void ATBWPlayerCharacter::ResolveCharacterVisual()
 
 	if (!bUsingRealAnim)
 	{
+		// Fall back to clips driven straight from the movement component. The
+		// mannequin that ships in MoverExamples comes with anim blueprints
+		// written for the Mover plugin's movement component, not for
+		// UCharacterMovementComponent, so even when one binds it reads no state
+		// and outputs the reference pose. That is the "walks with its feet
+		// welded together" report, and it is not fixed by finding a better path.
+		bBlockoutLocomotion = FTBWAnimLibrary::For(MeshComp->GetSkeletalMeshAsset()
+			? MeshComp->GetSkeletalMeshAsset()->GetSkeleton() : nullptr).HasAnything();
+	}
+
+	if (!bUsingRealAnim && !bBlockoutLocomotion)
+	{
 		// Say it loudly. A silent T-pose looks like a physics bug for an hour
 		// before anyone thinks to check whether an anim instance was ever set.
 		UE_LOG(LogTBW, Warning,
@@ -296,9 +311,52 @@ void ATBWPlayerCharacter::RefreshMoveState()
 	MoveState = bMoving ? ETBWMoveState::Walk : ETBWMoveState::Idle;
 }
 
+void ATBWPlayerCharacter::TickBlockoutLocomotion()
+{
+	USkeletalMeshComponent* MeshComp = GetMesh();
+	const USkeletalMesh* Asset = MeshComp ? MeshComp->GetSkeletalMeshAsset() : nullptr;
+	if (!MeshComp || !Asset)
+	{
+		return;
+	}
+
+	const FTBWLocomotionClips& Clips = FTBWAnimLibrary::For(Asset->GetSkeleton());
+	const UCharacterMovementComponent* Move = GetCharacterMovement();
+	const float Speed = Move ? Move->Velocity.Size2D() : 0.f;
+	const bool bCrouched = Move && Move->IsCrouching();
+
+	UAnimSequence* Clip = Clips.Idle;
+	float Rate = 1.f;
+
+	if (bCrouched)
+	{
+		Clip = (Speed > 10.f) ? Clips.CrouchWalk : Clips.CrouchIdle;
+		if (Speed > 10.f) { Rate = FMath::Clamp(Speed / FMath::Max(CrouchSpeed, 1.f), 0.5f, 1.8f); }
+	}
+	else if (Speed > WalkSpeed * 0.85f)
+	{
+		Clip = Clips.Run;
+		// Scale to the ground so the feet do not skate. Clamped: a clip played
+		// at 3x looks like a bug, and standing still is not worth a 0.1x crawl.
+		Rate = FMath::Clamp(Speed / FMath::Max(SprintSpeed, 1.f), 0.6f, 1.7f);
+	}
+	else if (Speed > 10.f)
+	{
+		Clip = Clips.Walk;
+		Rate = FMath::Clamp(Speed / FMath::Max(WalkSpeed, 1.f), 0.5f, 1.8f);
+	}
+
+	FTBWAnimLibrary::PlayLooping(MeshComp, Clip, Rate);
+}
+
 void ATBWPlayerCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (bBlockoutLocomotion)
+	{
+		TickBlockoutLocomotion();
+	}
 
 	UCharacterMovementComponent* MoveComp = GetCharacterMovement();
 	if (MoveComp && !bIsCrouched && MoveComp->IsMovingOnGround())

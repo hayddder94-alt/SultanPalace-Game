@@ -62,6 +62,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Character")
 	FName Segment;
 
+	/**
+	 * Flat costume colour. Seventeen identical grey mannequins is a warehouse,
+	 * not a cast; value and hue separate the brothers long before anyone models
+	 * a face. Chosen per role in tools/layout/east_wing.py.
+	 */
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Character")
+	FLinearColor BodyTint = FLinearColor(0.28f, 0.24f, 0.20f);
+
 	/** Debug label above the head. Stripped in Shipping. */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "TBW|Character")
 	bool bShowNameLabel = true;
@@ -88,6 +96,7 @@ public:
 private:
 	void ResolveBody();
 	void ApplyPose();
+	void ApplyIdleAnimation();
 
 	bool bUsingSkeletal = false;
 };
