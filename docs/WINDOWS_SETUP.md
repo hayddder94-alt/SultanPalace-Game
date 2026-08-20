@@ -314,3 +314,40 @@ rather than the generic failure banner.
 Live Coding cannot add or remove UCLASS/UPROPERTY members. Anything that
 changes reflected types — which a new `ETBWWorldFlag` entry does — needs the
 full build with the editor closed.
+
+---
+
+## `PLAY.cmd` — one command from pull to playing
+
+```
+.\tools\PLAY.cmd
+```
+
+Everything between "I pulled" and "I am walking in the palace", stopping at the
+first thing that is actually wrong:
+
+| Step | What it does | Stops if |
+|---|---|---|
+| 1 | pull | the pull fails, with the reason |
+| 2 | delete `Content\Characters` if present | the editor is holding it open |
+| 3 | compile | the editor is open (exit 90), or the code does not build |
+| 4 | rebuild the level from `east_wing.json` | the build script errors |
+| 5 | launch | the engine cannot be found |
+
+**It launches standalone, not the editor.** The editor draws its entire UI over
+the game and shares the GPU with the asset browser and the content thumbnails —
+a frame rate read there is not the game's frame rate, which is part of why the
+16 FPS reading has been so hard to interpret. `-Editor` if you need the
+viewport.
+
+| Flag | Effect |
+|---|---|
+| `-Editor` | open the editor on the palace map instead of playing |
+| `-SkipBuild` | straight to playing, no compile |
+| `-SkipLevel` | do not rebuild the level |
+| `-SkipPull` | offline |
+
+Step 2 exists because assets copied out of a plugin keep absolute references:
+every animation comes back with no skeleton, the character stands in its bind
+pose, and the report says success. The plugin is mounted by the `.uproject`
+now, so that copy does not just waste 180 MB — it shadows the working one.

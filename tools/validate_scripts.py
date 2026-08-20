@@ -17,6 +17,12 @@ actually broken, each of which cost a round trip with the user to discover.
   S3  PowerShell 7 only cmdlets in scripts the user runs under Windows
       PowerShell 5.1, which is what `powershell` resolves to on this machine.
 
+  S5  a lone backtick inside a double-quoted string
+
+      In PowerShell the backtick is the escape character, so "press ` to open"
+      silently swallows the space after it. Our console key IS a backtick, so
+      every instruction that mentions it is a candidate. Single quote those.
+
   S4  a raw Set-Clipboard outside the shared Copy-TBWReport helper
 
       Every script ends by copying a report and asking for it to be pasted into
@@ -66,11 +72,17 @@ def strip_strings(line: str) -> str:
     return "".join(out)
 
 
+def raw_line_for_backtick(line: str) -> str:
+    """The backtick check needs the original text, not the string-stripped one."""
+    return line
+
+
 def check(path: Path) -> None:
     rel = path.relative_to(ROOT)
     depth = 0
     for lineno, raw in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
         # Inside a comment, string literals do not exist - the text is text.
+        raw_line = raw
         line = raw if depth > 0 else strip_strings(raw)
         stripped = line.strip()
 
@@ -90,6 +102,14 @@ def check(path: Path) -> None:
             errors.append(
                 f"[S4] {rel}:{lineno} raw Set-Clipboard - use Copy-TBWReport from "
                 f"ue58_common.ps1 so a paste into a terminal cannot execute")
+
+        if depth == 0:
+            for dq in re.findall(r'"((?:[^"\\]|\\.)*)"', raw_line_for_backtick(raw_line)):
+                for m in re.finditer(r"`(.)", dq):
+                    if m.group(1) not in "nrtab0'\"$`{}":
+                        errors.append(
+                            f"[S5] {rel}:{lineno} lone backtick before {m.group(1)!r} "
+                            f"in a double-quoted string - it escapes the next character")
 
         for cmdlet in PS7_ONLY:
             if depth == 0 and re.search(rf"\b{re.escape(cmdlet)}\b", line):
