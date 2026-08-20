@@ -15,6 +15,9 @@ It catches the classes of mistake that would otherwise only surface after a
   E7  module used in an #include but missing from TBW.Build.cs
   E8  #include of a project header that no module include path can reach -> C1083
   E9  a known UE API called with the wrong argument form -> C2665 and friends
+  E10 a UE type is dereferenced without including the header that defines it
+      -> C2027 "use of undefined type". Forward declarations get you a pointer;
+      calling a method on it needs the definition.
 
   W1  private helper defined but never called                 -> dead feature
   W2  known deprecated API still in use                       -> tracked debt
@@ -359,6 +362,75 @@ def check_api_shapes() -> None:
 
 
 # --------------------------------------------------------------------------
+# E10 — a UE type used by value or by method call, with no include
+#
+# Engine headers forward declare a great deal. USkeletalMeshComponent declares
+# UAnimSingleNodeInstance without defining it, so
+#     Mesh->GetSingleNodeInstance()->GetAnimationAsset()
+# compiles in the editor's autocomplete and dies as C2027 twenty minutes into a
+# build. This is the offline version of that twenty minutes.
+#
+# The table only holds types that have actually cost this project a build, plus
+# the obvious neighbours. It is a ledger, not an attempt at completeness.
+# --------------------------------------------------------------------------
+
+# What each engine accessor RETURNS, and the header that defines it.
+#
+# Naming the type is not the trigger - the mistake never names it. The trigger
+# is calling a method on what the accessor returned:
+#     Mesh->GetSingleNodeInstance()->GetAnimationAsset()
+# UAnimSingleNodeInstance is only forward declared by the component header, so
+# that second arrow is C2027. The first version of this rule looked for the
+# type name in the source and found nothing, because the source never says it.
+RETURNS_NEEDING_INCLUDE = {
+    "GetSingleNodeInstance": ("UAnimSingleNodeInstance", "Animation/AnimSingleNodeInstance.h"),
+    "GetAnimInstance": ("UAnimInstance", "Animation/AnimInstance.h"),
+    "GetSkeletalMeshAsset": ("USkeletalMesh", "Engine/SkeletalMesh.h"),
+    "GetCharacterMovement": ("UCharacterMovementComponent", "GameFramework/CharacterMovementComponent.h"),
+    "GetCapsuleComponent": ("UCapsuleComponent", "Components/CapsuleComponent.h"),
+    "GetStaticMesh": ("UStaticMesh", "Engine/StaticMesh.h"),
+    "GetSkeleton": ("USkeleton", "Animation/Skeleton.h"),
+}
+
+# Types written out and then dereferenced directly.
+NEEDS_INCLUDE = {
+    "UAnimSequence": "Animation/AnimSequence.h",
+    "UMaterialInstanceDynamic": "Materials/MaterialInstanceDynamic.h",
+    "UTextRenderComponent": "Components/TextRenderComponent.h",
+    "USpringArmComponent": "GameFramework/SpringArmComponent.h",
+    "UCameraComponent": "Camera/CameraComponent.h",
+}
+
+
+def check_missing_includes() -> None:
+    for path in source_files((".cpp",)):
+        raw = path.read_text(encoding="utf-8")
+        code = strip_comments_and_strings(raw)
+        includes = set(re.findall(r'#include\s+"([^"]+)"', raw))
+
+        for method, (type_name, header) in RETURNS_NEEDING_INCLUDE.items():
+            if header in includes:
+                continue
+            for lineno, line in enumerate(code.splitlines(), 1):
+                # ...GetX() ->   or   ...GetX()->
+                if re.search(rf"\b{method}\s*\([^)]*\)\s*->", line):
+                    err("E10",
+                        f"{path.relative_to(ROOT)}:{lineno} calls a method on "
+                        f"{method}() but never includes \"{header}\" - "
+                        f"{type_name} is only forward declared -> C2027")
+
+        for type_name, header in NEEDS_INCLUDE.items():
+            if header in includes:
+                continue
+            for lineno, line in enumerate(code.splitlines(), 1):
+                if re.search(rf"\b{type_name}\b[^;\n]*->", line) or \
+                   re.search(rf"\b{type_name}\s*::", line):
+                    err("E10",
+                        f"{path.relative_to(ROOT)}:{lineno} dereferences {type_name} "
+                        f"but never includes \"{header}\" -> C2027")
+
+
+# --------------------------------------------------------------------------
 # E6 — project / engine lock
 # --------------------------------------------------------------------------
 
@@ -440,6 +512,7 @@ def main() -> int:
     check_build_deps()
     check_include_resolution()
     check_api_shapes()
+    check_missing_includes()
     check_deprecations()
 
     print("=" * 72)

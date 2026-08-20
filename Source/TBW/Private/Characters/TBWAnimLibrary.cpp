@@ -5,6 +5,10 @@
 #include "Animation/AnimSequence.h"
 #include "Animation/Skeleton.h"
 #include "Components/SkeletalMeshComponent.h"
+// GetSingleNodeInstance() is forward declared on the component; calling
+// GetAnimationAsset() on the result needs the definition. Without this:
+//   error C2027: use of undefined type 'UAnimSingleNodeInstance'
+#include "Animation/AnimSingleNodeInstance.h"
 #include "AssetRegistry/AssetRegistryModule.h"
 #include "AssetRegistry/IAssetRegistry.h"
 #include "TBW.h"

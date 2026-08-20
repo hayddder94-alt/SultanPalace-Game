@@ -157,7 +157,9 @@ if ($editors.Count -gt 0) {
     Write-Host " Or, to compile without closing it: click into the editor and press"
     Write-Host " Ctrl+Alt+F11 - that is Live Coding's own recompile."
     Write-Host ""
-    exit 6
+    # 90 is ours. UnrealBuildTool also exits 6 for ordinary compile errors, and
+    # GO.cmd showed "BUILD BLOCKED - close the editor" over two real C2027s.
+    exit 90
 }
 
 # --------------------------------------------------------------------- clean

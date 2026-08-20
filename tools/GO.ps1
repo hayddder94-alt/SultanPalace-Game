@@ -202,9 +202,10 @@ if (-not $SkipBuild) {
 
 if ($buildCode -ne 0) {
     Record "RESULT: build failed with exit code $buildCode"
-    # Exit 6 is our own pre-flight veto: the editor is open. Say that on the
-    # banner rather than making the user read for it.
-    $verdictText = if ($buildCode -eq 6) {
+    # 90 is the pre-flight veto in phase2_build_and_check.ps1. It used to be 6,
+    # which UnrealBuildTool also returns for ordinary compile errors - so a run
+    # with two genuine C2027s was announced as "close the editor".
+    $verdictText = if ($buildCode -eq 90) {
         "BUILD BLOCKED - close the Unreal editor and run this again"
     } else {
         "BUILD FAILED - paste this, nothing else needs doing"

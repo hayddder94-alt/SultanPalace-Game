@@ -98,3 +98,52 @@ git pull origin arena/019ffc4c-sultanpalace-game
 
 then work through `docs/PHASE2_PIE_CHECKLIST.md` and paste back the SUMMARY block plus the
 checklist verdict. Phase 3 scope is discussed only after that.
+
+---
+
+## E10 — a type that is only forward declared (added 2026-08-20)
+
+```
+TBWAnimLibrary.cpp(160,34): error C2027: use of undefined type 'UAnimSingleNodeInstance'
+TBWAnimLibrary.cpp(159,13): error C2737: 'bSameClip': const object must be initialized
+```
+
+Twenty minutes of build to learn that one `#include` was missing.
+`Components/SkeletalMeshComponent.h` forward declares `UAnimSingleNodeInstance`,
+so `GetSingleNodeInstance()` returns a perfectly good pointer — and the moment
+you call a method on it the compiler needs the definition. The second error is
+a cascade of the first.
+
+**The first version of this rule did not work**, and the failure is instructive.
+It searched the source for the type name. The mistake never writes the type
+name:
+
+```cpp
+Mesh->GetSingleNodeInstance()->GetAnimationAsset()
+```
+
+The trigger is not naming a type — it is **calling a method on what an accessor
+returned**. So the rule is keyed on the accessor:
+
+| Call | Returns | Header it needs |
+|---|---|---|
+| `GetSingleNodeInstance()->` | `UAnimSingleNodeInstance` | `Animation/AnimSingleNodeInstance.h` |
+| `GetAnimInstance()->` | `UAnimInstance` | `Animation/AnimInstance.h` |
+| `GetSkeletalMeshAsset()->` | `USkeletalMesh` | `Engine/SkeletalMesh.h` |
+| `GetCharacterMovement()->` | `UCharacterMovementComponent` | `GameFramework/CharacterMovementComponent.h` |
+| `GetCapsuleComponent()->` | `UCapsuleComponent` | `Components/CapsuleComponent.h` |
+| `GetStaticMesh()->` | `UStaticMesh` | `Engine/StaticMesh.h` |
+| `GetSkeleton()->` | `USkeleton` | `Animation/Skeleton.h` |
+
+Verified by deleting the include and watching E10 name the right file and line,
+then restoring it.
+
+The table is a ledger of what has actually cost this project a build, not an
+attempt at completeness. Add a row the first time a C2027 gets through.
+
+## Exit code 6 is not ours
+
+The editor pre-flight used to `exit 6`. UnrealBuildTool also returns 6 for
+ordinary compile errors, so a run with two genuine C2027s was announced as
+**BUILD BLOCKED - close the Unreal editor**, which is advice for a completely
+different problem. The pre-flight now exits **90**.
