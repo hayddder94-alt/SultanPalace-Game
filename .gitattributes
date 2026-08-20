@@ -12,6 +12,12 @@
 *.abc filter=lfs diff=lfs merge=lfs -text
 *.otf filter=lfs diff=lfs merge=lfs -text
 
+# Concept art is small, few, and needed by everyone who clones. Routing it
+# through LFS would mean a clone without git-lfs installed gets 130-byte
+# pointer files where the reference sheets should be - so it stays ordinary
+# binary, like the font.
+docs/art/**/*.png -filter -diff -merge binary
+
 # HUD Arabic font is stored as a regular binary (no LFS required).
 Content/TBW/UI/Fonts/*.ttf -filter -diff -merge binary
 
