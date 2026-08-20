@@ -14,6 +14,16 @@
 		{
 			"Name": "EnhancedInput",
 			"Enabled": true
+		},
+		{
+			"Name": "Mover",
+			"Enabled": true,
+			"_why": "Dependency of MoverExamples."
+		},
+		{
+			"Name": "MoverExamples",
+			"Enabled": true,
+			"_why": "TEMPORARY. This engine was installed without Templates and Feature Packs, so the only mannequin on the machine lives inside this plugin. tools/ADD_CHARACTERS.cmd copied the assets out and every animation then failed with 'Unable to retrieve target Skeleton' - a .uasset carries absolute references, and /MoverExamples/... does not resolve unless the plugin is mounted. Enabling it is the fix. Remove this the day a character is imported under /Game/TBW."
 		}
 	],
 	"TargetPlatforms": [

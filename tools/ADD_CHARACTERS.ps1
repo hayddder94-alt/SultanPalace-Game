@@ -9,8 +9,34 @@
 #  No account, no download, no licence question: it is engine content, covered by
 #  the same Unreal Engine EULA the project already runs under.
 #
+#  READ THIS BEFORE COPYING - 2026-08-20
+#
+#  On an engine installed WITHOUT Templates and Feature Packs there is nothing
+#  under Engine\Templates, and this script falls back to the mannequin inside
+#  the MoverExamples plugin. Copying those files works and then does not:
+#
+#      LogScript: Error: /Game/Characters/Mannequins/Animations/Manny/MM_Idle :
+#      Unable to retrieve target Skeleton for Animation Asset
+#      Invalid Skeleton supplied
+#
+#  A .uasset stores ABSOLUTE references. Every copied animation still points at
+#  /MoverExamples/.../SK_Mannequin_Skeleton, and that path only exists while the
+#  plugin is mounted. The clips are found, they resolve by name, and they have
+#  no skeleton - so the character stands in its bind pose and the scan looks
+#  like it succeeded.
+#
+#  The fix is not a better copy. It is to MOUNT THE PLUGIN, which
+#  TheBetrayedWill.uproject now does, and let the loader use /MoverExamples/...
+#  directly. Then delete the broken copy:
+#
+#      .\tools\ADD_CHARACTERS.cmd -Remove
+#
+#  Copying is still correct for real template content under Engine\Templates,
+#  because that lives at /Game/... already and has no plugin path to lose.
+#
 #  Usage:
-#    .\tools\ADD_CHARACTERS.cmd
+#    .\tools\ADD_CHARACTERS.cmd -Remove     delete a broken copy (do this now)
+#    .\tools\ADD_CHARACTERS.cmd             copy (only if Engine\Templates exists)
 #    .\tools\ADD_CHARACTERS.cmd -Force      overwrite an existing copy
 # ============================================================================
 
@@ -18,6 +44,7 @@ param(
     [string]$EngineRoot = $env:UE58_ROOT,
     [string]$Source = "",
     [switch]$Force,
+    [switch]$Remove,
     [switch]$SkipVerify
 )
 
@@ -33,6 +60,26 @@ Write-Host "============================================================" -Foreg
 Write-Host "   ADDING CHARACTER BODIES" -ForegroundColor Cyan
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""
+
+if ($Remove) {
+    $copy = Join-Path $ProjectContent "Characters"
+    if (Test-Path $copy) {
+        $size = [math]::Round(((Get-ChildItem $copy -Recurse -File |
+                 Measure-Object Length -Sum).Sum / 1MB), 1)
+        Write-Host " Deleting the copied plugin content:" -ForegroundColor Yellow
+        Write-Host "   $copy  ($size MB)"
+        Remove-Item $copy -Recurse -Force
+        Write-Host ""
+        Write-Host " Gone. The project now uses /MoverExamples/... directly," -ForegroundColor Green
+        Write-Host " which is where those assets' own references point."
+    } else {
+        Write-Host " Nothing to remove - $copy does not exist." -ForegroundColor Green
+    }
+    Write-Host ""
+    Write-Host " Next: .\tools\GO.cmd  (editor closed), then .\tools\BUILD_LEVEL.cmd"
+    Write-Host ""
+    exit 0
+}
 
 $EngineRoot = Resolve-UE58Root -Preferred $EngineRoot
 if (-not $EngineRoot) {

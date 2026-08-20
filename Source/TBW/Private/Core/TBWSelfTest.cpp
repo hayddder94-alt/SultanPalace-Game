@@ -266,9 +266,14 @@ void UTBWSelfTest::TestPlayer()
 			{
 				const FString Clips = FTBWAnimLibrary::Describe(Asset->GetSkeleton());
 				Report.Add(FString::Printf(TEXT("  INFO  clips: %s"), *Clips));
-				Check(TEXT("the character has something to play"),
-					!Clips.Contains(TEXT("idle=- walk=- run=-")),
-					TEXT("no animation sequence resolved - it will stand in the bind pose"));
+				// Detail is printed on PASS as well as FAIL, so it has to read
+				// as a statement of fact, not as an accusation. The first
+				// version said "no animation sequence resolved" next to the
+				// word PASS, which is exactly the kind of self-contradiction
+				// that teaches people to stop reading test output.
+				const bool bHasClips = !Clips.Contains(TEXT("idle=- walk=- run=-"));
+				Check(TEXT("the character has something to play"), bHasClips,
+					bHasClips ? FString() : FString(TEXT("nothing resolved - it will stand in the bind pose")));
 			}
 		}
 	}

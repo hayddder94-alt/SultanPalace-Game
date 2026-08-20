@@ -559,3 +559,61 @@ tbw.Anim.TrustThirdPartyBP 1
 
 والسجل صار يطبع `Anim scan: N found, M used` فيفرّق التشغيل القادم بين
 «لا شيء على القرص» و«شيء موجود ورُفض».
+
+---
+
+## 2026-08-20 02:10 — 34/0. المقاطع وُجدت، ثم قال السجل لماذا لن تعمل
+
+```
+INFO  body: skeletal mesh, single-node blockout locomotion
+INFO  clips: idle=MM_Idle walk=MM_Walk_Fwd run=MF_Unarmed_Jog_Fwd
+             crouch=MM_Unarmed_Crouch_Walk_Fwd
+TBW SELFTEST RESULT: 34 passed, 0 failed
+```
+
+المسح يعمل: أسماء حقيقية بدل `-`. **لكن الفحص الأخضر ليس القصة كلها**، وأعمق
+سطر في هذا السجل ليس بين الـPASS:
+
+```
+LogScript: Error: /Game/Characters/Mannequins/Animations/Manny/MM_Idle :
+           Unable to retrieve target Skeleton for Animation Asset
+           Invalid Skeleton supplied
+```
+
+### السبب: نسخ `.uasset` يكسر مراجعه
+
+`ADD_CHARACTERS.cmd` نسخ الشخصية من داخل إضافة `MoverExamples`. وملف `.uasset`
+يخزّن **مراجع مطلقة**: كل مقطع منسوخ ما زال يشير إلى
+`/MoverExamples/.../SK_Mannequin_Skeleton`، وذلك المسار لا يوجد إلا إذا كانت
+الإضافة مركّبة (mounted). والإضافة لم تكن كذلك.
+
+فالنتيجة: المقاطع تُوجد، وتُطابَق بالاسم، **وليس لها هيكل عظمي**. الشخصية تقف في
+وضعية الارتباط بينما كل شيء في التقرير يقول «نجاح».
+
+كنت قد كتبت هذا التحذير بنفسي في ملاحظات سابقة — «لا تنسخ ملفات `.uasset` تلك،
+فهي تحمل مراجع مطلقة» — ثم بنيتُ أداة تفعل ذلك بالضبط.
+
+### الإصلاح: ركّب الإضافة، لا تنسخ منها
+
+`TheBetrayedWill.uproject` صار يفعّل `Mover` و`MoverExamples`. عندها يُركَّب
+`/MoverExamples/...` وتُحلّ كل المراجع من مصدرها، والمحمّل يقرأ منها مباشرة —
+القائمة كانت تحتوي تلك المسارات أصلًا.
+
+النسخة المكسورة تُحذف:
+
+```
+.\tools\ADD_CHARACTERS.cmd -Remove
+```
+
+وهذا **مؤقت وموسوم كذلك في `.uproject`**: `MoverExamples` إضافة تجريبية، ولا
+تشحن في لعبة نهائية. تُزال يوم تُستورد شخصية حقيقية تحت `/Game/TBW/Characters`.
+
+### وعطل تجميلي في الفحص نفسه
+
+```
+PASS  the character has something to play  (no animation sequence resolved ...)
+```
+
+`Check()` يطبع نص التفصيل في حالتي النجاح والفشل، فظهرت جملة اتهام بجانب كلمة
+PASS. هذا بالضبط ما يعلّم الناس التوقف عن قراءة مخرجات الاختبارات. صار التفصيل
+يُملأ عند الفشل فقط.
