@@ -41,7 +41,7 @@ function Finish([int]$code, [string]$verdict) {
 
     # the lines that carry information: results, errors, the test output
     foreach ($l in $lines) {
-        if ($l -match "error [A-Z]+\d+|: error|LNK\d{4}|fatal error|BUILD SUCCEEDED|BUILD FAILED|Exit code|Errors found|Warnings found|Engine version|SELFTEST|PASS  |FAIL  |INFO  |VERDICT|now at:|git pull failed|^  git: |remote reachable|locally modified|branch  |remote url|cause  |suggested fix|WHY THE PULL FAILED|^      ") {
+        if ($l -match "error [A-Z]+\d+|: error|LNK\d{4}|fatal error|BUILD SUCCEEDED|BUILD FAILED|Exit code|Errors found|Warnings found|Engine version|SELFTEST|PASS  |FAIL  |INFO  |VERDICT|now at:|git pull failed|^  git: |remote reachable|locally modified|branch  |remote url|cause  |suggested fix|WHY THE PULL FAILED|WHY IT FAILED|^cause |^fix   |THE EDITOR IS RUNNING|^   pid |^      ") {
             $short.Add($l.Trim())
         }
     }
@@ -194,7 +194,7 @@ if (-not $SkipBuild) {
     $buildOut | ForEach-Object { Record "  $_" }
 
     # Show only what matters on screen; the report keeps everything.
-    $buildOut | Where-Object { $_ -match "Engine |Exit code|Errors found|Warnings found|error |BUILD" } |
+    $buildOut | Where-Object { $_ -match "Engine |Exit code|Errors found|Warnings found|error |BUILD|^cause |^fix   |EDITOR IS RUNNING|^   pid " } |
         ForEach-Object { Write-Host "   $_" }
 } else {
     Record "  skipped"
@@ -202,7 +202,14 @@ if (-not $SkipBuild) {
 
 if ($buildCode -ne 0) {
     Record "RESULT: build failed with exit code $buildCode"
-    Finish 1 "BUILD FAILED - paste this, nothing else needs doing"
+    # Exit 6 is our own pre-flight veto: the editor is open. Say that on the
+    # banner rather than making the user read for it.
+    $verdictText = if ($buildCode -eq 6) {
+        "BUILD BLOCKED - close the Unreal editor and run this again"
+    } else {
+        "BUILD FAILED - paste this, nothing else needs doing"
+    }
+    Finish 1 $verdictText
 }
 Write-Host "   build: SUCCEEDED" -ForegroundColor Green
 

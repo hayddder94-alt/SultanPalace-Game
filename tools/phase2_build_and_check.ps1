@@ -128,6 +128,38 @@ if ($EngineVersion -ne "unknown" -and -not $EngineVersion.StartsWith("5.8")) {
     Write-Warning "Continuing on $EngineVersion because -AllowWrongEngineVersion was passed."
 }
 
+# ------------------------------------------------------- pre-flight: editor
+<#
+    UnrealBuildTool will not touch the module DLLs while the editor holds them,
+    and Live Coding makes that a hard refusal:
+
+        Unable to build while Live Coding is active. Exit the editor and game
+
+    It exits 6 with zero errors and zero warnings in the log, so the summary
+    read "BUILD FAILED, Errors found 0" - a verdict with no cause, which is the
+    same failure the git-pull reporting had. Catch it before the 20 minute
+    build starts, and name the process holding the lock.
+#>
+$editors = @(Get-Process -Name "UnrealEditor", "UnrealEditor-Cmd" -ErrorAction SilentlyContinue)
+if ($editors.Count -gt 0) {
+    Write-Host ""
+    Write-Host "==============================================================" -ForegroundColor Red
+    Write-Host " THE EDITOR IS RUNNING - the build cannot start" -ForegroundColor Red
+    Write-Host "==============================================================" -ForegroundColor Red
+    foreach ($e in $editors) {
+        Write-Host ("   pid {0}  {1}  started {2}" -f $e.Id, $e.ProcessName, $e.StartTime)
+    }
+    Write-Host ""
+    Write-Host " UnrealBuildTool cannot replace module DLLs the editor has open,"
+    Write-Host " and Live Coding refuses outright."
+    Write-Host ""
+    Write-Host " Close the editor, then run this again." -ForegroundColor Yellow
+    Write-Host " Or, to compile without closing it: click into the editor and press"
+    Write-Host " Ctrl+Alt+F11 - that is Live Coding's own recompile."
+    Write-Host ""
+    exit 6
+}
+
 # --------------------------------------------------------------------- clean
 if ($Clean) {
     Write-Host "[clean] removing Binaries / Intermediate / DerivedDataCache ..."
@@ -191,6 +223,40 @@ Write-Host "Errors found   : $($errors.Count)"
 Write-Host "Warnings found : $($warnings.Count)"
 Write-Host "Full log       : $BuildLog"
 Write-Host ""
+
+<#
+    A non-zero exit with no matching "error Cxxxx" lines means UBT refused
+    before compiling anything. Those refusals are few and each has exactly one
+    remedy, so name them instead of printing "Errors found : 0" under the word
+    FAILED and leaving the reader to guess.
+#>
+if ($BuildExit -ne 0 -and $errors.Count -eq 0) {
+    $blob = ($log -join "`n")
+    $why = $null; $fix = $null
+    if ($blob -match "Unable to build while Live Coding is active") {
+        $why = "Live Coding is active - the editor is holding the module DLLs"
+        $fix = "close the editor and run this again (or press Ctrl+Alt+F11 inside it)"
+    } elseif ($blob -match "Cannot open .*\.dll for writing|being used by another process|Access is denied") {
+        $why = "a running process is holding a build output open"
+        $fix = "close the editor and any packaged build, then run this again"
+    } elseif ($blob -match "Unable to instantiate module|Missing precompiled manifest") {
+        $why = "a module or plugin the project needs is not built for this engine"
+        $fix = "run .\tools\build_phase2.cmd -Clean once"
+    } elseif ($blob -match "Waiting for another instance|mutex") {
+        $why = "another UnrealBuildTool is already running"
+        $fix = "wait for it to finish, or reboot if nothing is visibly running"
+    } elseif ($blob -match "You must install or update \.NET") {
+        $why = ".NET could not be resolved outside the engine's bundled copy"
+        $fix = "re-run: this script prefers E:\UE_5.8\Engine\Binaries\ThirdParty\DotNet"
+    } else {
+        $why = "UBT exited $BuildExit before emitting a compiler error"
+        $fix = "send the full log: $BuildLog"
+    }
+    Write-Host "---- WHY IT FAILED ------------------------------------------" -ForegroundColor Yellow
+    Write-Host "cause : $why" -ForegroundColor Yellow
+    Write-Host "fix   : $fix" -ForegroundColor Yellow
+    Write-Host ""
+}
 
 if ($errors.Count -gt 0) {
     Write-Host "---- ERRORS -------------------------------------------------"

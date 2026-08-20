@@ -272,3 +272,45 @@ or turn it off for this repository once:
 ```
 git config core.pager cat
 ```
+
+---
+
+## `BUILD FAILED` with `Errors found : 0`
+
+Seen 2026-08-20. The whole diagnosis was in one line buried in the middle of
+the output:
+
+```
+Unable to build while Live Coding is active. Exit the editor and game,
+or press Ctrl+Alt+F11 if iterating on code in the editor or game
+```
+
+UnrealBuildTool cannot replace module DLLs that a running editor has open, and
+Live Coding refuses outright. It exits **6** having emitted no compiler errors,
+so the summary honestly reported `Errors found : 0` under the word `FAILED` — a
+verdict with no cause, the same shape of unhelpfulness the git-pull reporting
+had.
+
+Two fixes went in:
+
+* **Pre-flight.** `phase2_build_and_check.ps1` now looks for `UnrealEditor` and
+  `UnrealEditor-Cmd` *before* starting, prints the pid and start time of
+  whatever is holding the lock, and exits immediately instead of after a long
+  wait.
+* **Triage.** When UBT exits non-zero with no compiler error, the script
+  classifies the refusal — Live Coding, a locked output file, an unbuilt
+  module, a competing UBT instance, .NET — and prints one remedy.
+
+`GO.cmd` shows `BUILD BLOCKED - close the Unreal editor and run this again`
+rather than the generic failure banner.
+
+### Two ways to compile
+
+| | When | How |
+|---|---|---|
+| Full build | after a `git pull` that touched C++ | close the editor, `.\tools\GO.cmd` |
+| Live Coding | small edits while the editor is open | click into the editor, **Ctrl+Alt+F11** |
+
+Live Coding cannot add or remove UCLASS/UPROPERTY members. Anything that
+changes reflected types — which a new `ETBWWorldFlag` entry does — needs the
+full build with the editor closed.
