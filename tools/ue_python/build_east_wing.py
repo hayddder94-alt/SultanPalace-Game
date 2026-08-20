@@ -502,16 +502,23 @@ def build_lighting(layout):
     # made it sound deliberate.
     #
     # The principle was not wrong: unclamped auto exposure does hide mistakes.
-    # The answer is a CLAMPED auto exposure - it cannot lie about a room being
-    # four stops too dark, but it also cannot hand the player a black screen.
+    # But an image you can see is the precondition for judging anything at all,
+    # so auto exposure goes in first and calibration comes after the first look.
     safe_set(settings, "override_auto_exposure_method", True)
     safe_set(settings, "auto_exposure_method", unreal.AutoExposureMethod.AEM_HISTOGRAM)
-    safe_set(settings, "override_auto_exposure_min_brightness", True)
-    safe_set(settings, "auto_exposure_min_brightness", 0.4)
-    safe_set(settings, "override_auto_exposure_max_brightness", True)
-    safe_set(settings, "auto_exposure_max_brightness", 4.0)
+    # DO NOT clamp min/max here.
+    #
+    # With r.DefaultFeature.AutoExposure.ExtendDefaultLuminanceRange=True those
+    # two properties are read as EV100, not as luminance. The first version of
+    # this fix set them to 0.4 and 4.0, which sounded conservative and would
+    # have pinned a 42000-lux scene ten stops OVER - a white screen instead of a
+    # black one. The engine defaults are -10..20 and they are correct.
+    #
+    # Clamping is an art-calibration decision to be made after someone has seen
+    # the room. Guessing photometric constants for hardware and a scene I cannot
+    # look at is how the EV100-11 bug happened in the first place.
     safe_set(settings, "override_auto_exposure_bias", True)
-    safe_set(settings, "auto_exposure_bias", 1.0)
+    safe_set(settings, "auto_exposure_bias", 0.0)
     safe_set(settings, "override_auto_exposure_speed_up", True)
     safe_set(settings, "auto_exposure_speed_up", 3.0)
     safe_set(settings, "override_auto_exposure_speed_down", True)
