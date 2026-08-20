@@ -722,12 +722,21 @@ def open_or_reset_level():
     # purpose, actors that refused to die, and actors that threw. The count went
     # 0, then 2, then 3 across three rebuilds and there was no way to tell which
     # kind had grown. Separate them and name the survivors.
-    system = 0
+    system = []
     refused = []
     for actor in editor_actor.get_all_level_actors():
-        # WorldSettings and the default brush cannot be destroyed and must not be.
-        if isinstance(actor, unreal.WorldSettings) or isinstance(actor, unreal.Brush):
-            system += 1
+        # WorldSettings and the DEFAULT BRUSH cannot be destroyed and must not be.
+        #
+        # This used to test isinstance(actor, unreal.Brush), and APostProcessVolume
+        # derives from AVolume derives from ABrush. So every rebuild kept the old
+        # post-process volume and then placed a new one on top of it. The counter
+        # read "4 engine-owned", then 5, and the level quietly accumulated an
+        # unbound PPV per build - five of them stacking their exposure and Lumen
+        # overrides. Match the exact class instead: only ABrush itself is the
+        # editor's default brush.
+        cls_name = type(actor).__name__
+        if cls_name in ("WorldSettings", "Brush"):
+            system.append("{0} ({1})".format(actor.get_actor_label(), cls_name))
             continue
         try:
             if editor_actor.destroy_actor(actor):
@@ -738,7 +747,9 @@ def open_or_reset_level():
             refused.append((actor.get_actor_label(), type(actor).__name__, str(exc)[:60]))
 
     LOG("[TBW] cleared {0} actor(s); {1} engine-owned, {2} survived".format(
-        removed, system, len(refused)))
+        removed, len(system), len(refused)))
+    for kept in system:
+        LOG("      kept: {0}".format(kept))
     for label, cls, why in refused:
         # A survivor is a leak: it is still in the level when the fresh copy is
         # placed on top of it, so every rebuild would add one more.

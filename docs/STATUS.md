@@ -459,3 +459,52 @@ PASS  the character has something to play
 ```
 
 وإن لم يُعثر على شيء يفشل الفحص صراحةً بدل أن يمرّ.
+
+---
+
+## 2026-08-20 01:48 — عطل تراكمي كشفه عدّاد كنتُ قد أصلحته للتو
+
+```
+run 1:  cleared 0    ; 0 engine-owned
+run 2:  cleared 219  ; 2 engine-owned
+run 3:  cleared 219  ; 3 engine-owned
+run 4:  cleared 220  ; 4 engine-owned
+run 5:  cleared 241  ; 5 engine-owned
+```
+
+رقم يزحف بلا تفسير هو عطل ينتظر موعده — وقد حان.
+
+**السبب:** فحص التنظيف كان يكتب
+`isinstance(actor, unreal.Brush)`، و`APostProcessVolume` يرث من `AVolume` الذي
+يرث من `ABrush`. فكل إعادة بناء **تُبقي** حجم المعالجة اللاحقة القديم ثم تضع
+واحدًا جديدًا فوقه.
+
+**النتيجة: خمسة `PostProcessVolume` غير محدودة (`unbound=True`) متراكمة في
+المستوى**، كلٌّ منها يفرض تعريضه وإعداداته لـLumen. هذا ليس تجميليًا: تعريضات
+متعددة متراكبة تفسّر سلوكًا غير متوقع في الصورة، وكنت أضبط أرقام التعريض وأنا
+أظن أن هناك واحدًا فقط.
+
+**الإصلاح:** المطابقة على اسم الصنف **بالضبط** (`WorldSettings` أو `Brush`)، لا
+على الوراثة. وصار كل ممثل مُبقى يُطبع باسمه:
+
+```
+[TBW] cleared N actor(s); 2 engine-owned, 0 survived
+      kept: WorldSettings (WorldSettings)
+      kept: Brush (Brush)
+```
+
+بعد إعادة البناء القادمة يجب أن يعود الرقم إلى **2** ويبقى هناك إلى الأبد. إن
+لم يعد، فالتشخيص خاطئ وأريد معرفته.
+
+## والأهم: هذا السجل بُني بثنائي قديم
+
+```
+INFO  body: skeletal mesh          ← نص ما قبل commit 24a1bb4
+```
+
+لا يوجد سطر `INFO clips:`، ولا `+ anim`، ولا `single-node blockout locomotion`.
+أي أن `24a1bb4` و`dbda894` **لم يُصرَّفا**. آخر محاولة تصريف رفضها Live Coding
+لأن المحرر كان مفتوحًا، ولم تُعَد.
+
+`BUILD_LEVEL.cmd` **لا يصرّف C++** — يشغّل بايثون داخل المحرك بالثنائي الموجود.
+التصريف مهمة `GO.cmd` وحدها، والمحرر مغلق.
