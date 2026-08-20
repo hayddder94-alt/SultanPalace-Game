@@ -56,6 +56,19 @@ namespace
 			FModuleManager::LoadModuleChecked<FAssetRegistryModule>(TEXT("AssetRegistry"));
 		IAssetRegistry& Registry = Module.Get();
 
+		// The registry does not necessarily know about these paths yet. In a
+		// commandlet or a fresh -game process the background scan may not have
+		// reached /Game/Characters, and GetAssets then honestly returns nothing.
+		// That is what "clips: idle=- walk=- run=-" was: not an empty disk, an
+		// unasked question.
+		TArray<FString> Roots;
+		for (const TCHAR* Root : SearchRoots)
+		{
+			Roots.Add(FString(Root));
+		}
+		Registry.ScanPathsSynchronous(Roots, /*bForceRescan*/ false);
+		Registry.WaitForCompletion();
+
 		TArray<FAssetData> Assets;
 		for (const TCHAR* Root : SearchRoots)
 		{
@@ -66,21 +79,43 @@ namespace
 			Registry.GetAssets(Filter, Assets);
 		}
 
-		int32 Considered = 0;
-		for (const FAssetData& Data : Assets)
+		// Prefer clips authored for this exact skeleton - a clip from another rig
+		// produces a folded, broken pose, which reads as a bug in our own code.
+		// But prefer, not require. tools/ADD_CHARACTERS.cmd copies the mannequin
+		// out of a plugin, and the copies can end up tagged with the plugin's
+		// skeleton path while the mesh reports the copied one. Demanding an exact
+		// match then discards every clip on disk and leaves a statue, which is a
+		// strictly worse outcome than a possible retarget artefact.
+		TArray<FAssetData> Matching;
+		if (Skeleton)
 		{
-			// Only clips that belong to this skeleton. Playing a clip authored
-			// for another rig produces a folded, broken pose - worse than a
-			// T-pose because it looks like a bug in our own code.
-			if (Skeleton)
+			const FString SkeletonPath = Skeleton->GetPathName();
+			const FString SkeletonName = Skeleton->GetName();
+			for (const FAssetData& Data : Assets)
 			{
 				const FString Tag = Data.GetTagValueRef<FString>(TEXT("Skeleton"));
-				if (!Tag.IsEmpty() && !Tag.Contains(Skeleton->GetPathName()))
+				if (Tag.IsEmpty() || Tag.Contains(SkeletonPath) || Tag.Contains(SkeletonName))
 				{
-					continue;
+					Matching.Add(Data);
 				}
 			}
+		}
 
+		const int32 TotalFound = Assets.Num();
+		const int32 OnSkeleton = Matching.Num();
+		if (OnSkeleton == 0 && TotalFound > 0)
+		{
+			UE_LOG(LogTBW, Warning,
+				TEXT("%d animation sequence(s) on disk but none tagged for skeleton '%s'. "
+					 "Using them anyway - a retarget artefact is easier to see and fix "
+					 "than a statue."),
+				TotalFound, Skeleton ? *Skeleton->GetName() : TEXT("<none>"));
+			Matching = Assets;
+		}
+
+		int32 Considered = 0;
+		for (const FAssetData& Data : Matching)
+		{
 			const FString Name = Data.AssetName.ToString();
 			++Considered;
 
@@ -115,8 +150,8 @@ namespace
 		if (!Out.Lie) { Out.Lie = Out.Idle; }
 
 		UE_LOG(LogTBW, Display,
-			TEXT("Anim scan: %d sequence(s) on this skeleton. idle=%s walk=%s run=%s"),
-			Considered,
+			TEXT("Anim scan: %d found, %d used. idle=%s walk=%s run=%s"),
+			TotalFound, Considered,
 			Out.Idle ? *Out.Idle->GetName() : TEXT("none"),
 			Out.Walk ? *Out.Walk->GetName() : TEXT("none"),
 			Out.Run ? *Out.Run->GetName() : TEXT("none"));

@@ -22,7 +22,22 @@
 #include "Materials/Material.h"
 #include "EnhancedInputComponent.h"
 #include "UObject/ConstructorHelpers.h"
+#include "HAL/IConsoleManager.h"
 #include "TBW.h"
+
+/**
+ * Opt back in to third-party anim blueprints.
+ *
+ * Default off. See the comment in ResolveCharacterVisual: the mannequin's
+ * ABP from MoverExamples binds happily and animates nothing, and a successful
+ * binding suppresses the single-node fallback that does work.
+ */
+static TAutoConsoleVariable<int32> CVarTrustThirdPartyAnimBP(
+	TEXT("tbw.Anim.TrustThirdPartyBP"),
+	0,
+	TEXT("1 = allow anim blueprints we did not author (ABP_Manny and friends).\n")
+	TEXT("0 = our own only; everything else falls back to single-node clips."),
+	ECVF_Default);
 
 ATBWPlayerCharacter::ATBWPlayerCharacter()
 {
@@ -177,28 +192,37 @@ void ATBWPlayerCharacter::ResolveCharacterVisual()
 	MeshComp->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	MeshComp->SetCollisionProfileName(TEXT("CharacterMesh"));
 
-	// The anim blueprint is a SEPARATE fact from the mesh. A skeletal mesh with
-	// no anim instance is a T-posing statue that slides across the floor, and
-	// the self test used to report that state as "body: skeletal mesh" - a pass
-	// that hid a broken character. The two are tracked apart now.
+	// Which anim blueprints we TRUST, and why the list is this short.
 	//
-	// The list covers three layouts, because the mannequin arrives by three
-	// different routes on this project:
-	//   /Game/TBW/...        our own imports
-	//   /Game/Characters/... copied per machine by tools/ADD_CHARACTERS.cmd
-	//   /MoverExamples/...   mounted only while that engine plugin is enabled
-	static const TCHAR* AnimCandidates[] =
+	// ABP_Manny bound successfully from /Game/Characters/Mannequins/Animations
+	// and the character still walked in its bind pose. That copy comes out of
+	// the MoverExamples plugin and is authored against the Mover plugin's own
+	// movement component; bound to an ACharacter it reads no state and outputs
+	// nothing. A binding that succeeds and animates nothing is worse than no
+	// binding, because it suppresses the fallback that would have worked.
+	//
+	// So: trust our own, and treat everything else as unproven until somebody
+	// watches it move. tbw.Anim.TrustThirdPartyBP 1 opts back in - useful the
+	// day the real Third Person template lands at the same path with a
+	// CharacterMovement-driven graph.
+	static const TCHAR* OwnAnim = TEXT("/Game/TBW/Characters/Evan/ABP_Evan.ABP_Evan_C");
+	static const TCHAR* ThirdPartyAnim[] =
 	{
-		TEXT("/Game/TBW/Characters/Evan/ABP_Evan.ABP_Evan_C"),
 		TEXT("/Game/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C"),
 		TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"),
-		TEXT("/Game/Characters/Mannequins/Animations/ABP_MannyExtended.ABP_MannyExtended_C"),
 		TEXT("/Game/Characters/Mannequin/Animations/ABP_Manny.ABP_Manny_C"),
-		TEXT("/Game/Characters/Animations/ABP_Manny.ABP_Manny_C"),
-		TEXT("/MoverExamples/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C"),
-		TEXT("/MoverExamples/Characters/Mannequins/Animations/ABP_MannyExtended.ABP_MannyExtended_C"),
-		TEXT("/MoverTests/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C")
+		TEXT("/MoverExamples/Characters/Mannequins/Animations/ABP_Manny.ABP_Manny_C")
 	};
+
+	TArray<const TCHAR*> AnimCandidates;
+	AnimCandidates.Add(OwnAnim);
+	if (CVarTrustThirdPartyAnimBP.GetValueOnGameThread() != 0)
+	{
+		for (const TCHAR* Path : ThirdPartyAnim)
+		{
+			AnimCandidates.Add(Path);
+		}
+	}
 
 	for (const TCHAR* Path : AnimCandidates)
 	{
