@@ -56,3 +56,39 @@ not a content cost — there is no content. Ranked by likelihood:
 Only after 1 and 2 are eliminated does the renderer configuration become
 suspect. The standing policy below still holds: do not cut Nanite or Lumen on
 the strength of an editor reading.
+
+---
+
+## Answering "which GPU" without asking you to know anything
+
+Asked ten times, never made easy. That was my failure, not yours: I kept
+requesting a section of a log file and left the reading of it to you.
+
+```
+.\tools\GPU.cmd
+```
+
+One command, three answers:
+
+1. **What is in the laptop** — from `Win32_VideoController`. Both cards.
+2. **What Unreal actually chose** — grepped out of `Saved\Logs\*.log`, matching
+   the several forms the engine uses (`Adapter Name`, `Chosen D3D12 Adapter`,
+   `RHI Adapter`, `VendorId`) because the wording moves between versions and
+   between the D3D11 and D3D12 RHIs.
+3. **Whether that is the fast one**, in words, with the fix if it is not.
+
+### Why the question will not go away
+
+This is an Optimus laptop: an Intel HD 530 and a Quadro P3000, and *Windows*
+decides which one an application gets. An earlier `-nullrhi` run logged
+`GPU: Intel HD 530`.
+
+If Unreal is on the integrated chip then every number in this document was
+measured on the wrong hardware, and the plan to add seventeen skinned
+characters is budgeted against a fiction.
+
+### One caveat the tool prints for itself
+
+`tools/selftest.ps1` runs the engine with `-nullrhi` deliberately — it renders
+nothing, on purpose, so the checks are fast and headless. Those logs will never
+name an adapter. Only a real run does, which is what `PLAY.cmd` gives.
