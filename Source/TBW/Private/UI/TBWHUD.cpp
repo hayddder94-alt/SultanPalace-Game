@@ -12,15 +12,20 @@
 #include "Core/TBWVersion.h"
 #include "Engine/Canvas.h"
 #include "Engine/Engine.h"
+#include "Engine/FontFace.h"
 #include "Engine/GameViewportClient.h"
+#include "Fonts/FontFaceData.h"
+#include "Fonts/SlateFontInfo.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
+#include "Styling/CoreStyle.h"
+#include "UObject/StrongObjectPtr.h"
+#include "UObject/UObjectGlobals.h"
 #include "Widgets/SBoxPanel.h"
 #include "Widgets/Layout/SBorder.h"
 #include "Widgets/Layout/SBox.h"
 #include "Widgets/Text/STextBlock.h"
-#include "Fonts/SlateFontInfo.h"
-#include "Styling/CoreStyle.h"
 
 namespace TBWHudText
 {
@@ -33,6 +38,45 @@ namespace TBWHudText
 	{
 		return FPaths::ConvertRelativePathToFull(
 			FPaths::ProjectContentDir() / TEXT("TBW/UI/Fonts/DejaVuSans.ttf"));
+	}
+
+	// One UFontFace built from the shipped TTF, kept alive for the HUD's
+	// lifetime so Slate never sees a transient object collected mid-session.
+	static TStrongObjectPtr<UFontFace> CachedFontFace;
+
+	/**
+	 * Slate font for the Arabic face.
+	 *
+	 * FSlateFontInfo(FString filename, size) is deprecated in UE 5.x and
+	 * emitted three build warnings every compile. The supported path is a
+	 * UFontFace object: we build one from the same TTF bytes at runtime
+	 * (RF_Transient - never saved to content) and hand Slate the object.
+	 * The rendering input is byte-for-byte the same DejaVuSans.ttf as before.
+	 */
+	static FSlateFontInfo LoadFont(float InSize)
+	{
+		const FString FontPath = FontFile();
+		if (FPaths::FileExists(FontPath))
+		{
+			if (!CachedFontFace.IsValid())
+			{
+				TArray<uint8> FontBytes;
+				if (FFileHelper::LoadFileToArray(FontBytes, *FontPath))
+				{
+					UFontFace* FontFace = NewObject<UFontFace>(GetTransientPackage(), NAME_None, RF_Transient);
+					FFontFaceDataRef FontFaceData = FFontFaceData::MakeFontFaceData();
+					FontFaceData->SetData(MoveTemp(FontBytes));
+					FontFace->FontFaceData = FontFaceData;
+					CachedFontFace = TStrongObjectPtr<UFontFace>(FontFace);
+				}
+			}
+			if (CachedFontFace.IsValid())
+			{
+				return FSlateFontInfo(CachedFontFace.Get(), InSize);
+			}
+		}
+		UE_LOG(LogTemp, Warning, TEXT("TBWHUD: Arabic font missing at %s"), *FontPath);
+		return FCoreStyle::GetDefaultFontStyle("Regular", InSize);
 	}
 }
 
@@ -70,13 +114,8 @@ void ATBWHUD::AddNarrativeWidgets()
 		return;
 	}
 
-	const FString FontPath = TBWHudText::FontFile();
-	FSlateFontInfo Body = FPaths::FileExists(FontPath)
-		? FSlateFontInfo(FontPath, 22)
-		: FCoreStyle::GetDefaultFontStyle("Regular", 22);
-	FSlateFontInfo Small = FPaths::FileExists(FontPath)
-		? FSlateFontInfo(FontPath, 16)
-		: FCoreStyle::GetDefaultFontStyle("Regular", 16);
+	const FSlateFontInfo Body = TBWHudText::LoadFont(22);
+	const FSlateFontInfo Small = TBWHudText::LoadFont(16);
 
 	SAssignNew(SubtitleText, STextBlock)
 		.Text(FText::GetEmpty())
@@ -172,17 +211,7 @@ void ATBWHUD::AddArabicTitleWidget()
 		return;
 	}
 
-	const FString FontPath = TBWHudText::FontFile();
-	FSlateFontInfo FontInfo;
-	if (FPaths::FileExists(FontPath))
-	{
-		FontInfo = FSlateFontInfo(FontPath, 16);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("TBWHUD: Arabic font missing at %s"), *FontPath);
-		FontInfo = FCoreStyle::GetDefaultFontStyle("Regular", 16);
-	}
+	const FSlateFontInfo FontInfo = TBWHudText::LoadFont(16);
 
 	TSharedRef<SWidget> Title = SNew(STextBlock)
 		.Text(FText::FromString(TBWHudText::ArabicTitle))

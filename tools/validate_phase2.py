@@ -489,7 +489,12 @@ def check_build_deps() -> None:
 # --------------------------------------------------------------------------
 
 DEPRECATED = {
-    r"FSlateFontInfo\s*\(\s*[A-Za-z_]": "FSlateFontInfo(FString) ctor is deprecated in UE5 — accepted technical debt, Arabic HUD works",
+    # The deprecated FSlateFontInfo(FString filename, size) constructor. Match a
+    # bare identifier as the first argument directly followed by a comma; the
+    # supported UObject/FontFace form takes an expression such as
+    # CachedFontFace.Get() or FCoreStyle::GetDefaultFontStyle(...), neither of
+    # which is a bare identifier, so it is not flagged.
+    r"FSlateFontInfo\s*\(\s*[A-Za-z_][A-Za-z0-9_]*\s*,": "FSlateFontInfo(FString) ctor is deprecated in UE5 - use UFontFace + FSlateFontInfo(const UObject*, size)",
 }
 
 
